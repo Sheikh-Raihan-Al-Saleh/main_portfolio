@@ -75,20 +75,67 @@ function getDevicePosition(angle: number) {
                                     : 'max-w-[240px]',
                         ]"
                     >
-                        <img
-                            v-if="devices[device.index].image"
-                            :src="devices[device.index].image"
-                            :alt="`${devices[device.index].label} mockup`"
-                            class="aspect-video w-full object-cover"
-                            loading="lazy"
-                        />
+                        <!-- Desktop/Laptop screen -->
+                        <div
+                            v-if="device.variant === 'laptop'"
+                            class="w-full bg-black"
+                        >
+                            <img
+                                v-if="devices[device.index].image"
+                                :src="devices[device.index].image"
+                                :alt="`${devices[device.index].label} mockup`"
+                                class="w-full h-auto block"
+                            />
+                            <div
+                                v-else
+                                class="w-full aspect-video bg-muted flex items-center justify-center"
+                            >
+                                <span class="text-sm text-muted-foreground">
+                                    {{ devices[device.index].label }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Tablet screen -->
+                        <div
+                            v-else-if="device.variant === 'tablet'"
+                            class="w-full bg-black"
+                        >
+                            <img
+                                v-if="devices[device.index].image"
+                                :src="devices[device.index].image"
+                                :alt="`${devices[device.index].label} mockup`"
+                                class="w-full h-auto block"
+                            />
+                            <div
+                                v-else
+                                class="w-full aspect-video bg-muted flex items-center justify-center"
+                            >
+                                <span class="text-sm text-muted-foreground">
+                                    {{ devices[device.index].label }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Mobile phone screen -->
                         <div
                             v-else
-                            class="aspect-video w-full bg-muted flex items-center justify-center"
+                            class="w-full bg-black"
                         >
-                            <span class="text-xs text-muted-foreground">
-                                {{ devices[device.index].label }}
-                            </span>
+                            <img
+                                v-if="devices[device.index].image"
+                                :src="devices[device.index].image"
+                                :alt="`${devices[device.index].label} mockup`"
+                                class="w-full h-auto block"
+                            />
+                            <div
+                                v-else
+                                class="w-full aspect-[9/16] bg-muted flex items-center justify-center"
+                            >
+                                <span class="text-xs text-muted-foreground">
+                                    {{ devices[device.index].label }}
+                                </span>
+                            </div>
                         </div>
                     </DeviceFrame>
                 </div>
