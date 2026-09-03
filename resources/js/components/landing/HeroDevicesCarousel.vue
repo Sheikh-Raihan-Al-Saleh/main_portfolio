@@ -112,7 +112,7 @@ const deviceLabels = ['Desktop', 'Tablet', 'Mobile'];
                 animate="visible"
                 :variants="fadeUp"
             >
-                <DeviceFrame variant="phone" class="max-w-xs">
+                <DeviceFrame variant="phone" class="max-w-[200px]">
                     <motion.div
                         class="w-full bg-black"
                         :key="`img-${currentIndex}`"
