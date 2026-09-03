@@ -1,0 +1,1117 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-sans:
+        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+
+    --font-display: 'Merriweather', Georgia, 'Times New Roman', serif;
+
+    --font-mono: 'IBM Plex Mono', 'Fira Code', ui-monospace, monospace;
+
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-brand: var(--brand);
+    --color-brand-foreground: var(--brand-foreground);
+    --color-brand-subtle: var(--brand-subtle);
+    --color-brand-accent: var(--brand-accent);
+    --color-brand-glow: var(--brand-glow);
+
+    --color-sidebar: var(--sidebar-background);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+
+    --color-syn-keyword: var(--syn-keyword);
+    --color-syn-string: var(--syn-string);
+    --color-syn-function: var(--syn-function);
+    --color-syn-comment: var(--syn-comment);
+    --color-syn-variable: var(--syn-variable);
+    --color-syn-type: var(--syn-type);
+    --color-syn-number: var(--syn-number);
+    --color-syn-operator: var(--syn-operator);
+}
+
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIGHT MODE — Laravel-inspired clean white + red accent
+   ═══════════════════════════════════════════════════════════ */
+:root {
+    --background: #ffffff;
+    --foreground: hsl(0 0% 7%);
+    --card: #ffffff;
+    --card-foreground: hsl(0 0% 7%);
+    --popover: #ffffff;
+    --popover-foreground: hsl(0 0% 7%);
+    --primary: hsl(0 0% 7%);
+    --primary-foreground: #ffffff;
+    --secondary: hsl(0 0% 96%);
+    --secondary-foreground: hsl(0 0% 12%);
+    --muted: hsl(0 0% 96%);
+    --muted-foreground: hsl(0 0% 45%);
+    --accent: hsl(0 0% 94%);
+    --accent-foreground: hsl(0 0% 9%);
+    --destructive: hsl(0 84% 60%);
+    --destructive-foreground: #ffffff;
+    --border: hsl(0 0% 89.8%);
+    --input: hsl(0 0% 89.8%);
+    --ring: hsl(4 96% 53%);
+    --radius: 0.625rem;
+
+    --chart-1: hsl(4 96% 53%);
+    --chart-2: hsl(160 70% 35%);
+    --chart-3: hsl(200 80% 50%);
+    --chart-4: hsl(30 80% 50%);
+    --chart-5: hsl(262 83% 58%);
+
+    /* Brand — Laravel Red */
+    --brand: hsl(4 96% 53%);
+    --brand-foreground: #ffffff;
+    --brand-subtle: hsl(4 96% 96%);
+    --brand-accent: hsl(4 96% 45%);
+    --brand-glow: hsl(4 96% 53% / 0.5);
+
+    --gradient-start: hsl(4 96% 53%);
+    --gradient-mid: hsl(24 90% 55%);
+    --gradient-end: hsl(340 75% 55%);
+
+    --syn-keyword: hsl(4 96% 53%);
+    --syn-string: hsl(160 70% 35%);
+    --syn-function: hsl(200 80% 45%);
+    --syn-comment: hsl(0 0% 60%);
+    --syn-variable: hsl(262 83% 58%);
+    --syn-type: hsl(30 80% 45%);
+    --syn-number: hsl(4 80% 50%);
+    --syn-operator: hsl(0 0% 40%);
+
+    --sidebar-background: #ffffff;
+    --sidebar-foreground: hsl(0 0% 7%);
+    --sidebar-primary: hsl(0 0% 7%);
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: hsl(0 0% 96%);
+    --sidebar-accent-foreground: hsl(0 0% 7%);
+    --sidebar-border: hsl(0 0% 89.8%);
+    --sidebar-ring: hsl(4 96% 53%);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DARK MODE — Laravel dark neutral
+   ═══════════════════════════════════════════════════════════ */
+.dark {
+    --background: hsl(0 0% 9%);
+    --foreground: hsl(0 0% 93%);
+    --card: hsl(0 0% 9%);
+    --card-foreground: hsl(0 0% 93%);
+    --popover: hsl(0 0% 9%);
+    --popover-foreground: hsl(0 0% 93%);
+    --primary: hsl(0 0% 93%);
+    --primary-foreground: hsl(0 0% 9%);
+    --secondary: hsl(0 0% 14.9%);
+    --secondary-foreground: hsl(0 0% 88%);
+    --muted: hsl(0 0% 14.9%);
+    --muted-foreground: hsl(0 0% 63%);
+    --accent: hsl(0 0% 14.9%);
+    --accent-foreground: hsl(0 0% 93%);
+    --destructive: hsl(0 84% 60%);
+    --destructive-foreground: #ffffff;
+    --border: hsl(0 0% 14.9%);
+    --input: hsl(0 0% 14.9%);
+    --ring: hsl(4 96% 58%);
+
+    --chart-1: hsl(4 96% 58%);
+    --chart-2: hsl(160 70% 50%);
+    --chart-3: hsl(200 80% 58%);
+    --chart-4: hsl(30 80% 58%);
+    --chart-5: hsl(262 83% 65%);
+
+    --brand: hsl(4 96% 58%);
+    --brand-foreground: hsl(0 0% 9%);
+    --brand-subtle: hsl(4 40% 12%);
+    --brand-accent: hsl(4 96% 50%);
+    --brand-glow: hsl(4 96% 58% / 0.4);
+
+    --gradient-start: hsl(4 96% 58%);
+    --gradient-mid: hsl(24 90% 58%);
+    --gradient-end: hsl(340 75% 62%);
+
+    --syn-keyword: hsl(4 96% 65%);
+    --syn-string: hsl(160 70% 55%);
+    --syn-function: hsl(200 80% 60%);
+    --syn-comment: hsl(0 0% 45%);
+    --syn-variable: hsl(262 83% 70%);
+    --syn-type: hsl(30 80% 60%);
+    --syn-number: hsl(4 80% 60%);
+    --syn-operator: hsl(0 0% 55%);
+
+    --sidebar-background: hsl(0 0% 9%);
+    --sidebar-foreground: hsl(0 0% 93%);
+    --sidebar-primary: hsl(0 0% 93%);
+    --sidebar-primary-foreground: hsl(0 0% 9%);
+    --sidebar-accent: hsl(0 0% 14.9%);
+    --sidebar-accent-foreground: hsl(0 0% 93%);
+    --sidebar-border: hsl(0 0% 14.9%);
+    --sidebar-ring: hsl(4 96% 58%);
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    body {
+        @apply bg-background text-foreground antialiased;
+        /* Never let absolutely-positioned decorations (floating hero badges,
+           device frames, corner dots) push horizontal page scroll. `clip`
+           keeps sticky positioning intact (unlike `hidden`). */
+        overflow-x: clip;
+    }
+    html {
+        overflow-x: clip;
+    }
+
+    ::selection {
+        background-color: hsl(4 96% 53% / 0.2);
+        color: var(--foreground);
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: hsl(0 0% 80%) transparent;
+    }
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+        border-radius: 9999px;
+        background-color: hsl(0 0% 80%);
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UTILITY CLASSES — Laravel-inspired Design System
+   ═══════════════════════════════════════════════════════════ */
+@layer utilities {
+    /* ── Typography ─────────────────────────────────────── */
+
+    /* ── Noise Texture (Laravel signature) ──────────────── */
+
+    .bg-noise {
+        position: relative;
+    }
+    .bg-noise::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 50;
+        opacity: 0.03;
+        mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ── Container ──────────────────────────────────────── */
+
+    .container-laravel {
+        width: 100%;
+        max-width: 1280px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    @media (min-width: 640px) {
+        .container-laravel {
+            padding-left: 3rem;
+            padding-right: 3rem;
+        }
+    }
+
+    /* ── Section Pattern ────────────────────────────────── */
+
+    @media (min-width: 1280px) {
+        .section-dashed-xl {
+            border-left: 1px dashed var(--border);
+            border-right: 1px dashed var(--border);
+        }
+    }
+
+    /* ── Corner Dots (Laravel signature) ────────────────── */
+
+    .corner-dot {
+        position: absolute;
+        width: 7px;
+        height: 7px;
+        background: var(--brand);
+    }
+
+    .corner-dot-tl {
+        top: -4px;
+        left: -4px;
+    }
+
+    .corner-dot-tr {
+        top: -4px;
+        right: -4px;
+    }
+
+    .corner-dot-bl {
+        bottom: -4px;
+        left: -4px;
+    }
+
+    .corner-dot-br {
+        bottom: -4px;
+        right: -4px;
+    }
+
+    /* ── Red Glow Background ────────────────────────────── */
+
+    .bg-red-glow {
+        background: radial-gradient(
+            45% 100% at 65% 80%,
+            hsl(4 96% 53% / 0.12),
+            transparent
+        );
+    }
+
+    .dark .bg-red-glow {
+        background: radial-gradient(
+            45% 100% at 65% 80%,
+            hsl(4 96% 58% / 0.08),
+            transparent
+        );
+    }
+
+    /* ── Buttons ────────────────────────────────────────── */
+
+    .btn-laravel {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--foreground);
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        transition: all 0.15s ease-out;
+        cursor: pointer;
+        text-align: center;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    }
+    .btn-laravel:hover {
+        background: var(--muted);
+    }
+
+    .btn-laravel-primary {
+        background: var(--foreground);
+        color: var(--background);
+        border-color: var(--foreground);
+    }
+    .btn-laravel-primary:hover {
+        opacity: 0.9;
+    }
+
+    /* ── Code Window ────────────────────────────────────── */
+
+    .code-window {
+        border-radius: 0.75rem;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        background: var(--card);
+        box-shadow:
+            0 1px 3px 0 rgb(0 0 0 / 0.1),
+            0 1px 2px -1px rgb(0 0 0 / 0.1);
+    }
+
+    .code-window-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--muted);
+    }
+
+    .code-window-dot {
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 9999px;
+    }
+
+    .code-window-body {
+        padding: 1rem;
+        font-family: var(--font-mono);
+        font-size: 0.8125rem;
+        line-height: 1.7;
+    }
+
+    /* ── Marquee ────────────────────────────────────────── */
+
+    .animate-marquee {
+        animation: marquee-scroll 40s linear infinite;
+    }
+
+    .animate-marquee:hover {
+        animation-play-state: paused;
+    }
+
+    @keyframes marquee-scroll {
+        from {
+            transform: translateX(0);
+        }
+        to {
+            transform: translateX(-50%);
+        }
+    }
+
+    /* ── Horizontal fade mask (scrollable pill/nav rows) ── */
+
+    .mask-fade-x {
+        -webkit-mask-image: linear-gradient(
+            to right,
+            transparent,
+            black 1.5rem,
+            black calc(100% - 1.5rem),
+            transparent
+        );
+        mask-image: linear-gradient(
+            to right,
+            transparent,
+            black 1.5rem,
+            black calc(100% - 1.5rem),
+            transparent
+        );
+    }
+
+    /* ── Rich text (landing `body_html`) ────────────────
+       The server-rendered Markdown lands here as plain HTML; keep it
+       legible on every breakpoint and never let wide tables, pre blocks
+       or unbroken URLs overflow the viewport. */
+
+    .prose-landing {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        color: var(--muted-foreground);
+    }
+
+    .prose-landing > * + * {
+        margin-top: 1rem;
+    }
+
+    .prose-landing > :first-child {
+        margin-top: 0;
+    }
+
+    .prose-landing :is(h1, h2, h3, h4) {
+        margin-top: 2em;
+        color: var(--foreground);
+        letter-spacing: -0.02em;
+        line-height: 1.25;
+        text-wrap: balance;
+    }
+
+    .prose-landing h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+    }
+
+    .prose-landing h2 {
+        font-size: 1.375rem;
+        font-weight: 700;
+    }
+
+    .prose-landing h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+    }
+
+    .prose-landing h4 {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .prose-landing :is(strong, b) {
+        font-weight: 600;
+        color: var(--foreground);
+    }
+
+    .prose-landing a {
+        color: var(--brand);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+
+    .prose-landing a:hover {
+        text-decoration: none;
+    }
+
+    .prose-landing :is(ul, ol) {
+        display: grid;
+        gap: 0.5rem;
+        padding-left: 1.25rem;
+    }
+
+    .prose-landing ul {
+        list-style: disc;
+    }
+
+    .prose-landing ol {
+        list-style: decimal;
+    }
+
+    .prose-landing blockquote {
+        border-left: 3px solid var(--brand);
+        padding-left: 1rem;
+        color: var(--muted-foreground);
+    }
+
+    .prose-landing :is(p, li, blockquote) {
+        text-wrap: pretty;
+    }
+
+    .prose-landing code {
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+        border-radius: 0.25rem;
+        background: var(--muted);
+        padding: 0.125rem 0.375rem;
+    }
+
+    .prose-landing :is(img, video, iframe) {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.75rem;
+    }
+
+    .prose-landing pre {
+        max-width: 100%;
+        overflow-x: auto;
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        background: var(--muted);
+        padding: 1rem;
+    }
+
+    .prose-landing pre code {
+        background: none;
+        padding: 0;
+    }
+
+    .prose-landing table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        border-collapse: collapse;
+    }
+
+    .prose-landing :is(th, td) {
+        border: 1px solid var(--border);
+        padding: 0.5rem 0.75rem;
+        text-align: left;
+    }
+
+    .prose-landing hr {
+        border-color: var(--border);
+    }
+
+    /* ── Reduced Motion ─────────────────────────────────── */
+
+    @media (prefers-reduced-motion: reduce) {
+        .animate-marquee {
+            animation: none;
+        }
+        .footer-grid-bg,
+        .footer-orb,
+        .footer-border-glow {
+            animation: none !important;
+        }
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   3D ANIMATED FOOTER
+   ═══════════════════════════════════════════════════════════ */
+.footer-3d {
+    background: var(--background);
+    padding: 3rem 1rem 0;
+}
+
+.footer-3d-perspective {
+    position: relative;
+    max-width: 1280px;
+    margin: 0 auto;
+    perspective: 1200px;
+}
+
+/* Animated grid background */
+.footer-grid-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: 1.5rem;
+    opacity: 0.5;
+    background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    -webkit-mask-image: radial-gradient(
+        ellipse 70% 50% at 50% 60%,
+        black 20%,
+        transparent 70%
+    );
+    mask-image: radial-gradient(
+        ellipse 70% 50% at 50% 60%,
+        black 20%,
+        transparent 70%
+    );
+    animation: grid-drift 20s linear infinite;
+}
+
+@keyframes grid-drift {
+    0% {
+        background-position:
+            0 0,
+            0 0;
+    }
+    100% {
+        background-position:
+            60px 60px,
+            60px 60px;
+    }
+}
+
+/* Floating gradient orbs */
+.footer-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    animation: orb-float 12s ease-in-out infinite;
+}
+
+.footer-orb-1 {
+    width: 400px;
+    height: 400px;
+    background: hsl(4 96% 53% / 0.12);
+    top: -100px;
+    left: -100px;
+    animation-delay: 0s;
+}
+
+.footer-orb-2 {
+    width: 300px;
+    height: 300px;
+    background: hsl(200 80% 50% / 0.08);
+    bottom: -50px;
+    right: -80px;
+    animation-delay: -4s;
+}
+
+.footer-orb-3 {
+    width: 250px;
+    height: 250px;
+    background: hsl(262 83% 58% / 0.06);
+    top: 40%;
+    left: 50%;
+    animation-delay: -8s;
+}
+
+.dark .footer-orb-1 {
+    background: hsl(4 96% 58% / 0.08);
+}
+.dark .footer-orb-2 {
+    background: hsl(200 80% 58% / 0.06);
+}
+.dark .footer-orb-3 {
+    background: hsl(262 83% 65% / 0.04);
+}
+
+@keyframes orb-float {
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+    25% {
+        transform: translate(30px, -20px) scale(1.05);
+    }
+    50% {
+        transform: translate(-15px, 15px) scale(0.95);
+    }
+    75% {
+        transform: translate(20px, 10px) scale(1.03);
+    }
+}
+
+/* Main glass card */
+.footer-main-card {
+    position: relative;
+    border-radius: 1.5rem;
+    border: 1px solid var(--border);
+    background: color-mix(in oklab, var(--card) 85%, transparent);
+    backdrop-filter: blur(20px) saturate(1.3);
+    -webkit-backdrop-filter: blur(20px) saturate(1.3);
+    overflow: hidden;
+    transform-style: preserve-3d;
+}
+
+/* Gradient border glow */
+.footer-border-glow {
+    position: absolute;
+    inset: -1px;
+    border-radius: 1.5rem;
+    padding: 1px;
+    background: linear-gradient(
+        135deg,
+        hsl(4 96% 53% / 0.4),
+        transparent 40%,
+        transparent 60%,
+        hsl(200 80% 50% / 0.2)
+    );
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    animation: glow-rotate 8s linear infinite;
+}
+
+@keyframes glow-rotate {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.footer-content {
+    position: relative;
+    padding: 2rem 1.25rem 0;
+}
+
+@media (min-width: 640px) {
+    .footer-content {
+        padding: 3rem 2.5rem 0;
+    }
+}
+
+/* Upper section: Brand + Columns grid */
+.footer-upper {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (min-width: 640px) {
+    .footer-upper {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 768px) {
+    .footer-upper {
+        grid-template-columns: 1.4fr repeat(4, 1fr);
+        gap: 2rem;
+    }
+}
+
+/* Brand column */
+.footer-brand-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-right: 1rem;
+}
+
+.footer-logo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    text-decoration: none;
+    color: var(--foreground);
+}
+
+.footer-logo-icon {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    background: var(--foreground);
+    color: var(--background);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    font-family: var(--font-display);
+}
+
+.footer-logo-text {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.footer-tagline {
+    max-width: 360px;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    color: var(--muted-foreground);
+}
+
+.footer-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.footer-status-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: hsl(160 70% 45%);
+    box-shadow: 0 0 8px 2px hsl(160 70% 45% / 0.4);
+    animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.footer-status-dot--off {
+    background: var(--muted-foreground);
+    box-shadow: none;
+    animation: none;
+}
+
+@keyframes pulse-dot {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.2);
+    }
+}
+
+.footer-status-text {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+}
+
+/* Divider */
+.footer-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0.5rem 0 1.5rem;
+}
+
+/* Giant 3D watermark */
+.footer-watermark-wrap {
+    overflow: hidden;
+    margin: 1rem 0 2rem;
+    perspective: 800px;
+}
+
+.footer-watermark {
+    font-family: var(--font-mono);
+    font-size: clamp(4rem, 15vw, 13rem);
+    font-weight: 800;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--border);
+    text-stroke: 1.5px var(--border);
+    transform: translateZ(-40px);
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Link columns */
+.footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.footer-col-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--foreground);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.footer-col-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+    color: var(--brand);
+}
+
+.footer-link-text {
+    position: relative;
+}
+
+.footer-link-text::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--brand);
+    transition: width 0.3s ease;
+}
+
+.footer-link:hover .footer-link-text::after {
+    width: 100%;
+}
+
+.footer-link-arrow {
+    width: 0.75rem;
+    height: 0.75rem;
+    opacity: 0;
+    transform: translate(-4px, 4px);
+    transition: all 0.2s ease;
+}
+
+.footer-link:hover .footer-link-arrow {
+    opacity: 1;
+    transform: translate(0, 0);
+}
+
+.footer-link-text-plain {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+}
+
+/* Bottom bar */
+.footer-bottom {
+    border-top: none;
+    padding: 1.25rem 0 0;
+}
+
+.footer-bottom-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+}
+
+@media (min-width: 640px) {
+    .footer-bottom-inner {
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
+    }
+}
+
+.footer-socials {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    perspective: 600px;
+}
+
+.footer-social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    color: var(--muted-foreground);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    transform-style: preserve-3d;
+}
+
+.footer-social-icon:hover {
+    color: var(--brand);
+    border-color: var(--brand);
+    background: hsl(4 96% 53% / 0.06);
+    box-shadow: 0 4px 12px hsl(4 96% 53% / 0.15);
+}
+
+.footer-copyright {
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+}
+
+.footer-heart {
+    color: var(--brand);
+    display: inline-block;
+    animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    15% {
+        transform: scale(1.15);
+    }
+    30% {
+        transform: scale(1);
+    }
+    45% {
+        transform: scale(1.1);
+    }
+}
+
+.footer-bottom-links {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+@media (min-width: 640px) {
+    .footer-bottom-links {
+        justify-content: center;
+    }
+}
+
+.footer-bottom-link {
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-bottom-link:hover {
+    color: var(--brand);
+}
+
+.footer-bottom-sep {
+    color: var(--border);
+    font-size: 0.75rem;
+}
+
+.footer-back-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    text-decoration: none;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
+}
+
+.footer-back-top:hover {
+    color: var(--brand);
+    border-color: var(--brand);
+    background: hsl(4 96% 53% / 0.06);
+}
+
+/* Reduced motion overrides */
+@media (prefers-reduced-motion: reduce) {
+    .footer-3d-perspective {
+        perspective: none;
+    }
+    .footer-main-card {
+        transform: none !important;
+    }
+    .footer-watermark {
+        transform: none !important;
+    }
+    .footer-social-icon {
+        transform: none !important;
+    }
+}

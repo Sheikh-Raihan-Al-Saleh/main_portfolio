@@ -1,0 +1,424 @@
+<script setup lang="ts">
+import { Link, usePage } from '@inertiajs/vue3';
+import { motion } from 'motion-v';
+import { computed } from 'vue';
+import SocialIcon from '@/components/portfolio/SocialIcon.vue';
+import { EASE_OUT, inViewOnce } from '@/lib/motion';
+import type { FooterColumn, FooterLink, Profile } from '@/types';
+
+const page = usePage();
+const profile = computed(() => page.props.profile as Profile | undefined);
+
+const isHome = computed(() => page.url === '/' || page.url.startsWith('/?'));
+const year = new Date().getFullYear();
+const footer = computed(() => profile.value?.footer);
+
+const cardVariants = {
+    hidden: { opacity: 0, rotateX: 12, y: 80, scale: 0.92 },
+    visible: {
+        opacity: 1,
+        rotateX: 0,
+        y: 0,
+        scale: 1,
+        transition: { duration: 1, ease: EASE_OUT },
+    },
+};
+
+function brandVariants(delay: number) {
+    return {
+        hidden: { opacity: 0, x: -30 },
+        visible: {
+            opacity: 1,
+            x: 0,
+            transition: { duration: 0.7, ease: EASE_OUT, delay },
+        },
+    };
+}
+
+function socialVariants(delay: number) {
+    return {
+        hidden: { opacity: 0, scale: 0.5, rotateY: 90 },
+        visible: {
+            opacity: 1,
+            scale: 1,
+            rotateY: 0,
+            transition: { type: 'spring', stiffness: 200, damping: 15, delay },
+        },
+    };
+}
+
+function columnVariants(delay: number) {
+    return {
+        hidden: { opacity: 0, y: 30, rotateX: 8 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            rotateX: 0,
+            transition: { duration: 0.6, ease: EASE_OUT, delay },
+        },
+    };
+}
+
+function watermarkVariants(delay: number) {
+    return {
+        hidden: { opacity: 0, y: 60, rotateX: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            rotateX: 0,
+            transition: { duration: 1.2, ease: EASE_OUT, delay },
+        },
+    };
+}
+
+const initials = computed(() =>
+    profile.value?.name
+        ?.split(' ')
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join(''),
+);
+
+function waPhone(): string | null {
+    const phone = profile.value?.phone?.replace(/[^0-9]/g, '');
+
+    return phone ? `https://wa.me/${phone}` : null;
+}
+
+/**
+ * Resolve {{placeholder}} tokens in footer admin text against the profile.
+ * Unresolved tokens (missing socials, phone, etc.) become empty strings so
+ * that links referencing them are silently dropped.
+ */
+function resolve(text: string): string {
+    const p = profile.value;
+    const tokens: Record<string, string> = {
+        year: String(year),
+        name: p?.name ?? '',
+        headline: p?.headline ?? '',
+        tagline: p?.tagline ?? '',
+        email: p?.public_email ?? '',
+        phone: p?.phone ?? '',
+        location: p?.location ?? '',
+        whatsapp: waPhone() ?? '',
+        github: p?.socials?.github ?? '',
+        linkedin: p?.socials?.linkedin ?? '',
+        x: p?.socials?.x ?? '',
+        website: p?.socials?.website ?? '',
+    };
+
+    return text.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key: string) => {
+        const value = tokens[key];
+
+        return value === undefined ? match : value;
+    });
+}
+
+function normalizeHref(url: string): string {
+    const trimmed = url.trim();
+
+    // Section anchors should point at the current scrolled page on the home
+    // route and at the home page from anywhere else.
+    return trimmed.startsWith('#') && !isHome.value ? `/${trimmed}` : trimmed;
+}
+
+function isExternal(url: string): boolean {
+    return /^https?:\/\//.test(url);
+}
+
+type RenderedLink = {
+    label: string;
+    href: string | undefined;
+    external: boolean;
+};
+
+function renderLink(link: FooterLink): RenderedLink | null {
+    const label = resolve(link.label ?? '').trim();
+    const url = normalizeHref(resolve(link.url ?? '').trim());
+
+    if (!label && !url) {
+        return null;
+    }
+
+    if (!url) {
+        return { label: label || url, href: undefined, external: false };
+    }
+
+    return { label: label || url, href: url, external: isExternal(url) };
+}
+
+type RenderedColumn = {
+    title: string;
+    links: RenderedLink[];
+};
+
+const columns = computed<RenderedColumn[]>(() =>
+    (footer.value?.columns ?? [])
+        .map((column: FooterColumn) => ({
+            title: resolve(column.title ?? '').trim() || column.title,
+            links: (column.links ?? [])
+                .map(renderLink)
+                .filter((link): link is RenderedLink => link !== null),
+        }))
+        .filter((column) => column.title && column.links.length > 0),
+);
+
+const socialLinks = computed(() => {
+    const socials = profile.value?.socials ?? {};
+
+    return [
+        { href: socials.github, name: 'github' as const, label: 'GitHub' },
+        {
+            href: socials.linkedin,
+            name: 'linkedin' as const,
+            label: 'LinkedIn',
+        },
+        { href: socials.x, name: 'x' as const, label: 'X' },
+        { href: socials.website, name: 'website' as const, label: 'Website' },
+    ].filter((link) => typeof link.href === 'string' && link.href.length > 0);
+});
+
+const legalLinks = computed<RenderedLink[]>(() =>
+    (footer.value?.legal_links ?? [])
+        .map(renderLink)
+        .filter((link): link is RenderedLink => link !== null),
+);
+
+const statusText = computed(() => {
+    const text = profile.value?.available_for_work
+        ? (footer.value?.status_text ?? '')
+        : (footer.value?.status_text_unavailable ?? '');
+
+    return resolve(text).trim();
+});
+
+const copyright = computed(() =>
+    resolve(
+        footer.value?.copyright ?? '© {{year}} {{name}}. All rights reserved.',
+    ),
+);
+
+const backToTop = computed(() =>
+    resolve(footer.value?.back_to_top ?? 'Back to top').trim(),
+);
+</script>
+
+<template>
+    <footer class="footer-3d relative overflow-hidden">
+        <div class="footer-3d-perspective">
+            <div class="footer-grid-bg" aria-hidden="true" />
+            <div class="footer-orb footer-orb-1" aria-hidden="true" />
+            <div class="footer-orb footer-orb-2" aria-hidden="true" />
+            <div class="footer-orb footer-orb-3" aria-hidden="true" />
+
+            <motion.div
+                initial="hidden"
+                while-in-view="visible"
+                :variants="cardVariants"
+                :in-view-options="inViewOnce"
+                class="footer-main-card"
+            >
+                <div class="footer-border-glow" aria-hidden="true" />
+
+                <div class="footer-content">
+                    <div class="footer-upper">
+                        <motion.div
+                            initial="hidden"
+                            while-in-view="visible"
+                            :variants="brandVariants(0.15)"
+                            :in-view-options="inViewOnce"
+                            class="footer-brand-col"
+                        >
+                            <Link
+                                href="/"
+                                class="footer-logo-link"
+                                :aria-label="profile?.name ?? 'Home'"
+                            >
+                                <span class="footer-logo-icon">{{
+                                    initials ?? '{ }'
+                                }}</span>
+                                <span class="footer-logo-text">{{
+                                    profile?.name
+                                }}</span>
+                            </Link>
+                            <p v-if="profile?.tagline" class="footer-tagline">
+                                {{ profile.tagline }}
+                            </p>
+                            <div v-if="statusText" class="footer-status">
+                                <span
+                                    class="footer-status-dot"
+                                    :class="{
+                                        'footer-status-dot--off':
+                                            !profile?.available_for_work,
+                                    }"
+                                />
+                                <span class="footer-status-text">{{
+                                    statusText
+                                }}</span>
+                            </div>
+
+                            <div
+                                v-if="socialLinks.length"
+                                class="footer-socials"
+                            >
+                                <motion.a
+                                    v-for="(link, i) in socialLinks"
+                                    :key="link.label"
+                                    :href="link.href ?? undefined"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    :aria-label="link.label"
+                                    class="footer-social-icon"
+                                    initial="hidden"
+                                    while-in-view="visible"
+                                    :variants="socialVariants(0.5 + i * 0.08)"
+                                    :in-view-options="inViewOnce"
+                                    while-hover="{ y: -4, scale: 1.15, rotateY: 10 }"
+                                >
+                                    <SocialIcon
+                                        :name="link.name"
+                                        class="size-4"
+                                    />
+                                </motion.a>
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            v-for="(col, i) in columns"
+                            :key="col.title"
+                            initial="hidden"
+                            while-in-view="visible"
+                            :variants="columnVariants(0.2 + i * 0.08)"
+                            :in-view-options="inViewOnce"
+                            class="footer-col"
+                        >
+                            <h4 class="footer-col-title">{{ col.title }}</h4>
+                            <ul class="footer-col-list">
+                                <li v-for="item in col.links" :key="item.label">
+                                    <a
+                                        v-if="item.href"
+                                        :href="item.href"
+                                        :target="
+                                            item.external ? '_blank' : undefined
+                                        "
+                                        :rel="
+                                            item.external
+                                                ? 'noopener noreferrer'
+                                                : undefined
+                                        "
+                                        class="footer-link"
+                                    >
+                                        <span class="footer-link-text">{{
+                                            item.label
+                                        }}</span>
+                                        <svg
+                                            v-if="item.external"
+                                            class="footer-link-arrow"
+                                            viewBox="0 0 12 12"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.5"
+                                        >
+                                            <path
+                                                d="M3.5 2.5h6v6M10 2.5L2 10.5"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                            />
+                                        </svg>
+                                    </a>
+                                    <span
+                                        v-else
+                                        class="footer-link-text-plain"
+                                        >{{ item.label }}</span
+                                    >
+                                </li>
+                            </ul>
+                        </motion.div>
+                    </div>
+
+                    <div
+                        v-if="profile?.name"
+                        class="footer-watermark-wrap"
+                        aria-hidden="true"
+                    >
+                        <motion.p
+                            initial="hidden"
+                            while-in-view="visible"
+                            :variants="watermarkVariants(0.4)"
+                            :in-view-options="inViewOnce"
+                            class="footer-watermark"
+                        >
+                            {{ profile.name.split(' ')[0]?.toUpperCase() }}
+                        </motion.p>
+                    </div>
+
+                    <div class="footer-divider" />
+
+                    <div class="footer-bottom">
+                        <div class="footer-bottom-inner">
+                            <p v-if="copyright" class="footer-copyright">
+                                {{ copyright }}
+                            </p>
+
+                            <div
+                                v-if="legalLinks.length"
+                                class="footer-bottom-links"
+                            >
+                                <template
+                                    v-for="(link, i) in legalLinks"
+                                    :key="`${link.label}-${i}`"
+                                >
+                                    <a
+                                        v-if="link.href"
+                                        :href="link.href"
+                                        :target="
+                                            link.external ? '_blank' : undefined
+                                        "
+                                        :rel="
+                                            link.external
+                                                ? 'noopener noreferrer'
+                                                : undefined
+                                        "
+                                        class="footer-bottom-link"
+                                    >
+                                        {{ link.label }}
+                                    </a>
+                                    <span v-else class="footer-bottom-link">{{
+                                        link.label
+                                    }}</span>
+                                    <span
+                                        v-if="i < legalLinks.length - 1"
+                                        class="footer-bottom-sep"
+                                        >&middot;</span
+                                    >
+                                </template>
+                            </div>
+
+                            <motion.a
+                                href="#hero"
+                                class="footer-back-top"
+                                while-hover="{ y: -3 }"
+                                whileTap="{ scale: 0.95 }"
+                            >
+                                <svg
+                                    class="size-3.5"
+                                    viewBox="0 0 12 12"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.5"
+                                >
+                                    <path
+                                        d="M6 10V2M2.5 5.5L6 2l3.5 3.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    />
+                                </svg>
+                                <span>{{ backToTop }}</span>
+                            </motion.a>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+        </div>
+    </footer>
+</template>
