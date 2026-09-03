@@ -53,9 +53,35 @@ class LandingPageController extends Controller
             $landingPage->og_image_path = null;
         }
 
+        // Handle single hero media (backward compatibility)
         $landingPage->hero_media_path = $this->storeMedia(
             $request->file('hero_media'), 'landing/hero', $landingPage->hero_media_path,
         );
+
+        // Handle multiple hero media paths (new feature)
+        if ($request->hasAny(['hero_media_paths.0', 'hero_media_paths.1', 'hero_media_paths.2'])) {
+            $paths = [];
+            $existingPaths = $landingPage->hero_media_paths ?? [];
+
+            foreach ([0, 1, 2] as $index) {
+                $file = $request->file("hero_media_paths.{$index}");
+
+                if ($file) {
+                    // Delete old file at this index if it exists
+                    if (isset($existingPaths[$index])) {
+                        $this->deleteMedia($existingPaths[$index]);
+                    }
+                    // Store new file
+                    $paths[$index] = $this->putMedia($file, 'landing/hero');
+                } elseif (isset($existingPaths[$index])) {
+                    // Keep existing file if not replaced
+                    $paths[$index] = $existingPaths[$index];
+                }
+            }
+
+            // Only save if we have any paths
+            $landingPage->hero_media_paths = ! empty($paths) ? array_values($paths) : null;
+        }
 
         $landingPage->og_image_path = $this->storeMedia(
             $request->file('og_image'), 'landing/og', $landingPage->og_image_path,
@@ -82,7 +108,12 @@ class LandingPageController extends Controller
                 $this->deleteMediaMany($section->mediaPaths());
             }
 
+            // Delete legacy single hero media
             $this->deleteMedia($landingPage->hero_media_path);
+
+            // Delete multiple hero media paths
+            $this->deleteMediaMany($landingPage->hero_media_paths);
+
             $this->deleteMedia($landingPage->og_image_path);
 
             $landingPage->delete();

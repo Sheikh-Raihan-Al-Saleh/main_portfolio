@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight } from '@lucide/vue';
 import { motion, useTransform } from 'motion-v';
 import { computed, ref } from 'vue';
 import { resolveSection } from '@/components/landing/sectionRegistry';
+import HeroDevicesCarousel from '@/components/landing/HeroDevicesCarousel.vue';
 import TechBadge from '@/components/portfolio/TechBadge.vue';
 import { Button } from '@/components/ui/button';
 import { useScrollProgress } from '@/composables/useScrollProgress';
@@ -208,14 +209,11 @@ const heroScale = useTransform(progress, [0, 1], [1, 0.97]);
                     </div>
 
                     <motion.div
-                        v-if="landingPage.hero_media_url"
+                        v-if="landingPage.hero_media_urls && landingPage.hero_media_urls.length > 0"
                         :variants="fadeUp"
-                        class="overflow-hidden rounded-lg border border-border p-2"
                     >
-                        <img
-                            :src="landingPage.hero_media_url"
-                            :alt="headline"
-                            class="w-full rounded-lg"
+                        <HeroDevicesCarousel
+                            :images="landingPage.hero_media_urls"
                         />
                     </motion.div>
                 </motion.div>

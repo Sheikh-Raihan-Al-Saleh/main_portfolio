@@ -236,15 +236,45 @@ function editSection(section: LandingSection) {
                         <InputError :message="errors.subheadline" />
                     </div>
 
-                    <FileField
-                        name="hero_media"
-                        label="Hero image"
-                        remove-name="remove_hero_media"
-                        :current-url="landingPage?.hero_media_url"
-                        accept="image/*"
-                        preview
-                    />
-                    <InputError :message="errors.hero_media" />
+                    <div class="grid gap-4 border-t border-border pt-4">
+                        <div>
+                            <h3 class="text-sm font-semibold mb-4">Hero Images</h3>
+                            <p class="text-xs text-muted-foreground mb-4">
+                                Upload up to 3 images that will rotate in the hero section.
+                                Recommended: Desktop (1920x1080), Tablet (768x576), Mobile (375x667)
+                            </p>
+                        </div>
+
+                        <!-- Desktop/Laptop image -->
+                        <FileField
+                            name="hero_media_paths[0]"
+                            label="1. Desktop/Laptop (recommended: 1920x1080)"
+                            accept="image/*"
+                            hint="Shown on desktop devices"
+                            preview
+                        />
+                        <InputError :message="errors['hero_media_paths.0']" />
+
+                        <!-- Tablet image -->
+                        <FileField
+                            name="hero_media_paths[1]"
+                            label="2. Tablet (recommended: 768x576)"
+                            accept="image/*"
+                            hint="Shown on tablet devices"
+                            preview
+                        />
+                        <InputError :message="errors['hero_media_paths.1']" />
+
+                        <!-- Mobile/Phone image -->
+                        <FileField
+                            name="hero_media_paths[2]"
+                            label="3. Mobile/Phone (recommended: 375x667)"
+                            accept="image/*"
+                            hint="Shown on mobile devices"
+                            preview
+                        />
+                        <InputError :message="errors['hero_media_paths.2']" />
+                    </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div class="grid gap-2">

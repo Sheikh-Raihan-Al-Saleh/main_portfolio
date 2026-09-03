@@ -2,7 +2,7 @@
 import { cn } from '@/lib/utils';
 
 type Props = {
-    variant?: 'phone' | 'laptop';
+    variant?: 'phone' | 'tablet' | 'laptop';
     class?: string;
 };
 
@@ -13,6 +13,7 @@ const props = withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
+    <!-- Phone variant -->
     <div
         v-if="props.variant === 'phone'"
         :class="
@@ -32,6 +33,23 @@ const props = withDefaults(defineProps<Props>(), {
         </div>
     </div>
 
+    <!-- Tablet variant -->
+    <div
+        v-else-if="props.variant === 'tablet'"
+        :class="
+            cn(
+                'relative mx-auto w-full max-w-[500px] rounded-3xl border-[12px] border-border/80 bg-card p-0 shadow-2xl',
+                props.class,
+            )
+        "
+    >
+        <!-- Rounded bezel -->
+        <div class="overflow-hidden rounded-2xl">
+            <slot />
+        </div>
+    </div>
+
+    <!-- Laptop variant -->
     <div v-else :class="cn('mx-auto w-full', props.class)">
         <div
             class="overflow-hidden rounded-xl border-[8px] border-border/80 bg-card shadow-2xl"
