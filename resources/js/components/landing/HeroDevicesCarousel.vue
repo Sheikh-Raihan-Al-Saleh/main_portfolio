@@ -2,7 +2,7 @@
 import { motion } from 'motion-v';
 import { computed } from 'vue';
 import DeviceFrame from '@/components/landing/frames/DeviceFrame.vue';
-import { fadeUp, stagger } from '@/lib/motion';
+import { fadeUp } from '@/lib/motion';
 
 type Props = {
     images: string[];
@@ -10,135 +10,118 @@ type Props = {
 
 const props = defineProps<Props>();
 
-// Ensure we have at least 3 images, fill with empty if needed
+// Devices with 3D positioning
 const devices = computed(() => [
-    { variant: 'laptop' as const, image: props.images[0] ?? null, label: 'Desktop', delay: 0 },
-    { variant: 'tablet' as const, image: props.images[1] ?? null, label: 'Tablet', delay: 0.1 },
-    { variant: 'phone' as const, image: props.images[2] ?? null, label: 'Mobile', delay: 0.2 },
+    {
+        variant: 'tablet' as const,
+        label: 'Tablet',
+        imageIndex: 1,
+        rotateY: 20,
+        translateX: -120,
+        zIndex: 10,
+        scale: 0.9,
+    },
+    {
+        variant: 'laptop' as const,
+        label: 'Desktop',
+        imageIndex: 0,
+        rotateY: 0,
+        translateX: 0,
+        zIndex: 20,
+        scale: 1,
+    },
+    {
+        variant: 'phone' as const,
+        label: 'Mobile',
+        imageIndex: 2,
+        rotateY: -20,
+        translateX: 120,
+        zIndex: 15,
+        scale: 0.85,
+    },
 ]);
+
+function getImageForDevice(imageIndex: number) {
+    return props.images[imageIndex] ?? null;
+}
 </script>
 
 <template>
-    <!-- Rotating carousel container - all devices face forward -->
-    <motion.div
-        :variants="fadeUp"
-        class="relative mx-auto w-full max-w-6xl"
-    >
-        <!-- Rotation container - spins the entire group -->
+    <!-- 3D Device Showcase -->
+    <div class="w-full flex justify-end py-8">
         <motion.div
-            class="flex items-center justify-center gap-8 py-12 px-4"
-            :animate="{ rotateY: 360 }"
-            :transition="{
-                duration: 20,
-                repeat: Infinity,
-                ease: 'linear',
-            }"
-            style="perspective: 1200px; transform-style: preserve-3d"
+            :variants="fadeUp"
+            class="relative"
+            style="perspective: 1200px; width: 100%; max-width: 900px"
         >
-            <!-- Laptop - Desktop (Left/Tall) -->
+            <!-- Rotating 3D container - all devices rotate together -->
             <motion.div
-                :variants="stagger(0.1)"
-                initial="hidden"
-                animate="visible"
-                class="flex justify-center"
+                class="relative flex items-center justify-center"
+                style="height: 500px; transform-style: preserve-3d"
+                :animate="{ rotateY: 360 }"
+                :transition="{
+                    duration: 12,
+                    repeat: Infinity,
+                    ease: 'linear',
+                }"
             >
-                <div class="transform" style="transform-origin: center">
-                    <DeviceFrame
-                        variant="laptop"
-                        class="max-w-xs"
+                <!-- Each device positioned in 3D space -->
+                <div
+                    v-for="(device, index) in devices"
+                    :key="device.variant"
+                    class="absolute flex items-center justify-center"
+                    :style="{
+                        transform: `translateX(${device.translateX}px) rotateY(${device.rotateY}deg) scale(${device.scale})`,
+                        zIndex: device.zIndex,
+                        transformStyle: 'preserve-3d',
+                    }"
+                >
+                    <motion.div
+                        :initial="{ opacity: 0 }"
+                        :animate="{ opacity: 1 }"
+                        :transition="{ delay: index * 0.2, duration: 0.8 }"
                     >
-                        <!-- Desktop/Laptop screen -->
-                        <div class="w-full bg-black">
-                            <img
-                                v-if="devices[0].image"
-                                :src="devices[0].image"
-                                :alt="devices[0].label"
-                                class="w-full h-auto block"
-                            />
-                            <div
-                                v-else
-                                class="w-full aspect-video bg-muted flex items-center justify-center"
-                            >
-                                <span class="text-sm text-muted-foreground">
-                                    {{ devices[0].label }}
-                                </span>
+                        <DeviceFrame
+                            :variant="device.variant"
+                            :class="[
+                                device.variant === 'laptop'
+                                    ? 'max-w-md'
+                                    : device.variant === 'tablet'
+                                        ? 'max-w-xs'
+                                        : 'max-w-[260px]',
+                            ]"
+                        >
+                            <div class="w-full bg-black">
+                                <img
+                                    v-if="getImageForDevice(device.imageIndex)"
+                                    :src="getImageForDevice(device.imageIndex)"
+                                    :alt="device.label"
+                                    class="w-full h-auto block"
+                                />
+                                <div
+                                    v-else
+                                    :class="[
+                                        'w-full flex items-center justify-center bg-muted',
+                                        device.variant === 'phone'
+                                            ? 'aspect-[9/16]'
+                                            : 'aspect-video',
+                                    ]"
+                                >
+                                    <span class="text-sm text-muted-foreground">
+                                        {{ device.label }}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                    </DeviceFrame>
-                </div>
-            </motion.div>
-
-            <!-- Tablet - Center (Medium) -->
-            <motion.div
-                :variants="stagger(0.2)"
-                initial="hidden"
-                animate="visible"
-                class="flex justify-center"
-            >
-                <div class="transform" style="transform-origin: center">
-                    <DeviceFrame
-                        variant="tablet"
-                        class="max-w-xs"
-                    >
-                        <!-- Tablet screen -->
-                        <div class="w-full bg-black">
-                            <img
-                                v-if="devices[1].image"
-                                :src="devices[1].image"
-                                :alt="devices[1].label"
-                                class="w-full h-auto block"
-                            />
-                            <div
-                                v-else
-                                class="w-full aspect-video bg-muted flex items-center justify-center"
-                            >
-                                <span class="text-sm text-muted-foreground">
-                                    {{ devices[1].label }}
-                                </span>
-                            </div>
-                        </div>
-                    </DeviceFrame>
-                </div>
-            </motion.div>
-
-            <!-- Mobile - Phone (Right/Small) -->
-            <motion.div
-                :variants="stagger(0.3)"
-                initial="hidden"
-                animate="visible"
-                class="flex justify-center"
-            >
-                <div class="transform" style="transform-origin: center">
-                    <DeviceFrame
-                        variant="phone"
-                        class="max-w-[240px]"
-                    >
-                        <!-- Mobile phone screen -->
-                        <div class="w-full bg-black">
-                            <img
-                                v-if="devices[2].image"
-                                :src="devices[2].image"
-                                :alt="devices[2].label"
-                                class="w-full h-auto block"
-                            />
-                            <div
-                                v-else
-                                class="w-full aspect-[9/16] bg-muted flex items-center justify-center"
-                            >
-                                <span class="text-xs text-muted-foreground">
-                                    {{ devices[2].label }}
-                                </span>
-                            </div>
-                        </div>
-                    </DeviceFrame>
+                        </DeviceFrame>
+                    </motion.div>
                 </div>
             </motion.div>
         </motion.div>
-    </motion.div>
+    </div>
 </template>
 
 <style scoped>
-/* Ensure smooth 3D rotation */
+/* 3D support */
 :deep(div) {
     backface-visibility: hidden;
 }
