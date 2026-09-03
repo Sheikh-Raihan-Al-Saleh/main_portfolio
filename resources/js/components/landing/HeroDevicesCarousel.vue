@@ -2,7 +2,7 @@
 import { motion } from 'motion-v';
 import { computed } from 'vue';
 import DeviceFrame from '@/components/landing/frames/DeviceFrame.vue';
-import { fadeUp } from '@/lib/motion';
+import { fadeUp, stagger } from '@/lib/motion';
 
 type Props = {
     images: string[];
@@ -12,78 +12,47 @@ const props = defineProps<Props>();
 
 // Ensure we have at least 3 images, fill with empty if needed
 const devices = computed(() => [
-    { variant: 'laptop' as const, image: props.images[0] ?? null, label: 'Desktop' },
-    { variant: 'tablet' as const, image: props.images[1] ?? null, label: 'Tablet' },
-    { variant: 'phone' as const, image: props.images[2] ?? null, label: 'Mobile' },
+    { variant: 'laptop' as const, image: props.images[0] ?? null, label: 'Desktop', delay: 0 },
+    { variant: 'tablet' as const, image: props.images[1] ?? null, label: 'Tablet', delay: 0.1 },
+    { variant: 'phone' as const, image: props.images[2] ?? null, label: 'Mobile', delay: 0.2 },
 ]);
-
-// Rotation positions for the 3 devices (anti-clockwise)
-// Each device is 120 degrees apart (360 / 3)
-const devicePositions = [
-    { index: 0, angle: 0, zIndex: 30 },      // Top (Laptop)
-    { index: 1, angle: 120, zIndex: 20 },    // Bottom-left (Tablet)
-    { index: 2, angle: 240, zIndex: 10 },    // Bottom-right (Phone)
-];
-
-// Calculate the position of each device based on angle
-function getDevicePosition(angle: number) {
-    const radius = 180; // Distance from center
-    const radians = (angle * Math.PI) / 180;
-    const x = Math.cos(radians) * radius;
-    const y = Math.sin(radians) * radius;
-    return { x, y };
-}
 </script>
 
 <template>
-    <!-- Rotating carousel container -->
+    <!-- Rotating carousel container - all devices face forward -->
     <motion.div
         :variants="fadeUp"
-        class="relative mx-auto w-full max-w-4xl"
+        class="relative mx-auto w-full max-w-6xl"
     >
-        <!-- Rotation container -->
+        <!-- Rotation container - spins the entire group -->
         <motion.div
-            class="relative mx-auto"
-            style="height: 700px"
-            :animate="{ rotate: -360 }"
+            class="flex items-center justify-center gap-8 py-12 px-4"
+            :animate="{ rotateY: 360 }"
             :transition="{
                 duration: 20,
                 repeat: Infinity,
                 ease: 'linear',
             }"
+            style="perspective: 1200px; transform-style: preserve-3d"
         >
-            <!-- Individual device positions -->
-            <div
-                v-for="device in devicePositions"
-                :key="device.index"
-                class="absolute"
-                :style="{
-                    zIndex: device.zIndex,
-                    left: '50%',
-                    top: '50%',
-                    transform: `translate(calc(-50% + ${getDevicePosition(device.angle).x}px), calc(-50% + ${getDevicePosition(device.angle).y}px))`,
-                }"
+            <!-- Laptop - Desktop (Left/Tall) -->
+            <motion.div
+                :variants="stagger(0.1)"
+                initial="hidden"
+                animate="visible"
+                class="flex justify-center"
             >
-                <div class="flex items-center justify-center">
+                <div class="transform" style="transform-origin: center">
                     <DeviceFrame
-                        :variant="devices[device.index].variant"
-                        :class="[
-                            device.variant === 'laptop'
-                                ? 'max-w-sm'
-                                : device.variant === 'tablet'
-                                    ? 'max-w-xs'
-                                    : 'max-w-[240px]',
-                        ]"
+                        variant="laptop"
+                        class="max-w-xs"
                     >
                         <!-- Desktop/Laptop screen -->
-                        <div
-                            v-if="device.variant === 'laptop'"
-                            class="w-full bg-black"
-                        >
+                        <div class="w-full bg-black">
                             <img
-                                v-if="devices[device.index].image"
-                                :src="devices[device.index].image"
-                                :alt="`${devices[device.index].label} mockup`"
+                                v-if="devices[0].image"
+                                :src="devices[0].image"
+                                :alt="devices[0].label"
                                 class="w-full h-auto block"
                             />
                             <div
@@ -91,20 +60,32 @@ function getDevicePosition(angle: number) {
                                 class="w-full aspect-video bg-muted flex items-center justify-center"
                             >
                                 <span class="text-sm text-muted-foreground">
-                                    {{ devices[device.index].label }}
+                                    {{ devices[0].label }}
                                 </span>
                             </div>
                         </div>
+                    </DeviceFrame>
+                </div>
+            </motion.div>
 
+            <!-- Tablet - Center (Medium) -->
+            <motion.div
+                :variants="stagger(0.2)"
+                initial="hidden"
+                animate="visible"
+                class="flex justify-center"
+            >
+                <div class="transform" style="transform-origin: center">
+                    <DeviceFrame
+                        variant="tablet"
+                        class="max-w-xs"
+                    >
                         <!-- Tablet screen -->
-                        <div
-                            v-else-if="device.variant === 'tablet'"
-                            class="w-full bg-black"
-                        >
+                        <div class="w-full bg-black">
                             <img
-                                v-if="devices[device.index].image"
-                                :src="devices[device.index].image"
-                                :alt="`${devices[device.index].label} mockup`"
+                                v-if="devices[1].image"
+                                :src="devices[1].image"
+                                :alt="devices[1].label"
                                 class="w-full h-auto block"
                             />
                             <div
@@ -112,20 +93,32 @@ function getDevicePosition(angle: number) {
                                 class="w-full aspect-video bg-muted flex items-center justify-center"
                             >
                                 <span class="text-sm text-muted-foreground">
-                                    {{ devices[device.index].label }}
+                                    {{ devices[1].label }}
                                 </span>
                             </div>
                         </div>
+                    </DeviceFrame>
+                </div>
+            </motion.div>
 
+            <!-- Mobile - Phone (Right/Small) -->
+            <motion.div
+                :variants="stagger(0.3)"
+                initial="hidden"
+                animate="visible"
+                class="flex justify-center"
+            >
+                <div class="transform" style="transform-origin: center">
+                    <DeviceFrame
+                        variant="phone"
+                        class="max-w-[240px]"
+                    >
                         <!-- Mobile phone screen -->
-                        <div
-                            v-else
-                            class="w-full bg-black"
-                        >
+                        <div class="w-full bg-black">
                             <img
-                                v-if="devices[device.index].image"
-                                :src="devices[device.index].image"
-                                :alt="`${devices[device.index].label} mockup`"
+                                v-if="devices[2].image"
+                                :src="devices[2].image"
+                                :alt="devices[2].label"
                                 class="w-full h-auto block"
                             />
                             <div
@@ -133,28 +126,20 @@ function getDevicePosition(angle: number) {
                                 class="w-full aspect-[9/16] bg-muted flex items-center justify-center"
                             >
                                 <span class="text-xs text-muted-foreground">
-                                    {{ devices[device.index].label }}
+                                    {{ devices[2].label }}
                                 </span>
                             </div>
                         </div>
                     </DeviceFrame>
                 </div>
-            </div>
+            </motion.div>
         </motion.div>
-
-        <!-- Center dot (decorative) -->
-        <div
-            class="absolute inset-0 flex items-center justify-center pointer-events-none"
-            aria-hidden="true"
-        >
-            <div class="size-3 rounded-full bg-brand/60 shadow-lg" />
-        </div>
     </motion.div>
 </template>
 
 <style scoped>
-/* Ensure smooth perspective for 3D effect */
-:deep(.relative) {
-    perspective: 1000px;
+/* Ensure smooth 3D rotation */
+:deep(div) {
+    backface-visibility: hidden;
 }
 </style>
