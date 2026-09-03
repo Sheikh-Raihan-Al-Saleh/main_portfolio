@@ -14,7 +14,7 @@ class MediaController extends Controller
      * (CPanel) where `php artisan storage:link` may not persist or may not be
      * executable.
      */
-    public function show(string $path): StreamedResponse|Response
+    public function show(string $path): StreamedResponse
     {
         $disk = Storage::disk('public');
 

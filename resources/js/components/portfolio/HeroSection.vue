@@ -341,9 +341,15 @@ const content = computed(() => contentConfig(props.profile));
                             <div
                                 class="relative mx-auto w-56 rounded-2xl sm:w-64 md:w-72"
                             >
-                                <!-- Gradient border ring -->
-                                <div
+                                <!-- Gradient border ring with light mode animation -->
+                                <motion.div
                                     class="absolute -inset-1 rounded-2xl bg-gradient-to-br from-brand via-brand/50 to-brand opacity-60 blur-sm"
+                                    :animate="{ opacity: [0.4, 0.8, 0.4] }"
+                                    :transition="{
+                                        duration: 3,
+                                        repeat: Infinity,
+                                        ease: 'easeInOut',
+                                    }"
                                 />
                                 <div
                                     class="relative overflow-hidden rounded-2xl bg-background p-1"
@@ -365,7 +371,7 @@ const content = computed(() => contentConfig(props.profile));
                                 </div>
                             </div>
 
-                            <!-- Floating tech badges -->
+                            <!-- Floating tech badges with light mode glow -->
                             <motion.span
                                 v-for="(badge, index) in floatingBadges"
                                 :key="badge"
@@ -376,7 +382,7 @@ const content = computed(() => contentConfig(props.profile));
                                     ease: 'easeInOut',
                                     delay: index * 0.4,
                                 }"
-                                class="absolute z-10 rounded-lg border border-border bg-background/90 px-3 py-1.5 font-mono text-xs font-medium shadow-lg backdrop-blur-sm"
+                                class="badge-float absolute z-10 rounded-lg border border-border bg-background/90 px-3 py-1.5 font-mono text-xs font-medium shadow-lg backdrop-blur-sm"
                                 :class="[
                                     index === 0 ? '-top-3 -left-4' : '',
                                     index === 1 ? 'top-8 -right-6' : '',
@@ -391,10 +397,10 @@ const content = computed(() => contentConfig(props.profile));
                             </motion.span>
                         </motion.div>
 
-                        <!-- Code card below image -->
+                        <!-- Code card below image with light mode glow -->
                         <motion.div
                             :variants="fadeUp"
-                            class="code-window mx-auto mt-8 w-full max-w-xs"
+                            class="code-window code-window-light mx-auto mt-8 w-full max-w-xs"
                         >
                             <div class="code-window-header">
                                 <span class="code-window-dot bg-red-500" />
@@ -548,10 +554,63 @@ const content = computed(() => contentConfig(props.profile));
     opacity: 0;
     transform: translateY(-6px);
 }
+
+/* Light mode enhancements */
+:root:not([data-theme="dark"]) {
+    --glow-animation: glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.3));
+    }
+    50% {
+        filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.6));
+    }
+}
+
+/* Light mode badge float glow */
+:root:not([data-theme="dark"]) .badge-float {
+    box-shadow:
+        0 4px 12px rgba(99, 102, 241, 0.15),
+        inset 0 0 1px rgba(99, 102, 241, 0.1);
+    transition: box-shadow 0.6s ease-in-out;
+}
+
+:root:not([data-theme="dark"]) .badge-float:hover {
+    box-shadow:
+        0 8px 24px rgba(99, 102, 241, 0.3),
+        inset 0 0 1px rgba(99, 102, 241, 0.2);
+}
+
+/* Light mode code window glow and animation */
+:root:not([data-theme="dark"]) .code-window-light {
+    box-shadow:
+        0 8px 32px rgba(99, 102, 241, 0.1),
+        inset 0 1px 0 rgba(99, 102, 241, 0.1);
+    animation: code-window-glow 4s ease-in-out infinite;
+}
+
+@keyframes code-window-glow {
+    0%, 100% {
+        box-shadow:
+            0 8px 32px rgba(99, 102, 241, 0.1),
+            inset 0 1px 0 rgba(99, 102, 241, 0.1);
+    }
+    50% {
+        box-shadow:
+            0 12px 48px rgba(99, 102, 241, 0.2),
+            inset 0 1px 0 rgba(99, 102, 241, 0.15);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .role-enter-active,
     .role-leave-active {
         transition: none;
+    }
+    :root:not([data-theme="dark"]) {
+        --glow-animation: none;
     }
 }
 </style>
