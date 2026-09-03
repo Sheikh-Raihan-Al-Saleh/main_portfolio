@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { motion } from 'motion-v';
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import DeviceFrame from '@/components/landing/frames/DeviceFrame.vue';
 import { fadeUp } from '@/lib/motion';
 
@@ -10,119 +10,133 @@ type Props = {
 
 const props = defineProps<Props>();
 
-// Devices with 3D positioning
-const devices = computed(() => [
-    {
-        variant: 'tablet' as const,
-        label: 'Tablet',
-        imageIndex: 1,
-        rotateY: 20,
-        translateX: -120,
-        zIndex: 10,
-        scale: 0.9,
-    },
-    {
-        variant: 'laptop' as const,
-        label: 'Desktop',
-        imageIndex: 0,
-        rotateY: 0,
-        translateX: 0,
-        zIndex: 20,
-        scale: 1,
-    },
-    {
-        variant: 'phone' as const,
-        label: 'Mobile',
-        imageIndex: 2,
-        rotateY: -20,
-        translateX: 120,
-        zIndex: 15,
-        scale: 0.85,
-    },
-]);
+// Current image index
+const currentIndex = ref(0);
 
-function getImageForDevice(imageIndex: number) {
-    return props.images[imageIndex] ?? null;
-}
+// Auto-rotate images
+let interval: ReturnType<typeof setInterval> | null = null;
+
+onMounted(() => {
+    interval = setInterval(() => {
+        currentIndex.value = (currentIndex.value + 1) % props.images.length;
+    }, 3000);
+});
+
+onBeforeUnmount(() => {
+    if (interval) {
+        clearInterval(interval);
+    }
+});
+
+// Current image
+const currentImage = computed(() => props.images[currentIndex.value] ?? null);
+
+// Device labels
+const deviceLabels = ['Desktop', 'Tablet', 'Mobile'];
 </script>
 
 <template>
-    <!-- 3D Device Showcase -->
-    <div class="w-full flex justify-end py-8">
-        <motion.div
-            :variants="fadeUp"
-            class="relative"
-            style="perspective: 1200px; width: 100%; max-width: 900px"
-        >
-            <!-- Rotating 3D container - all devices rotate together -->
+    <!-- Simple carousel - 3 devices, same size -->
+    <motion.div
+        :variants="fadeUp"
+        class="w-full flex justify-end"
+    >
+        <div class="flex items-center justify-end gap-6 py-8">
+            <!-- Device 1 - Laptop -->
             <motion.div
-                class="relative flex items-center justify-center"
-                style="height: 500px; transform-style: preserve-3d"
-                :animate="{ rotateY: 360 }"
-                :transition="{
-                    duration: 12,
-                    repeat: Infinity,
-                    ease: 'linear',
-                }"
+                initial="hidden"
+                animate="visible"
+                :variants="fadeUp"
             >
-                <!-- Each device positioned in 3D space -->
-                <div
-                    v-for="(device, index) in devices"
-                    :key="device.variant"
-                    class="absolute flex items-center justify-center"
-                    :style="{
-                        transform: `translateX(${device.translateX}px) rotateY(${device.rotateY}deg) scale(${device.scale})`,
-                        zIndex: device.zIndex,
-                        transformStyle: 'preserve-3d',
-                    }"
-                >
+                <DeviceFrame variant="laptop" class="max-w-sm">
                     <motion.div
+                        class="w-full bg-black"
+                        :key="`img-${currentIndex}`"
                         :initial="{ opacity: 0 }"
                         :animate="{ opacity: 1 }"
-                        :transition="{ delay: index * 0.2, duration: 0.8 }"
+                        :transition="{ duration: 0.5 }"
                     >
-                        <DeviceFrame
-                            :variant="device.variant"
-                            :class="[
-                                device.variant === 'laptop'
-                                    ? 'max-w-md'
-                                    : device.variant === 'tablet'
-                                        ? 'max-w-xs'
-                                        : 'max-w-[260px]',
-                            ]"
+                        <img
+                            v-if="currentIndex === 0 && currentImage"
+                            :src="currentImage"
+                            :alt="deviceLabels[0]"
+                            class="w-full h-auto block"
+                        />
+                        <div
+                            v-else
+                            class="w-full aspect-video bg-muted flex items-center justify-center"
                         >
-                            <div class="w-full bg-black">
-                                <img
-                                    v-if="getImageForDevice(device.imageIndex)"
-                                    :src="getImageForDevice(device.imageIndex)"
-                                    :alt="device.label"
-                                    class="w-full h-auto block"
-                                />
-                                <div
-                                    v-else
-                                    :class="[
-                                        'w-full flex items-center justify-center bg-muted',
-                                        device.variant === 'phone'
-                                            ? 'aspect-[9/16]'
-                                            : 'aspect-video',
-                                    ]"
-                                >
-                                    <span class="text-sm text-muted-foreground">
-                                        {{ device.label }}
-                                    </span>
-                                </div>
-                            </div>
-                        </DeviceFrame>
+                            <span class="text-sm text-muted-foreground">
+                                {{ deviceLabels[0] }}
+                            </span>
+                        </div>
                     </motion.div>
-                </div>
+                </DeviceFrame>
             </motion.div>
-        </motion.div>
-    </div>
-</template>
 
-<style scoped>
-/* 3D support */
-:deep(div) {
-    backface-visibility: hidden;
-}
-</style>
+            <!-- Device 2 - Tablet -->
+            <motion.div
+                initial="hidden"
+                animate="visible"
+                :variants="fadeUp"
+            >
+                <DeviceFrame variant="tablet" class="max-w-sm">
+                    <motion.div
+                        class="w-full bg-black"
+                        :key="`img-${currentIndex}`"
+                        :initial="{ opacity: 0 }"
+                        :animate="{ opacity: 1 }"
+                        :transition="{ duration: 0.5 }"
+                    >
+                        <img
+                            v-if="currentIndex === 1 && currentImage"
+                            :src="currentImage"
+                            :alt="deviceLabels[1]"
+                            class="w-full h-auto block"
+                        />
+                        <div
+                            v-else
+                            class="w-full aspect-video bg-muted flex items-center justify-center"
+                        >
+                            <span class="text-sm text-muted-foreground">
+                                {{ deviceLabels[1] }}
+                            </span>
+                        </div>
+                    </motion.div>
+                </DeviceFrame>
+            </motion.div>
+
+            <!-- Device 3 - Phone -->
+            <motion.div
+                initial="hidden"
+                animate="visible"
+                :variants="fadeUp"
+            >
+                <DeviceFrame variant="phone" class="max-w-sm">
+                    <motion.div
+                        class="w-full bg-black"
+                        :key="`img-${currentIndex}`"
+                        :initial="{ opacity: 0 }"
+                        :animate="{ opacity: 1 }"
+                        :transition="{ duration: 0.5 }"
+                    >
+                        <img
+                            v-if="currentIndex === 2 && currentImage"
+                            :src="currentImage"
+                            :alt="deviceLabels[2]"
+                            class="w-full h-auto block"
+                        />
+                        <div
+                            v-else
+                            class="w-full aspect-[9/16] bg-muted flex items-center justify-center"
+                        >
+                            <span class="text-xs text-muted-foreground">
+                                {{ deviceLabels[2] }}
+                            </span>
+                        </div>
+                    </motion.div>
+                </DeviceFrame>
+            </motion.div>
+        </div>
+    </motion.div>
+</template>
