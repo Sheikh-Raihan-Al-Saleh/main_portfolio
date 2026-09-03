@@ -48,7 +48,7 @@ const deviceLabels = ['Desktop', 'Tablet', 'Mobile'];
                 animate="visible"
                 :variants="fadeUp"
             >
-                <DeviceFrame variant="laptop" class="max-w-sm">
+                <DeviceFrame variant="laptop" class="max-w-xs">
                     <motion.div
                         class="w-full bg-black"
                         :key="`img-${currentIndex}`"
@@ -80,7 +80,7 @@ const deviceLabels = ['Desktop', 'Tablet', 'Mobile'];
                 animate="visible"
                 :variants="fadeUp"
             >
-                <DeviceFrame variant="tablet" class="max-w-sm">
+                <DeviceFrame variant="tablet" class="max-w-xs">
                     <motion.div
                         class="w-full bg-black"
                         :key="`img-${currentIndex}`"
@@ -112,7 +112,7 @@ const deviceLabels = ['Desktop', 'Tablet', 'Mobile'];
                 animate="visible"
                 :variants="fadeUp"
             >
-                <DeviceFrame variant="phone" class="max-w-sm">
+                <DeviceFrame variant="phone" class="max-w-xs">
                     <motion.div
                         class="w-full bg-black"
                         :key="`img-${currentIndex}`"
