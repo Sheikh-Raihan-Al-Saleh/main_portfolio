@@ -348,7 +348,7 @@ const backToTop = computed(() =>
                             :in-view-options="inViewOnce"
                             class="footer-watermark"
                         >
-                            {{ profile.name.split(' ')[0]?.toUpperCase() }}
+                            {{ profile.name?.toUpperCase() }}
                         </motion.p>
                     </div>
 

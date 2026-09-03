@@ -89,7 +89,7 @@ function closeMobile() {
                         <span
                             class="hidden text-sm font-semibold tracking-tight sm:inline"
                         >
-                            {{ profile?.name?.split(' ')[0] ?? 'portfolio' }}
+                            {{ profile?.name ?? 'portfolio' }}
                         </span>
                     </Link>
 
