@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\ResolvesMediaUrls;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -46,30 +47,21 @@ use Illuminate\Support\Carbon;
 #[Appends(['avatar_url', 'resume_url', 'og_image_url'])]
 class Profile extends Model
 {
+    use ResolvesMediaUrls;
+
     protected function getAvatarUrlAttribute(): ?string
     {
-        return $this->publicUrl($this->avatar_path);
+        return $this->mediaUrl($this->avatar_path);
     }
 
     protected function getResumeUrlAttribute(): ?string
     {
-        return $this->publicUrl($this->resume_path);
+        return $this->mediaUrl($this->resume_path);
     }
 
     protected function getOgImageUrlAttribute(): ?string
     {
-        return $this->publicUrl($this->og_image_path);
-    }
-
-    private function publicUrl(?string $path): ?string
-    {
-        if (blank($path)) {
-            return null;
-        }
-
-        // Serve via /media/{path} which reads directly from the storage disk,
-        // bypassing the public/storage symlink that is unreliable on CPanel.
-        return url('media/'.$path);
+        return $this->mediaUrl($this->og_image_path);
     }
 
     /**

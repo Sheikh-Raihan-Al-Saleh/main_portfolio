@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\ResolvesMediaUrls;
 use Database\Factories\ProjectLandingPageFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -13,7 +14,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
@@ -51,6 +51,7 @@ class ProjectLandingPage extends Model
 {
     /** @use HasFactory<ProjectLandingPageFactory> */
     use HasFactory;
+    use ResolvesMediaUrls;
 
     /**
      * Keep the denormalised `projects.has_landing_page` flag true to the
@@ -85,16 +86,12 @@ class ProjectLandingPage extends Model
 
     protected function getHeroMediaUrlAttribute(): ?string
     {
-        return filled($this->hero_media_path)
-            ? Storage::disk('public')->url($this->hero_media_path)
-            : null;
+        return $this->mediaUrl($this->hero_media_path);
     }
 
     protected function getOgImageUrlAttribute(): ?string
     {
-        return filled($this->og_image_path)
-            ? Storage::disk('public')->url($this->og_image_path)
-            : null;
+        return $this->mediaUrl($this->og_image_path);
     }
 
     /** @param  Builder<ProjectLandingPage>  $query */
