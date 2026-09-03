@@ -12,29 +12,39 @@ const props = defineProps<Props>();
 
 // Ensure we have at least 3 images, fill with empty if needed
 const devices = computed(() => [
-    { variant: 'laptop' as const, image: props.images[0] ?? null },
-    { variant: 'tablet' as const, image: props.images[1] ?? null },
-    { variant: 'phone' as const, image: props.images[2] ?? null },
+    { variant: 'laptop' as const, image: props.images[0] ?? null, label: 'Desktop' },
+    { variant: 'tablet' as const, image: props.images[1] ?? null, label: 'Tablet' },
+    { variant: 'phone' as const, image: props.images[2] ?? null, label: 'Mobile' },
 ]);
 
 // Rotation positions for the 3 devices (anti-clockwise)
 // Each device is 120 degrees apart (360 / 3)
 const devicePositions = [
-    { index: 0, rotate: 0, zIndex: 30 },      // Top (Laptop)
-    { index: 1, rotate: 120, zIndex: 20 },    // Bottom-left (Tablet)
-    { index: 2, rotate: 240, zIndex: 10 },    // Bottom-right (Phone)
+    { index: 0, angle: 0, zIndex: 30 },      // Top (Laptop)
+    { index: 1, angle: 120, zIndex: 20 },    // Bottom-left (Tablet)
+    { index: 2, angle: 240, zIndex: 10 },    // Bottom-right (Phone)
 ];
+
+// Calculate the position of each device based on angle
+function getDevicePosition(angle: number) {
+    const radius = 180; // Distance from center
+    const radians = (angle * Math.PI) / 180;
+    const x = Math.cos(radians) * radius;
+    const y = Math.sin(radians) * radius;
+    return { x, y };
+}
 </script>
 
 <template>
     <!-- Rotating carousel container -->
     <motion.div
         :variants="fadeUp"
-        class="relative mx-auto w-full max-w-3xl"
+        class="relative mx-auto w-full max-w-4xl"
     >
         <!-- Rotation container -->
         <motion.div
-            class="relative mx-auto h-[600px]"
+            class="relative mx-auto"
+            style="height: 700px"
             :animate="{ rotate: -360 }"
             :transition="{
                 duration: 20,
@@ -46,48 +56,42 @@ const devicePositions = [
             <div
                 v-for="device in devicePositions"
                 :key="device.index"
-                class="absolute inset-0 flex items-center justify-center"
-                :style="{ zIndex: device.zIndex }"
+                class="absolute"
+                :style="{
+                    zIndex: device.zIndex,
+                    left: '50%',
+                    top: '50%',
+                    transform: `translate(calc(-50% + ${getDevicePosition(device.angle).x}px), calc(-50% + ${getDevicePosition(device.angle).y}px))`,
+                }"
             >
-                <motion.div
-                    class="absolute"
-                    :animate="{ rotate: device.rotate }"
-                    :transition="{ duration: 0.1 }"
-                    style="
-                        transform-origin: 0 0;
-                        left: 50%;
-                        top: 50%;
-                    "
-                >
-                    <div
-                        class="absolute"
-                        :style="{
-                            transform: `translate(-50%, -50%) rotate(${device.rotate}deg) translateY(-200px)`,
-                        }"
+                <div class="flex items-center justify-center">
+                    <DeviceFrame
+                        :variant="devices[device.index].variant"
+                        :class="[
+                            device.variant === 'laptop'
+                                ? 'max-w-sm'
+                                : device.variant === 'tablet'
+                                    ? 'max-w-xs'
+                                    : 'max-w-[240px]',
+                        ]"
                     >
-                        <DeviceFrame
-                            :variant="devices[device.index].variant"
-                            :class="[
-                                device.variant === 'laptop'
-                                    ? 'max-w-md'
-                                    : device.variant === 'tablet'
-                                        ? 'max-w-sm'
-                                        : 'max-w-xs',
-                            ]"
+                        <img
+                            v-if="devices[device.index].image"
+                            :src="devices[device.index].image"
+                            :alt="`${devices[device.index].label} mockup`"
+                            class="aspect-video w-full object-cover"
+                            loading="lazy"
+                        />
+                        <div
+                            v-else
+                            class="aspect-video w-full bg-muted flex items-center justify-center"
                         >
-                            <img
-                                v-if="devices[device.index].image"
-                                :src="devices[device.index].image"
-                                :alt="`Device ${device.index + 1}`"
-                                class="aspect-video w-full object-cover"
-                            />
-                            <div
-                                v-else
-                                class="aspect-video w-full bg-muted"
-                            />
-                        </DeviceFrame>
-                    </div>
-                </motion.div>
+                            <span class="text-xs text-muted-foreground">
+                                {{ devices[device.index].label }}
+                            </span>
+                        </div>
+                    </DeviceFrame>
+                </div>
             </div>
         </motion.div>
 
@@ -96,9 +100,14 @@ const devicePositions = [
             class="absolute inset-0 flex items-center justify-center pointer-events-none"
             aria-hidden="true"
         >
-            <div
-                class="size-2 rounded-full bg-brand/50"
-            />
+            <div class="size-3 rounded-full bg-brand/60 shadow-lg" />
         </div>
     </motion.div>
 </template>
+
+<style scoped>
+/* Ensure smooth perspective for 3D effect */
+:deep(.relative) {
+    perspective: 1000px;
+}
+</style>
