@@ -129,6 +129,7 @@ export type ProjectLandingPage = {
     og_image_path: string | null;
     is_published: boolean;
     hero_media_url: string | null;
+    hero_media_urls: string[];
     og_image_url: string | null;
 };
 

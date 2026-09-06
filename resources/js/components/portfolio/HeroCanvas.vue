@@ -21,6 +21,7 @@ let geometry: THREE.BufferGeometry | null = null;
 let material: THREE.PointsMaterial | null = null;
 let frameId: number | null = null;
 let resizeObserver: ResizeObserver | null = null;
+let themeObserver: MutationObserver | null = null;
 
 // Target vs current, lerped each frame so the field eases toward the cursor
 // instead of snapping to it.
@@ -28,6 +29,10 @@ const pointer = { x: 0, y: 0 };
 const current = { x: 0, y: 0 };
 
 const PARTICLE_COUNT = 1400;
+
+function isDark(): boolean {
+    return document.documentElement.classList.contains('dark');
+}
 
 function brandColor(): THREE.Color {
     // Read the live token so the field recolours with the theme.
@@ -46,6 +51,42 @@ function brandColor(): THREE.Color {
     return color;
 }
 
+function starColor(): THREE.Color {
+    // Light mode: vivid red stars on white, dark mode: brand (also red) with additive glow
+    if (isDark()) {
+        return brandColor();
+    }
+
+    const color = new THREE.Color();
+
+    color.setStyle('#ef4444');
+
+    return color;
+}
+
+function applyThemeToMaterial() {
+    if (!material) {
+        return;
+    }
+
+    const dark = isDark();
+
+    if (dark) {
+        material.color.copy(brandColor());
+        material.blending = THREE.AdditiveBlending;
+        material.opacity = 0.75;
+        material.size = 0.035;
+    } else {
+        // Light mode: solid red stars, normal blending so they stay crisp on white
+        material.color.setStyle('#ef4444');
+        material.blending = THREE.NormalBlending;
+        material.opacity = 0.9;
+        material.size = 0.042;
+    }
+
+    material.needsUpdate = true;
+}
+
 function buildParticles(): THREE.Points {
     geometry = new THREE.BufferGeometry();
 
@@ -61,14 +102,16 @@ function buildParticles(): THREE.Points {
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
+    const dark = isDark();
+
     material = new THREE.PointsMaterial({
-        color: brandColor(),
-        size: 0.035,
+        color: starColor(),
+        size: dark ? 0.035 : 0.042,
         transparent: true,
-        opacity: 0.75,
+        opacity: dark ? 0.75 : 0.9,
         sizeAttenuation: true,
         depthWrite: false,
-        blending: THREE.AdditiveBlending,
+        blending: dark ? THREE.AdditiveBlending : THREE.NormalBlending,
     });
 
     return new THREE.Points(geometry, material);
@@ -183,6 +226,16 @@ onMounted(() => {
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     document.addEventListener('visibilitychange', onVisibilityChange);
 
+    // React to light/dark toggle — keep stars red in light mode, glowing in dark
+    themeObserver = new MutationObserver(() => {
+        applyThemeToMaterial();
+    });
+
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class'],
+    });
+
     start();
 });
 
@@ -191,6 +244,9 @@ onBeforeUnmount(() => {
 
     window.removeEventListener('pointermove', onPointerMove);
     document.removeEventListener('visibilitychange', onVisibilityChange);
+
+    themeObserver?.disconnect();
+    themeObserver = null;
 
     resizeObserver?.disconnect();
     resizeObserver = null;

@@ -336,7 +336,7 @@ const backToTop = computed(() =>
                         </motion.div>
                     </div>
 
-                    <div
+                    <!-- <div
                         v-if="profile?.name"
                         class="footer-watermark-wrap"
                         aria-hidden="true"
@@ -344,13 +344,13 @@ const backToTop = computed(() =>
                         <motion.p
                             initial="hidden"
                             while-in-view="visible"
-                            :variants="watermarkVariants(0.4)"
+                            :variants="watermarkVariants(0.8)"
                             :in-view-options="inViewOnce"
                             class="footer-watermark"
                         >
                             {{ profile.name?.toUpperCase() }}
                         </motion.p>
-                    </div>
+                    </div> -->
 
                     <div class="footer-divider" />
 

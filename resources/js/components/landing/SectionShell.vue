@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { motion } from 'motion-v';
-import { fadeUp, inViewOnce, stagger } from '@/lib/motion';
+import { fadeUp, inViewOnce, sectionReveal, stagger } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -29,53 +29,75 @@ const props = withDefaults(defineProps<Props>(), {
         :id="props.anchor"
         :class="
             cn(
-                'bg-noise scroll-mt-24 border-t border-border py-20 sm:py-24',
-                props.muted && 'bg-muted/30',
+                'relative scroll-mt-24 overflow-hidden py-16 sm:py-20',
+                props.muted ? 'bg-slate-50/70' : 'bg-white',
                 props.class,
             )
         "
     >
-        <div class="corner-dot corner-dot-tl" aria-hidden="true" />
-        <div class="corner-dot corner-dot-tr" aria-hidden="true" />
+        <!-- subtle depth glow -->
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div
+                class="absolute top-0 left-1/2 h-[420px] w-[900px] -translate-x-1/2 bg-gradient-to-b from-[#2563eb]/[0.03] to-transparent blur-2xl"
+            />
+        </div>
 
         <motion.div
-            :variants="stagger(0.1)"
+            :variants="sectionReveal"
             initial="hidden"
             while-in-view="visible"
             :in-view-options="inViewOnce"
             :class="
                 cn(
-                    'container-laravel section-dashed-xl',
-                    props.wide ? 'max-w-7xl' : '',
+                    'relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8',
+                    props.wide ? 'max-w-7xl' : 'max-w-6xl',
                 )
             "
         >
             <motion.div
                 v-if="props.eyebrow || props.heading || props.subheading"
-                :variants="fadeUp"
-                class="mb-12 max-w-3xl"
+                :variants="stagger(0.08)"
+                initial="hidden"
+                while-in-view="visible"
+                :in-view-options="inViewOnce"
+                class="mx-auto mb-10 max-w-3xl text-center sm:mb-12"
             >
-                <p
+                <motion.div
                     v-if="props.eyebrow"
-                    class="mb-3 font-mono text-xs text-brand uppercase"
+                    :variants="fadeUp"
+                    class="flex justify-center"
                 >
-                    {{ props.eyebrow }}
-                </p>
-                <h2
+                    <span
+                        class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold tracking-widest text-[#2563eb] uppercase shadow-sm"
+                    >
+                        <span
+                            class="size-1.5 animate-pulse rounded-full bg-[#2563eb]"
+                        />
+                        {{ props.eyebrow }}
+                    </span>
+                </motion.div>
+                <motion.h2
                     v-if="props.heading"
-                    class="font-display text-3xl font-bold tracking-tight text-balance sm:text-4xl"
+                    :variants="fadeUp"
+                    class="landing-section-title mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
                 >
                     {{ props.heading }}
-                </h2>
-                <p
+                </motion.h2>
+                <motion.p
                     v-if="props.subheading"
-                    class="mt-4 text-lg text-pretty text-muted-foreground"
+                    :variants="fadeUp"
+                    class="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-slate-500 sm:text-lg"
                 >
                     {{ props.subheading }}
-                </p>
+                </motion.p>
             </motion.div>
 
-            <motion.div :variants="fadeUp">
+            <motion.div
+                :variants="fadeUp"
+                initial="hidden"
+                while-in-view="visible"
+                :in-view-options="inViewOnce"
+            >
                 <slot />
             </motion.div>
         </motion.div>

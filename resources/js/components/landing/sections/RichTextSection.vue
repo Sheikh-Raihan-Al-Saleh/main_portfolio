@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import SectionShell from '@/components/landing/SectionShell.vue';
 import type { LandingSection } from '@/types';
-
 type Props = {
     section: Extract<LandingSection, { type: 'richtext' }>;
     anchor?: string;
 };
-
 defineProps<Props>();
 </script>
 
@@ -17,14 +15,9 @@ defineProps<Props>();
         :subheading="section.subheading"
         :anchor="anchor"
     >
-        <!--
-          `body_html` is rendered server-side by LandingPageController with
-          commonmark configured to strip raw HTML and reject unsafe links, so
-          nothing author-supplied reaches the DOM as markup.
-        -->
         <div
             v-if="section.body_html"
-            class="prose-landing mx-auto max-w-3xl"
+            class="card-3d prose-landing mx-auto max-w-3xl p-6 sm:p-8"
             v-html="section.body_html"
         />
     </SectionShell>

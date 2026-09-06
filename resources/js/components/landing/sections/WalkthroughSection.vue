@@ -13,53 +13,36 @@ type Props = {
     section: Extract<LandingSection, { type: 'demo_walkthrough' }>;
     anchor?: string;
 };
-
 const props = defineProps<Props>();
-
 const data = computed(() => props.section.data);
 const steps = computed(() => data.value.steps ?? []);
-
 const reduced = usePrefersReducedMotion();
-
 const track = ref<HTMLElement | null>(null);
-
-/**
- * Scroll position across the step list picks the active screenshot, so the
- * visual advances as the captions scroll past it.
- */
 const { value: progress } = useScrollProgress({
     target: track,
     offset: ['start 65%', 'end 85%'],
 });
-
 const activeIndex = ref(0);
-
 watch(progress, (latest) => {
     if (reduced.value || steps.value.length === 0) {
         return;
     }
 
     const index = Math.floor(latest * steps.value.length);
-
     activeIndex.value = Math.min(Math.max(index, 0), steps.value.length - 1);
 });
-
 const activeStep = computed(() => steps.value[activeIndex.value] ?? null);
-
 const frameComponent = computed(() =>
     data.value.frame === 'browser' ? BrowserFrame : DeviceFrame,
 );
-
 const frameProps = computed(() =>
     data.value.frame === 'browser'
         ? {}
         : { variant: data.value.frame === 'phone' ? 'phone' : 'laptop' },
 );
-
-function imageUrl(path: string): string {
+function imageUrl(path: string) {
     return `/media/${path}`;
 }
-
 function select(index: number) {
     activeIndex.value = index;
 }
@@ -73,59 +56,57 @@ function select(index: number) {
         :anchor="props.anchor"
         muted
     >
-        <!--
-          Reduced motion (and no-JS scroll positions) get a plain captioned
-          list: every screenshot visible, nothing pinned, nothing swapping.
-        -->
-        <ol v-if="reduced" class="space-y-12">
-            <li v-for="(step, index) in steps" :key="index" class="space-y-4">
-                <h3 class="font-display text-xl font-semibold">
-                    <span class="mr-2 text-brand">{{ index + 1 }}.</span
+        <ol v-if="reduced" class="space-y-10">
+            <li v-for="(step, index) in steps" :key="index" class="space-y-3">
+                <h3 class="text-lg font-bold text-slate-900">
+                    <span class="mr-2 text-[#2563eb]">{{ index + 1 }}.</span
                     >{{ step.title }}
                 </h3>
-                <p v-if="step.caption" class="text-muted-foreground">
+                <p v-if="step.caption" class="text-sm text-slate-500">
                     {{ step.caption }}
                 </p>
-                <component :is="frameComponent" v-bind="frameProps">
-                    <img
+                <component :is="frameComponent" v-bind="frameProps"
+                    ><img
                         :src="imageUrl(step.image_path)"
                         :alt="step.title"
                         loading="lazy"
                         class="w-full"
-                    />
-                </component>
+                /></component>
             </li>
         </ol>
-
-        <div v-else class="grid gap-12 lg:grid-cols-2 lg:gap-16">
-            <!-- Sticky visual -->
-            <div class="order-1 lg:sticky lg:top-28 lg:order-2 lg:h-fit">
-                <component :is="frameComponent" v-bind="frameProps">
-                    <div class="relative aspect-16/10 w-full overflow-hidden">
-                        <AnimatePresence mode="popLayout">
-                            <motion.img
-                                v-if="activeStep"
-                                :key="activeIndex"
-                                :src="imageUrl(activeStep.image_path)"
-                                :alt="activeStep.title"
-                                class="absolute inset-0 size-full object-cover object-top"
-                                :initial="{ opacity: 0, scale: 1.02 }"
-                                :animate="{ opacity: 1, scale: 1 }"
-                                :exit="{ opacity: 0 }"
-                                :transition="{
-                                    duration: 0.35,
-                                    ease: 'easeOut',
-                                }"
-                            />
-                        </AnimatePresence>
-                    </div>
-                </component>
+        <div
+            v-else
+            class="grid gap-10 [perspective:1200px] lg:grid-cols-2 lg:gap-14"
+        >
+            <div
+                class="order-1 [transform-style:preserve-3d] lg:sticky lg:top-28 lg:order-2 lg:h-fit"
+            >
+                <div class="card-3d p-2">
+                    <component :is="frameComponent" v-bind="frameProps">
+                        <div
+                            class="relative aspect-[16/10] w-full overflow-hidden rounded-lg"
+                        >
+                            <AnimatePresence mode="popLayout">
+                                <motion.img
+                                    v-if="activeStep"
+                                    :key="activeIndex"
+                                    :src="imageUrl(activeStep.image_path)"
+                                    :alt="activeStep.title"
+                                    class="absolute inset-0 size-full object-cover object-top"
+                                    :initial="{ opacity: 0, scale: 1.03 }"
+                                    :animate="{ opacity: 1, scale: 1 }"
+                                    :exit="{ opacity: 0 }"
+                                    :transition="{
+                                        duration: 0.4,
+                                        ease: 'easeOut',
+                                    }"
+                                />
+                            </AnimatePresence>
+                        </div>
+                    </component>
+                </div>
             </div>
-
-            <!-- Scrolling steps. Buttons rather than list items so the
-                 walkthrough is fully operable from the keyboard without
-                 scrolling, which scroll-driven UI otherwise breaks. -->
-            <ol ref="track" class="order-2 space-y-4 lg:order-1">
+            <ol ref="track" class="order-2 space-y-3 lg:order-1">
                 <li v-for="(step, index) in steps" :key="index">
                     <button
                         type="button"
@@ -134,10 +115,10 @@ function select(index: number) {
                         "
                         :class="
                             cn(
-                                'w-full rounded-xl border p-6 text-left transition-colors duration-300',
+                                'w-full rounded-2xl border p-5 text-left transition-all duration-300 [transform-style:preserve-3d]',
                                 index === activeIndex
-                                    ? 'border-brand/40 bg-card shadow-lg'
-                                    : 'border-transparent opacity-60 hover:opacity-100',
+                                    ? 'card-3d border-[#2563eb]/20 bg-white shadow-lg'
+                                    : 'border-transparent bg-white/60 opacity-60 hover:bg-white hover:opacity-100',
                             )
                         "
                         @click="select(index)"
@@ -147,22 +128,22 @@ function select(index: number) {
                             <span
                                 :class="
                                     cn(
-                                        'grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold transition-colors',
+                                        'grid size-8 shrink-0 place-items-center rounded-full text-xs font-bold transition-colors',
                                         index === activeIndex
-                                            ? 'bg-brand text-brand-foreground'
-                                            : 'bg-muted text-muted-foreground',
+                                            ? 'bg-[#2563eb] text-white shadow-md'
+                                            : 'bg-slate-100 text-slate-500',
                                     )
                                 "
                             >
                                 {{ index + 1 }}
                             </span>
-                            <h3 class="font-display text-lg font-semibold">
+                            <h3 class="text-base font-bold text-slate-900">
                                 {{ step.title }}
                             </h3>
                         </div>
                         <p
                             v-if="step.caption"
-                            class="mt-3 text-sm text-muted-foreground"
+                            class="mt-2 text-sm leading-relaxed text-slate-500"
                         >
                             {{ step.caption }}
                         </p>
