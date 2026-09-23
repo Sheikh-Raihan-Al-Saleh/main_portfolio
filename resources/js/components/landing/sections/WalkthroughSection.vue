@@ -41,7 +41,7 @@ const frameProps = computed(() =>
         : { variant: data.value.frame === 'phone' ? 'phone' : 'laptop' },
 );
 function imageUrl(path: string) {
-    return `/media/${path}`;
+    return `/uploads/${path}`;
 }
 function select(index: number) {
     activeIndex.value = index;

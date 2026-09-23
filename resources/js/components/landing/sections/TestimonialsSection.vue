@@ -61,7 +61,7 @@ function initials(name: string) {
                     >
                         <img
                             v-if="item.avatar_path"
-                            :src="`/media/${item.avatar_path}`"
+                            :src="`/uploads/${item.avatar_path}`"
                             :alt="item.name"
                             loading="lazy"
                             class="size-9 rounded-full object-cover"

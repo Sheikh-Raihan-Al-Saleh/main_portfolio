@@ -117,6 +117,7 @@ export type ProjectLandingPage = {
     headline: string | null;
     subheadline: string | null;
     hero_media_path: string | null;
+    hero_media_paths: (string | null)[] | null;
     hero_video_url: string | null;
     primary_cta_label: string | null;
     primary_cta_url: string | null;

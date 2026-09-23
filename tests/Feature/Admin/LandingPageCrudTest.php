@@ -64,7 +64,7 @@ test('an invalid accent colour is rejected', function () {
 });
 
 test('hero media is stored on the public disk', function () {
-    Storage::fake('public');
+    Storage::fake('uploads');
 
     $this->actingAs($this->admin)
         ->post("/admin/projects/{$this->project->slug}/landing", [
@@ -75,7 +75,7 @@ test('hero media is stored on the public disk', function () {
     $landingPage = ProjectLandingPage::sole();
 
     expect($landingPage->hero_media_path)->not->toBeNull();
-    Storage::disk('public')->assertExists($landingPage->hero_media_path);
+    Storage::disk('uploads')->assertExists($landingPage->hero_media_path);
 });
 
 test('updating a landing page replaces rather than duplicates it', function () {
@@ -89,13 +89,13 @@ test('updating a landing page replaces rather than duplicates it', function () {
 });
 
 test('deleting a landing page clears the project flag and its media', function () {
-    Storage::fake('public');
+    Storage::fake('uploads');
 
     $landingPage = ProjectLandingPage::factory()->for($this->project)->create([
         'hero_media_path' => 'landing/hero/example.jpg',
     ]);
 
-    Storage::disk('public')->put('landing/hero/example.jpg', 'x');
+    Storage::disk('uploads')->put('landing/hero/example.jpg', 'x');
 
     $this->actingAs($this->admin)
         ->delete("/admin/projects/{$this->project->slug}/landing")
@@ -104,5 +104,5 @@ test('deleting a landing page clears the project flag and its media', function (
     expect(ProjectLandingPage::find($landingPage->id))->toBeNull()
         ->and($this->project->fresh()->has_landing_page)->toBeFalse();
 
-    Storage::disk('public')->assertMissing('landing/hero/example.jpg');
+    Storage::disk('uploads')->assertMissing('landing/hero/example.jpg');
 });

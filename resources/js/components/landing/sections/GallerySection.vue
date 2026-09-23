@@ -25,7 +25,7 @@ const activeImage = computed(() =>
     openIndex.value === null ? null : (images.value[openIndex.value] ?? null),
 );
 function imageUrl(path: string) {
-    return `/media/${path}`;
+    return `/uploads/${path}`;
 }
 </script>
 

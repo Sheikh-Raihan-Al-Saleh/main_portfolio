@@ -12,7 +12,7 @@ type Props = {
 };
 const props = defineProps<Props>();
 const data = computed(() => props.section.data);
-const storageUrl = (path?: string | null) => (path ? `/media/${path}` : null);
+const storageUrl = (path?: string | null) => (path ? `/uploads/${path}` : null);
 const posterUrl = computed(() => storageUrl(data.value.poster_path));
 const uploadUrl = computed(() => storageUrl(data.value.video_path));
 const activated = ref(false);

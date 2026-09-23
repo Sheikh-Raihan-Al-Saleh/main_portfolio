@@ -59,18 +59,6 @@ function columnVariants(delay: number) {
     };
 }
 
-function watermarkVariants(delay: number) {
-    return {
-        hidden: { opacity: 0, y: 60, rotateX: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            rotateX: 0,
-            transition: { duration: 1.2, ease: EASE_OUT, delay },
-        },
-    };
-}
-
 const initials = computed(() =>
     profile.value?.name
         ?.split(' ')

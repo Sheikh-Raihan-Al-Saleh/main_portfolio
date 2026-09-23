@@ -53,6 +53,7 @@ class ProjectLandingPage extends Model
 {
     /** @use HasFactory<ProjectLandingPageFactory> */
     use HasFactory;
+
     use ResolvesMediaUrls;
 
     /**

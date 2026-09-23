@@ -51,6 +51,7 @@ class Project extends Model
 {
     /** @use HasFactory<ProjectFactory> */
     use HasFactory;
+
     use ResolvesMediaUrls;
 
     /**

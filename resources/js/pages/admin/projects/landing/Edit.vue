@@ -72,6 +72,14 @@ function editSection(section: LandingSection) {
     editingSection.value = section;
     editorOpen.value = true;
 }
+
+/** Static /uploads/ URL for an already-stored hero slot, so saved server
+ * images preview in the form instead of only freshly picked local files. */
+function heroPreview(index: number): string | null {
+    const path = props.landingPage?.hero_media_paths?.[index];
+
+    return path ? `/uploads/${path}` : null;
+}
 </script>
 
 <template>
@@ -238,10 +246,13 @@ function editSection(section: LandingSection) {
 
                     <div class="grid gap-4 border-t border-border pt-4">
                         <div>
-                            <h3 class="text-sm font-semibold mb-4">Hero Images</h3>
-                            <p class="text-xs text-muted-foreground mb-4">
-                                Upload up to 3 images that will rotate in the hero section.
-                                Recommended: Desktop (1920x1080), Tablet (768x576), Mobile (375x667)
+                            <h3 class="mb-4 text-sm font-semibold">
+                                Hero Images
+                            </h3>
+                            <p class="mb-4 text-xs text-muted-foreground">
+                                Upload up to 3 images that will rotate in the
+                                hero section. Recommended: Desktop (1920x1080),
+                                Tablet (768x576), Mobile (375x667)
                             </p>
                         </div>
 
@@ -249,8 +260,9 @@ function editSection(section: LandingSection) {
                         <FileField
                             name="hero_media_paths[0]"
                             label="1. Desktop/Laptop (recommended: 1920x1080)"
+                            :current-url="heroPreview(0)"
                             accept="image/*"
-                            hint="Shown on desktop devices"
+                            hint="Shown on desktop devices. Uploading replaces the current image."
                             preview
                         />
                         <InputError :message="errors['hero_media_paths.0']" />
@@ -259,8 +271,9 @@ function editSection(section: LandingSection) {
                         <FileField
                             name="hero_media_paths[1]"
                             label="2. Tablet (recommended: 768x576)"
+                            :current-url="heroPreview(1)"
                             accept="image/*"
-                            hint="Shown on tablet devices"
+                            hint="Shown on tablet devices. Uploading replaces the current image."
                             preview
                         />
                         <InputError :message="errors['hero_media_paths.1']" />
@@ -269,8 +282,9 @@ function editSection(section: LandingSection) {
                         <FileField
                             name="hero_media_paths[2]"
                             label="3. Mobile/Phone (recommended: 375x667)"
+                            :current-url="heroPreview(2)"
                             accept="image/*"
-                            hint="Shown on mobile devices"
+                            hint="Shown on mobile devices. Uploading replaces the current image."
                             preview
                         />
                         <InputError :message="errors['hero_media_paths.2']" />
