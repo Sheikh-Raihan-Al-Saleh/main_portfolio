@@ -13,9 +13,7 @@ type Props = {
     section: Extract<LandingSection, { type: 'faq' }>;
     anchor?: string;
 };
-
 const props = defineProps<Props>();
-
 const items = computed(() => props.section.data.items ?? []);
 </script>
 
@@ -26,21 +24,26 @@ const items = computed(() => props.section.data.items ?? []);
         :subheading="section.subheading"
         :anchor="props.anchor"
     >
-        <!-- `collapsible` so an open answer can be closed again, and multiple
-             so readers can compare two answers side by side. -->
-        <Accordion type="multiple" collapsible class="mx-auto max-w-3xl">
-            <AccordionItem
-                v-for="(item, index) in items"
-                :key="index"
-                :value="`faq-${index}`"
-            >
-                <AccordionTrigger class="text-left">
-                    {{ item.question }}
-                </AccordionTrigger>
-                <AccordionContent class="text-pretty text-muted-foreground">
-                    {{ item.answer }}
-                </AccordionContent>
-            </AccordionItem>
-        </Accordion>
+        <div class="mx-auto max-w-3xl">
+            <Accordion type="single" collapsible class="space-y-3">
+                <AccordionItem
+                    v-for="(item, idx) in items"
+                    :key="idx"
+                    :value="`faq-${idx}`"
+                    class="card-3d overflow-hidden border-0 px-2"
+                >
+                    <AccordionTrigger
+                        class="px-4 text-left text-[15px] font-semibold text-slate-900 hover:no-underline"
+                    >
+                        {{ item.question }}
+                    </AccordionTrigger>
+                    <AccordionContent
+                        class="px-4 pb-4 text-sm leading-relaxed text-slate-500"
+                    >
+                        {{ item.answer }}
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
+        </div>
     </SectionShell>
 </template>

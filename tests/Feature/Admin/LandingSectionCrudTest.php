@@ -143,9 +143,9 @@ test('reordering persists the new sort order', function () {
 });
 
 test('deleting a section removes its uploaded media', function () {
-    Storage::fake('public');
-    Storage::disk('public')->put('landing/steps/one.png', 'x');
-    Storage::disk('public')->put('landing/steps/two.png', 'x');
+    Storage::fake('uploads');
+    Storage::disk('uploads')->put('landing/steps/one.png', 'x');
+    Storage::disk('uploads')->put('landing/steps/two.png', 'x');
 
     $section = LandingSection::factory()
         ->for($this->landingPage, 'landingPage')
@@ -165,14 +165,14 @@ test('deleting a section removes its uploaded media', function () {
         ->assertRedirect();
 
     expect(LandingSection::find($section->id))->toBeNull();
-    Storage::disk('public')->assertMissing('landing/steps/one.png');
-    Storage::disk('public')->assertMissing('landing/steps/two.png');
+    Storage::disk('uploads')->assertMissing('landing/steps/one.png');
+    Storage::disk('uploads')->assertMissing('landing/steps/two.png');
 });
 
 test('updating a section deletes media it no longer references', function () {
-    Storage::fake('public');
-    Storage::disk('public')->put('landing/gallery/keep.png', 'x');
-    Storage::disk('public')->put('landing/gallery/drop.png', 'x');
+    Storage::fake('uploads');
+    Storage::disk('uploads')->put('landing/gallery/keep.png', 'x');
+    Storage::disk('uploads')->put('landing/gallery/drop.png', 'x');
 
     $section = LandingSection::factory()
         ->for($this->landingPage, 'landingPage')
@@ -185,8 +185,8 @@ test('updating a section deletes media it no longer references', function () {
         'data' => ['images' => ['landing/gallery/keep.png']],
     ]);
 
-    Storage::disk('public')->assertExists('landing/gallery/keep.png');
-    Storage::disk('public')->assertMissing('landing/gallery/drop.png');
+    Storage::disk('uploads')->assertExists('landing/gallery/keep.png');
+    Storage::disk('uploads')->assertMissing('landing/gallery/drop.png');
 });
 
 test('deleting a landing page cascades to its sections', function () {

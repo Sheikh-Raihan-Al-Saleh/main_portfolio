@@ -60,7 +60,13 @@ function clear() {
                 {{ previewUrl }}
             </span>
 
-            <Button type="button" variant="ghost" size="sm" @click="clear">
+            <Button
+                v-if="removeName"
+                type="button"
+                variant="ghost"
+                size="sm"
+                @click="clear"
+            >
                 <X class="size-4" />
                 Remove
             </Button>

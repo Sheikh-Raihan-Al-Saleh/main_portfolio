@@ -47,6 +47,18 @@ return [
             'report' => false,
         ],
 
+        // Uploaded media lives inside public/ so the web server serves it as
+        // plain static files (no symlink, no PHP route) and the files travel
+        // with the codebase on every deploy because they are committed.
+        'uploads' => [
+            'driver' => 'local',
+            'root' => public_path('uploads'),
+            'url' => '/uploads',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

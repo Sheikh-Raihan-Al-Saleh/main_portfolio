@@ -8,18 +8,25 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class MediaController extends Controller
 {
     /**
-     * Serve a file from the public storage disk.
+     * Legacy /media/{path} endpoint kept so old cached URLs keep working.
      *
-     * This bypasses the storage symlink, which is unreliable on shared hosting
-     * (CPanel) where `php artisan storage:link` may not persist or may not be
-     * executable.
+     * New code links straight to /uploads/{path} (static files). This route
+     * streams from the uploads disk, falling back to the pre-migration
+     * storage/app/public disk so nothing404s between deploying this change
+     * and running `php artisan media:migrate`.
      */
-    public function show(string $path): StreamedResponse|Response
+    public function show(string $path): StreamedResponse
     {
-        $disk = Storage::disk('public');
+        $disk = Storage::disk('uploads');
 
         if (! $disk->exists($path)) {
-            abort(404);
+            $legacy = Storage::disk('public');
+
+            if ($legacy->exists($path)) {
+                $disk = $legacy;
+            } else {
+                abort(404);
+            }
         }
 
         $mime = $disk->mimeType($path);

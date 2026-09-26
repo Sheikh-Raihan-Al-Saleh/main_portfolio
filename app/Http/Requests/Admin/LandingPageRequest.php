@@ -20,8 +20,12 @@ class LandingPageRequest extends FormRequest
             'eyebrow' => ['nullable', 'string', 'max:80'],
             'headline' => ['nullable', 'string', 'max:180'],
             'subheadline' => ['nullable', 'string', 'max:600'],
+            // Legacy single hero media (kept for backward compatibility)
             'hero_media' => ['nullable', 'image', 'max:6144'],
             'remove_hero_media' => ['boolean'],
+            // New multiple hero media paths (desktop, tablet, mobile)
+            'hero_media_paths' => ['nullable', 'array', 'max:3'],
+            'hero_media_paths.*' => ['nullable', 'image', 'max:6144'],
             'hero_video_url' => ['nullable', 'url', 'max:2048'],
             'primary_cta_label' => ['nullable', 'string', 'max:80'],
             'primary_cta_url' => ['nullable', 'string', 'max:2048'],

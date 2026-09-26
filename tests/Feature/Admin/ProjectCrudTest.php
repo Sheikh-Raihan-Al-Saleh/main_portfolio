@@ -40,7 +40,7 @@ test('slugs are made unique instead of colliding', function () {
 });
 
 test('a cover image is stored on the public disk', function () {
-    Storage::fake('public');
+    Storage::fake('uploads');
 
     $this->actingAs($this->admin)->post('/admin/projects', [
         'title' => 'With Cover',
@@ -50,11 +50,11 @@ test('a cover image is stored on the public disk', function () {
     $project = Project::sole();
 
     expect($project->cover_image_path)->not->toBeNull();
-    Storage::disk('public')->assertExists($project->cover_image_path);
+    Storage::disk('uploads')->assertExists($project->cover_image_path);
 });
 
 test('replacing a cover image deletes the previous file', function () {
-    Storage::fake('public');
+    Storage::fake('uploads');
 
     $project = Project::factory()->create([
         'cover_image_path' => UploadedFile::fake()->image('old.jpg')->store('projects', 'public'),
@@ -66,12 +66,12 @@ test('replacing a cover image deletes the previous file', function () {
         'cover_image' => UploadedFile::fake()->image('new.jpg'),
     ]);
 
-    Storage::disk('public')->assertMissing($old);
-    Storage::disk('public')->assertExists($project->fresh()->cover_image_path);
+    Storage::disk('uploads')->assertMissing($old);
+    Storage::disk('uploads')->assertExists($project->fresh()->cover_image_path);
 });
 
 test('deleting a project removes its uploaded images', function () {
-    Storage::fake('public');
+    Storage::fake('uploads');
 
     $project = Project::factory()->create([
         'cover_image_path' => UploadedFile::fake()->image('cover.jpg')->store('projects', 'public'),
@@ -81,7 +81,7 @@ test('deleting a project removes its uploaded images', function () {
     $this->actingAs($this->admin)->delete("/admin/projects/{$project->slug}");
 
     expect(Project::count())->toBe(0);
-    Storage::disk('public')->assertMissing($path);
+    Storage::disk('uploads')->assertMissing($path);
 });
 
 test('a project requires a title', function () {

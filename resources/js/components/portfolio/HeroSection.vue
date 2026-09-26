@@ -8,11 +8,14 @@ import {
     ref,
     shallowRef,
 } from 'vue';
+import AnimatedGradientBorder from '@/components/motion/AnimatedGradientBorder.vue';
+import MagneticButton from '@/components/motion/MagneticButton.vue';
+import TiltCard from '@/components/motion/TiltCard.vue';
 import AnimatedCounter from '@/components/portfolio/AnimatedCounter.vue';
 import { Button } from '@/components/ui/button';
 import { useScrollProgress } from '@/composables/useScrollProgress';
 import { contentConfig } from '@/lib/content';
-import { blurUp, fadeUp, stagger } from '@/lib/motion';
+import { blurUp, fadeUp, parallaxFloat, stagger } from '@/lib/motion';
 import type { PortfolioStats, Profile } from '@/types';
 
 type Props = {
@@ -144,9 +147,44 @@ const content = computed(() => contentConfig(props.profile));
         ref="heroRef"
         class="bg-noise relative min-h-screen overflow-hidden"
     >
-        <!-- Background elements -->
+        <!-- Animated Background — 3D depth + aurora orbs -->
         <div class="pointer-events-none absolute inset-0" aria-hidden="true">
             <div class="bg-red-glow absolute inset-0 opacity-60" />
+            <!-- Aurora floating orbs -->
+            <motion.div
+                class="absolute -top-24 -left-24 h-[520px] w-[520px] rounded-full bg-gradient-to-br from-brand/20 via-brand/10 to-transparent blur-3xl"
+                :animate="parallaxFloat"
+                :transition="{
+                    duration: 14,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                }"
+            />
+            <motion.div
+                class="absolute top-1/3 -right-24 h-[420px] w-[420px] rounded-full bg-gradient-to-br from-violet-500/15 via-brand/8 to-transparent blur-3xl"
+                :animate="{
+                    y: [0, -18, 0],
+                    x: [0, 10, 0],
+                    scale: [1, 1.06, 1],
+                }"
+                :transition="{
+                    duration: 11,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                    delay: 0.8,
+                }"
+            />
+            <motion.div
+                class="absolute bottom-0 left-1/3 h-[380px] w-[680px] rounded-full bg-gradient-to-r from-brand/8 via-transparent to-violet-500/8 blur-3xl"
+                :animate="{ y: [0, 12, 0], opacity: [0.6, 1, 0.6] }"
+                :transition="{
+                    duration: 9,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                    delay: 1.2,
+                }"
+            />
+            <!-- Grid with subtle drift -->
             <div
                 class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
                 style="
@@ -253,30 +291,34 @@ const content = computed(() => contentConfig(props.profile));
                             <span class="cursor-blink h-4 w-0.5 bg-brand" />
                         </motion.div>
 
-                        <!-- CTAs -->
+                        <!-- CTAs — magnetic 3D hover -->
                         <motion.div
                             :variants="fadeUp"
                             class="flex flex-wrap items-center gap-3 pt-2"
                         >
-                            <Button
-                                as-child
-                                size="lg"
-                                class="btn-laravel-primary rounded-lg px-7"
-                            >
-                                <a :href="content.hero.primary_cta_url">{{
-                                    content.hero.primary_cta_label
-                                }}</a>
-                            </Button>
-                            <Button
-                                as-child
-                                size="lg"
-                                variant="outline"
-                                class="btn-laravel rounded-lg px-7"
-                            >
-                                <a :href="content.hero.secondary_cta_url">{{
-                                    content.hero.secondary_cta_label
-                                }}</a>
-                            </Button>
+                            <MagneticButton>
+                                <Button
+                                    as-child
+                                    size="lg"
+                                    class="btn-laravel-primary rounded-lg px-7 shadow-lg shadow-brand/10 transition-shadow hover:shadow-brand/20"
+                                >
+                                    <a :href="content.hero.primary_cta_url">{{
+                                        content.hero.primary_cta_label
+                                    }}</a>
+                                </Button>
+                            </MagneticButton>
+                            <MagneticButton>
+                                <Button
+                                    as-child
+                                    size="lg"
+                                    variant="outline"
+                                    class="btn-laravel rounded-lg px-7"
+                                >
+                                    <a :href="content.hero.secondary_cta_url">{{
+                                        content.hero.secondary_cta_label
+                                    }}</a>
+                                </Button>
+                            </MagneticButton>
                             <a
                                 v-if="profile.resume_url"
                                 href="/resume"
@@ -336,36 +378,50 @@ const content = computed(() => contentConfig(props.profile));
                         animate="visible"
                         class="relative mx-auto w-full max-w-md lg:mx-0"
                     >
-                        <!-- Profile image with gradient ring -->
-                        <motion.div :variants="fadeUp" class="relative">
-                            <div
-                                class="relative mx-auto w-56 rounded-2xl sm:w-64 md:w-72"
+                        <!-- Profile image — 3D tilt + animated border + depth glow -->
+                        <motion.div
+                            :variants="fadeUp"
+                            class="relative [perspective:1000px]"
+                        >
+                            <motion.div
+                                class="pointer-events-none absolute -inset-6 -z-10 rounded-3xl bg-gradient-to-br from-brand/15 via-violet-500/10 to-brand/10 blur-2xl"
+                                :animate="{
+                                    opacity: [0.5, 0.85, 0.5],
+                                    scale: [1, 1.04, 1],
+                                }"
+                                :transition="{
+                                    duration: 4,
+                                    repeat: Infinity,
+                                    ease: 'easeInOut',
+                                }"
+                                aria-hidden="true"
+                            />
+                            <TiltCard
+                                class="mx-auto w-56 rounded-2xl sm:w-64 md:w-72"
                             >
-                                <!-- Gradient border ring -->
-                                <div
-                                    class="absolute -inset-1 rounded-2xl bg-gradient-to-br from-brand via-brand/50 to-brand opacity-60 blur-sm"
-                                />
-                                <div
-                                    class="relative overflow-hidden rounded-2xl bg-background p-1"
-                                >
-                                    <div class="overflow-hidden rounded-xl">
-                                        <img
-                                            v-if="profile.avatar_url"
-                                            :src="profile.avatar_url"
-                                            :alt="profile.name"
-                                            class="aspect-[3/4] w-full object-cover"
-                                        />
-                                        <div
-                                            v-else
-                                            class="grid aspect-[3/4] w-full place-items-center bg-muted font-mono text-5xl font-bold text-foreground"
-                                        >
-                                            {{ initials }}
+                                <AnimatedGradientBorder class="rounded-2xl">
+                                    <div
+                                        class="relative overflow-hidden rounded-2xl bg-background p-1"
+                                    >
+                                        <div class="overflow-hidden rounded-xl">
+                                            <img
+                                                v-if="profile.avatar_url"
+                                                :src="profile.avatar_url"
+                                                :alt="profile.name"
+                                                class="aspect-[3/4] w-full object-cover"
+                                            />
+                                            <div
+                                                v-else
+                                                class="grid aspect-[3/4] w-full place-items-center bg-muted font-mono text-5xl font-bold text-foreground"
+                                            >
+                                                {{ initials }}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
+                                </AnimatedGradientBorder>
+                            </TiltCard>
 
-                            <!-- Floating tech badges -->
+                            <!-- Floating tech badges with light mode glow -->
                             <motion.span
                                 v-for="(badge, index) in floatingBadges"
                                 :key="badge"
@@ -376,7 +432,7 @@ const content = computed(() => contentConfig(props.profile));
                                     ease: 'easeInOut',
                                     delay: index * 0.4,
                                 }"
-                                class="absolute z-10 rounded-lg border border-border bg-background/90 px-3 py-1.5 font-mono text-xs font-medium shadow-lg backdrop-blur-sm"
+                                class="badge-float absolute z-10 rounded-lg border border-border bg-background/90 px-3 py-1.5 font-mono text-xs font-medium shadow-lg backdrop-blur-sm"
                                 :class="[
                                     index === 0 ? '-top-3 -left-4' : '',
                                     index === 1 ? 'top-8 -right-6' : '',
@@ -391,10 +447,10 @@ const content = computed(() => contentConfig(props.profile));
                             </motion.span>
                         </motion.div>
 
-                        <!-- Code card below image -->
+                        <!-- Code card below image with light mode glow -->
                         <motion.div
                             :variants="fadeUp"
-                            class="code-window mx-auto mt-8 w-full max-w-xs"
+                            class="code-window code-window-light mx-auto mt-8 w-full max-w-xs"
                         >
                             <div class="code-window-header">
                                 <span class="code-window-dot bg-red-500" />
@@ -548,10 +604,65 @@ const content = computed(() => contentConfig(props.profile));
     opacity: 0;
     transform: translateY(-6px);
 }
+
+/* Light mode enhancements */
+:root:not([data-theme='dark']) {
+    --glow-animation: glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+    0%,
+    100% {
+        filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.3));
+    }
+    50% {
+        filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.6));
+    }
+}
+
+/* Light mode badge float glow */
+:root:not([data-theme='dark']) .badge-float {
+    box-shadow:
+        0 4px 12px rgba(99, 102, 241, 0.15),
+        inset 0 0 1px rgba(99, 102, 241, 0.1);
+    transition: box-shadow 0.6s ease-in-out;
+}
+
+:root:not([data-theme='dark']) .badge-float:hover {
+    box-shadow:
+        0 8px 24px rgba(99, 102, 241, 0.3),
+        inset 0 0 1px rgba(99, 102, 241, 0.2);
+}
+
+/* Light mode code window glow and animation */
+:root:not([data-theme='dark']) .code-window-light {
+    box-shadow:
+        0 8px 32px rgba(99, 102, 241, 0.1),
+        inset 0 1px 0 rgba(99, 102, 241, 0.1);
+    animation: code-window-glow 4s ease-in-out infinite;
+}
+
+@keyframes code-window-glow {
+    0%,
+    100% {
+        box-shadow:
+            0 8px 32px rgba(99, 102, 241, 0.1),
+            inset 0 1px 0 rgba(99, 102, 241, 0.1);
+    }
+    50% {
+        box-shadow:
+            0 12px 48px rgba(99, 102, 241, 0.2),
+            inset 0 1px 0 rgba(99, 102, 241, 0.15);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .role-enter-active,
     .role-leave-active {
         transition: none;
+    }
+    :root:not([data-theme='dark']) {
+        --glow-animation: none;
     }
 }
 </style>

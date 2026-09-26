@@ -27,7 +27,7 @@ const error = ref<string | null>(null);
 const inputRef = ref<HTMLInputElement | null>(null);
 
 const previewUrl = computed(() =>
-    props.modelValue ? `/media/${props.modelValue}` : null,
+    props.modelValue ? `/uploads/${props.modelValue}` : null,
 );
 
 const isVideo = computed(() =>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\ResolvesMediaUrls;
 use Database\Factories\ExperienceFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -10,7 +11,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
@@ -39,6 +39,8 @@ class Experience extends Model
     /** @use HasFactory<ExperienceFactory> */
     use HasFactory;
 
+    use ResolvesMediaUrls;
+
     /**
      * A null end date means the role is ongoing.
      */
@@ -49,9 +51,7 @@ class Experience extends Model
 
     protected function getLogoUrlAttribute(): ?string
     {
-        return filled($this->logo_path)
-            ? Storage::disk('public')->url($this->logo_path)
-            : null;
+        return $this->mediaUrl($this->logo_path);
     }
 
     /** @param  Builder<Experience>  $query */

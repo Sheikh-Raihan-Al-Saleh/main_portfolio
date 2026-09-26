@@ -59,18 +59,6 @@ function columnVariants(delay: number) {
     };
 }
 
-function watermarkVariants(delay: number) {
-    return {
-        hidden: { opacity: 0, y: 60, rotateX: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            rotateX: 0,
-            transition: { duration: 1.2, ease: EASE_OUT, delay },
-        },
-    };
-}
-
 const initials = computed(() =>
     profile.value?.name
         ?.split(' ')
@@ -336,7 +324,7 @@ const backToTop = computed(() =>
                         </motion.div>
                     </div>
 
-                    <div
+                    <!-- <div
                         v-if="profile?.name"
                         class="footer-watermark-wrap"
                         aria-hidden="true"
@@ -344,13 +332,13 @@ const backToTop = computed(() =>
                         <motion.p
                             initial="hidden"
                             while-in-view="visible"
-                            :variants="watermarkVariants(0.4)"
+                            :variants="watermarkVariants(0.8)"
                             :in-view-options="inViewOnce"
                             class="footer-watermark"
                         >
-                            {{ profile.name.split(' ')[0]?.toUpperCase() }}
+                            {{ profile.name?.toUpperCase() }}
                         </motion.p>
-                    </div>
+                    </div> -->
 
                     <div class="footer-divider" />
 

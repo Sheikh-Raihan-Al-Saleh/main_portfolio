@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\ResolvesMediaUrls;
 use Database\Factories\ProjectFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -12,7 +13,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -51,6 +51,8 @@ class Project extends Model
 {
     /** @use HasFactory<ProjectFactory> */
     use HasFactory;
+
+    use ResolvesMediaUrls;
 
     /**
      * Mirrors the column default so a project that has not been reloaded still
@@ -118,9 +120,7 @@ class Project extends Model
 
     protected function getCoverImageUrlAttribute(): ?string
     {
-        return filled($this->cover_image_path)
-            ? Storage::disk('public')->url($this->cover_image_path)
-            : null;
+        return $this->mediaUrl($this->cover_image_path);
     }
 
     /**
@@ -129,7 +129,7 @@ class Project extends Model
     protected function getGalleryUrlsAttribute(): array
     {
         return array_map(
-            fn (string $path): string => Storage::disk('public')->url($path),
+            fn (string $path): string => $this->mediaUrl($path) ?? '',
             $this->gallery ?? [],
         );
     }

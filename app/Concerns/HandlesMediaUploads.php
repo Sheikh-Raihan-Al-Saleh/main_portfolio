@@ -30,12 +30,12 @@ trait HandlesMediaUploads
     }
 
     /**
-     * Write a file to the public disk, failing loudly if the disk rejects it
-     * rather than silently persisting a `false` path on the model.
+     * Write a file to the public uploads directory, failing loudly if the disk
+     * rejects it rather than silently persisting a `false` path on the model.
      */
     protected function putMedia(UploadedFile $file, string $directory): string
     {
-        $path = $file->store($directory, 'public');
+        $path = $file->store($directory, 'uploads');
 
         if ($path === false) {
             throw new RuntimeException("Unable to store uploaded file in [{$directory}].");
@@ -46,8 +46,8 @@ trait HandlesMediaUploads
 
     protected function deleteMedia(?string $path): void
     {
-        if (filled($path) && Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
+        if (filled($path) && Storage::disk('uploads')->exists($path)) {
+            Storage::disk('uploads')->delete($path);
         }
     }
 

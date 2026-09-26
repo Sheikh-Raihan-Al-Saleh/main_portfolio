@@ -11,8 +11,9 @@ Route::get('projects', [PortfolioController::class, 'projects'])->name('projects
 Route::get('projects/{project}', [PortfolioController::class, 'showProject'])->name('projects.show');
 Route::get('resume', [PortfolioController::class, 'resume'])->name('resume');
 
-// Serve uploaded media directly from storage, bypassing the symlink.
-// This is required on shared hosting (CPanel) where `storage:link` is unreliable.
+// Legacy media URLs. New code links directly to static files under /uploads/;
+// this route keeps previously shared or cached /media/ links working (it
+// falls back to the pre-migration storage/app/public disk as well).
 Route::get('media/{path}', [MediaController::class, 'show'])
     ->where('path', '.*')
     ->name('media.show');

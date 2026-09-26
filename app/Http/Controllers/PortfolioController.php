@@ -87,9 +87,9 @@ class PortfolioController extends Controller
         $profile = Profile::current();
 
         abort_if(blank($profile->resume_path), 404);
-        abort_unless(Storage::disk('public')->exists($profile->resume_path), 404);
+        abort_unless(Storage::disk('uploads')->exists($profile->resume_path), 404);
 
-        return Storage::disk('public')->response(
+        return Storage::disk('uploads')->response(
             $profile->resume_path,
             str($profile->name)->slug().'-resume.pdf',
         );
