@@ -1,73 +1,94 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import AboutSection from '@/components/portfolio/AboutSection.vue';
-import ContactSection from '@/components/portfolio/ContactSection.vue';
-import ExperienceSection from '@/components/portfolio/ExperienceSection.vue';
-import HeroSection from '@/components/portfolio/HeroSection.vue';
-import ProjectsSection from '@/components/portfolio/ProjectsSection.vue';
-import SkillsSection from '@/components/portfolio/SkillsSection.vue';
+import ClientLogosSection from '@/components/company/ClientLogosSection.vue';
+import CompanyAboutSection from '@/components/company/CompanyAboutSection.vue';
+import CompanyContactSection from '@/components/company/CompanyContactSection.vue';
+import CompanyHero from '@/components/company/CompanyHero.vue';
+import CompanyWorkSection from '@/components/company/CompanyWorkSection.vue';
+import FounderWorkSection from '@/components/company/FounderWorkSection.vue';
+import SectionList from '@/components/landing/SectionList.vue';
 import type {
-    Education,
-    Experience,
-    PortfolioStats,
+    Client,
+    Company,
+    CompanyStats,
+    LandingSection,
     Profile,
     Project,
-    SkillGroup,
 } from '@/types';
 
 type Props = {
+    company: Company;
     profile: Profile;
     projects: Project[];
-    skillGroups: SkillGroup[];
-    experiences: Experience[];
-    educations: Education[];
-    stats: PortfolioStats;
+    totalProjects: number;
+    personalProjects: Project[];
+    totalPersonalProjects: number;
+    clients: Client[];
+    sections: LandingSection[];
+    stats: CompanyStats;
 };
 
 const props = defineProps<Props>();
 
-const title =
-    props.profile.meta_title ??
-    `${props.profile.name} — ${props.profile.headline ?? 'Portfolio'}`;
-
-/** A short slice of skill names to float as badges in the hero (SRS 3.1). */
-const heroHighlights = computed(() =>
-    props.skillGroups
-        .flatMap((group) => group.skills.map((skill) => skill.name))
-        .slice(0, 6),
+const title = computed(
+    () =>
+        props.company.meta_title ??
+        `${props.company.name} — ${props.company.headline ?? 'Software Studio'}`,
 );
+
+/**
+ * Builder blocks are named after the company (`features-9`, `stats-10`) so their
+ * ids are stable, unique and meaningful in the DOM.
+ */
+function anchorFor(section: LandingSection): string {
+    return `${section.type}-${section.id}`;
+}
 </script>
 
 <template>
     <Head :title="title">
         <meta
-            v-if="profile.meta_description"
+            v-if="company.meta_description"
             name="description"
-            :content="profile.meta_description"
+            :content="company.meta_description"
         />
         <meta property="og:title" :content="title" />
         <meta
-            v-if="profile.meta_description"
+            v-if="company.meta_description"
             property="og:description"
-            :content="profile.meta_description"
+            :content="company.meta_description"
         />
         <meta
-            v-if="profile.og_image_url"
+            v-if="company.og_image_url"
             property="og:image"
-            :content="profile.og_image_url"
+            :content="company.og_image_url"
         />
         <meta name="twitter:card" content="summary_large_image" />
     </Head>
 
-    <HeroSection
-        :profile="profile"
-        :stats="stats"
-        :highlights="heroHighlights"
+    <CompanyHero :company="company" :stats="stats" />
+
+    <!-- Social proof: who the studio has delivered for -->
+    <ClientLogosSection :clients="clients" />
+
+    <CompanyWorkSection
+        :company="company"
+        :projects="projects"
+        :total-projects="totalProjects"
     />
-    <AboutSection :profile="profile" />
-    <SkillsSection :skill-groups="skillGroups" />
-    <ProjectsSection :projects="projects" />
-    <ExperienceSection :experiences="experiences" :educations="educations" />
-    <ContactSection :profile="profile" />
+
+    <!-- About us, with the founder card linking out to his own portfolio -->
+    <CompanyAboutSection :company="company" :profile="profile" compact />
+
+    <!-- A preview of the founder's own work, with the link to the rest -->
+    <FounderWorkSection
+        :projects="personalProjects"
+        :total-projects="totalPersonalProjects"
+    />
+
+    <!-- Composed blocks from the admin section builder -->
+    <SectionList :sections="sections" :anchor-for="anchorFor" />
+
+    <CompanyContactSection :company="company" />
 </template>

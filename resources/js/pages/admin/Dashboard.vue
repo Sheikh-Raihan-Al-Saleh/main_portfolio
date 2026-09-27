@@ -5,26 +5,32 @@ import {
     ExternalLink,
     FolderKanban,
     GraduationCap,
+    Inbox,
     MessageSquare,
+    Plus,
     Sparkles,
     TrendingUp,
+    Users,
 } from '@lucide/vue';
 import { motion } from 'motion-v';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
+import AnimatedCounter from '@/components/portfolio/AnimatedCounter.vue';
 import { Button } from '@/components/ui/button';
 import { fadeUp, stagger } from '@/lib/motion';
 import { dashboard } from '@/routes/admin';
+import clients from '@/routes/admin/clients';
 import educations from '@/routes/admin/educations';
 import experiences from '@/routes/admin/experiences';
 import messages from '@/routes/admin/messages';
 import projects from '@/routes/admin/projects';
 import skills from '@/routes/admin/skills';
-import type { ContactMessage, Profile, Project } from '@/types';
+import type { Company, ContactMessage, Profile, Project } from '@/types';
 
 type Props = {
     stats: {
         projects: number;
         publishedProjects: number;
+        clients: number;
         skills: number;
         experiences: number;
         educations: number;
@@ -37,6 +43,7 @@ type Props = {
         'id' | 'title' | 'slug' | 'is_published' | 'is_featured' | 'updated_at'
     >[];
     profile: Profile;
+    company: Company;
 };
 
 const props = defineProps<Props>();
@@ -50,7 +57,8 @@ defineOptions({
 const cards = [
     {
         label: 'Projects',
-        value: `${props.stats.publishedProjects}/${props.stats.projects}`,
+        value: props.stats.publishedProjects,
+        suffix: `/${props.stats.projects}`,
         caption: 'published',
         icon: FolderKanban,
         href: projects.index(),
@@ -59,8 +67,20 @@ const cards = [
         text: 'text-blue-600 dark:text-blue-400',
     },
     {
+        label: 'Clients',
+        value: props.stats.clients,
+        suffix: '',
+        caption: 'logos',
+        icon: Users,
+        href: clients.index(),
+        color: 'from-sky-500 to-indigo-500',
+        bg: 'bg-sky-500/10',
+        text: 'text-sky-600 dark:text-sky-400',
+    },
+    {
         label: 'Skills',
         value: props.stats.skills,
+        suffix: '',
         caption: 'listed',
         icon: Sparkles,
         href: skills.index(),
@@ -71,6 +91,7 @@ const cards = [
     {
         label: 'Experience',
         value: props.stats.experiences,
+        suffix: '',
         caption: 'roles',
         icon: Briefcase,
         href: experiences.index(),
@@ -81,12 +102,24 @@ const cards = [
     {
         label: 'Education',
         value: props.stats.educations,
+        suffix: '',
         caption: 'entries',
         icon: GraduationCap,
         href: educations.index(),
         color: 'from-emerald-500 to-teal-500',
         bg: 'bg-emerald-500/10',
         text: 'text-emerald-600 dark:text-emerald-400',
+    },
+    {
+        label: 'Messages',
+        value: props.stats.unreadMessages,
+        suffix: `/${props.stats.messages}`,
+        caption: 'unread',
+        icon: Inbox,
+        href: messages.index(),
+        color: 'from-rose-500 to-pink-500',
+        bg: 'bg-rose-500/10',
+        text: 'text-rose-600 dark:text-rose-400',
     },
 ];
 
@@ -116,6 +149,33 @@ function formatDate(value: string): string {
                 </Button>
             </template>
         </AdminPageHeader>
+
+        <div class="mb-4 flex flex-wrap items-center gap-2">
+            <Button as-child size="sm">
+                <Link :href="projects.create()">
+                    <Plus class="size-4" />
+                    New project
+                </Link>
+            </Button>
+            <Button as-child variant="outline" size="sm">
+                <Link :href="clients.index()">
+                    <Users class="size-4" />
+                    Manage clients
+                </Link>
+            </Button>
+            <Button as-child variant="outline" size="sm">
+                <Link :href="messages.index()">
+                    <MessageSquare class="size-4" />
+                    Inbox
+                    <span
+                        v-if="stats.unreadMessages"
+                        class="rounded-full bg-blue-500 px-1.5 py-px text-[11px] font-semibold text-white"
+                    >
+                        {{ stats.unreadMessages }}
+                    </span>
+                </Link>
+            </Button>
+        </div>
 
         <motion.div
             :variants="stagger(0.08)"
@@ -160,7 +220,10 @@ function formatDate(value: string): string {
                         <p
                             class="text-3xl font-bold tracking-tight tabular-nums"
                         >
-                            {{ card.value }}
+                            <AnimatedCounter
+                                :value="card.value"
+                                :suffix="card.suffix"
+                            />
                         </p>
                         <p class="mt-0.5 text-sm text-muted-foreground">
                             {{ card.label }}

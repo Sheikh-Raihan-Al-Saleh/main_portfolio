@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Concerns\HandlesMediaUploads;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\LandingSectionRequest;
+use App\Models\Company;
 use App\Models\LandingSection;
 use App\Models\ProjectLandingPage;
 use Illuminate\Http\JsonResponse;
@@ -17,14 +18,19 @@ class LandingSectionController extends Controller
 {
     use HandlesMediaUploads;
 
+    /**
+     * Append a section to whichever page owns it: a project's landing page, or
+     * the company home page. The request guarantees exactly one owner key.
+     */
     public function store(LandingSectionRequest $request): RedirectResponse
     {
-        $landingPage = ProjectLandingPage::query()
-            ->findOrFail($request->integer('landing_page_id'));
-
         $section = new LandingSection($request->sectionAttributes());
-        $section->landing_page_id = $landingPage->id;
-        $section->sort_order = (int) $landingPage->sections()->max('sort_order') + 1;
+
+        $section->sort_order = $this->nextSortOrder(
+            $section->company_id,
+            $section->landing_page_id,
+        );
+
         $section->save();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Section added.')]);
@@ -76,6 +82,18 @@ class LandingSectionController extends Controller
         }
 
         return back();
+    }
+
+    /**
+     * The sort order to append at, given whichever owner the section has.
+     */
+    private function nextSortOrder(?int $companyId, ?int $landingPageId): int
+    {
+        $relation = $companyId !== null
+            ? Company::query()->findOrFail($companyId)->sections()
+            : ProjectLandingPage::query()->findOrFail($landingPageId)->sections();
+
+        return (int) $relation->max('sort_order') + 1;
     }
 
     /**

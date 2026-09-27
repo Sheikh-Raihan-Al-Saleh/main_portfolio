@@ -54,14 +54,14 @@ const titleParts = computed<{ text: string; accent: boolean }[]>(() => {
     >
         <!-- Sidebar label — Laravel monospace sidebar -->
         <motion.div
-            v-if="index"
+            v-if="index || eyebrow"
             :variants="fadeUp"
             class="hidden max-w-72 shrink-0 border-r border-border pr-10 sm:block"
         >
             <span
                 class="font-mono text-base text-balance text-foreground uppercase"
             >
-                <span class="text-brand">{{ index }}</span>
+                <span v-if="index" class="text-brand">{{ index }}</span>
                 {{ eyebrow }}
             </span>
         </motion.div>
@@ -69,12 +69,12 @@ const titleParts = computed<{ text: string; accent: boolean }[]>(() => {
         <!-- Main heading -->
         <div>
             <motion.div
-                v-if="eyebrow && index"
+                v-if="eyebrow"
                 :variants="fadeUp"
                 class="mb-4 sm:hidden"
             >
                 <span class="font-mono text-xs text-brand uppercase">
-                    {{ index }} {{ eyebrow }}
+                    <template v-if="index">{{ index }} </template>{{ eyebrow }}
                 </span>
             </motion.div>
 

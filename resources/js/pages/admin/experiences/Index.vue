@@ -75,7 +75,7 @@ function period(experience: Experience): string {
             :variants="fadeUp"
             initial="hidden"
             animate="visible"
-            class="overflow-hidden rounded-xl border border-border"
+            class="overflow-x-auto rounded-xl border border-border"
         >
             <Table>
                 <TableHeader>
@@ -173,6 +173,12 @@ function period(experience: Experience): string {
                                     class="size-8 text-muted-foreground/30"
                                 />
                                 <p>No roles yet — add your first one.</p>
+                                <Button as-child size="sm" class="mt-1">
+                                    <Link :href="experienceRoutes.create()">
+                                        <Plus class="size-4" />
+                                        New role
+                                    </Link>
+                                </Button>
                             </div>
                         </TableCell>
                     </TableRow>

@@ -11,8 +11,9 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Edits the site-wide profile singleton. Named SiteProfileController to avoid
- * colliding with the starter kit's account-level Settings\ProfileController.
+ * Edits the founder's profile: the About route and the personal portfolio.
+ * The company that sits on top of it is a separate record, edited by
+ * Admin\CompanyController.
  */
 class SiteProfileController extends Controller
 {
@@ -29,13 +30,14 @@ class SiteProfileController extends Controller
 
         $profile->fill($request->safe()->only([
             'name', 'hero_title', 'hero_statement', 'headline', 'tagline',
-            'bio', 'location', 'public_email', 'phone', 'available_for_work',
-            'roles', 'socials', 'footer', 'content', 'meta_title',
-            'meta_description',
+            'bio', 'founder_message', 'location', 'public_email', 'phone',
+            'available_for_work', 'roles', 'socials', 'footer', 'content',
+            'meta_title', 'meta_description',
         ]));
 
         foreach ([
             ['avatar', 'avatar_path', 'remove_avatar', 'profile'],
+            ['logo', 'logo_path', 'remove_logo', 'profile'],
             ['og_image', 'og_image_path', 'remove_og_image', 'profile'],
             ['resume', 'resume_path', 'remove_resume', 'profile/resume'],
         ] as [$input, $column, $removeFlag, $directory]) {

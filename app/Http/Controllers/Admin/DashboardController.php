@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use App\Models\ContactMessage;
 use App\Models\Education;
 use App\Models\Experience;
@@ -15,10 +16,13 @@ class DashboardController extends Controller
 {
     public function index(): Response
     {
+        $company = Company::current();
+
         return inertia('admin/Dashboard', [
             'stats' => [
                 'projects' => Project::query()->count(),
                 'publishedProjects' => Project::query()->published()->count(),
+                'clients' => $company->clients()->count(),
                 'skills' => Skill::query()->count(),
                 'experiences' => Experience::query()->count(),
                 'educations' => Education::query()->count(),
@@ -34,6 +38,7 @@ class DashboardController extends Controller
                 ->take(5)
                 ->get(['id', 'title', 'slug', 'is_published', 'is_featured', 'updated_at']),
             'profile' => Profile::current(),
+            'company' => $company,
         ]);
     }
 }

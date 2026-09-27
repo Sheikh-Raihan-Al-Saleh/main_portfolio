@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Concerns\HandlesMediaUploads;
+use App\Enums\ProjectContext;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProjectRequest;
 use App\Models\Project;
@@ -33,7 +34,9 @@ class ProjectController extends Controller
 
     public function create(): Response
     {
-        return inertia('admin/projects/Create');
+        return inertia('admin/projects/Create', [
+            'contexts' => ProjectContext::options(),
+        ]);
     }
 
     public function store(ProjectRequest $request): RedirectResponse
@@ -54,7 +57,10 @@ class ProjectController extends Controller
 
     public function edit(Project $project): Response
     {
-        return inertia('admin/projects/Edit', ['project' => $project]);
+        return inertia('admin/projects/Edit', [
+            'project' => $project,
+            'contexts' => ProjectContext::options(),
+        ]);
     }
 
     public function update(ProjectRequest $request, Project $project): RedirectResponse

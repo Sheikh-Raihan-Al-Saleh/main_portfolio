@@ -29,6 +29,7 @@ export type SectionCopy = {
     title: string;
     highlight: string;
     description: string;
+    message_label?: string;
 };
 
 export type HeroCopy = {
@@ -78,10 +79,13 @@ export type Profile = {
     headline: string | null;
     tagline: string | null;
     bio: string | null;
+    /** A note from the founder, shown at the top of the About section. */
+    founder_message: string | null;
     location: string | null;
     public_email: string | null;
     phone: string | null;
     avatar_path: string | null;
+    logo_path: string | null;
     resume_path: string | null;
     og_image_path: string | null;
     available_for_work: boolean;
@@ -92,14 +96,86 @@ export type Profile = {
     meta_title: string | null;
     meta_description: string | null;
     avatar_url: string | null;
+    logo_url: string | null;
     resume_url: string | null;
     og_image_url: string | null;
+};
+
+/**
+ * The company behind the home route. Distinct from `Profile`, which is the
+ * founder presented on the About route.
+ */
+export type Company = {
+    id: number;
+    name: string;
+    legal_name: string | null;
+    headline: string | null;
+    tagline: string | null;
+    bio: string | null;
+    mission: string | null;
+    location: string | null;
+    public_email: string | null;
+    phone: string | null;
+    website: string | null;
+    founded_year: string | null;
+    logo_path: string | null;
+    og_image_path: string | null;
+    hero_eyebrow: string | null;
+    hero_title: string | null;
+    hero_statement: string | null;
+    primary_cta_label: string | null;
+    primary_cta_url: string | null;
+    secondary_cta_label: string | null;
+    secondary_cta_url: string | null;
+    status_text: string | null;
+    accepting_projects: boolean;
+    socials: Social | null;
+    footer: FooterConfig | null;
+    meta_title: string | null;
+    meta_description: string | null;
+    logo_url: string | null;
+    og_image_url: string | null;
+};
+
+/**
+ * The fields the footer renders, whichever record owns it. Lets one footer
+ * component serve both the company and the founder.
+ */
+export type FooterOwner = {
+    name: string;
+    headline: string | null;
+    tagline: string | null;
+    public_email: string | null;
+    phone: string | null;
+    location: string | null;
+    socials: Social | null;
+    footer: FooterConfig | null;
+    available_for_work?: boolean;
+    accepting_projects?: boolean;
+};
+
+export type ProjectContext = 'company' | 'personal';
+
+/** A client or partner the studio has delivered for. */
+export type Client = {
+    id: number;
+    company_id: number;
+    name: string;
+    logo_path: string | null;
+    logo_url: string | null;
+    website_url: string | null;
+    industry: string | null;
+    summary: string | null;
+    sort_order: number;
+    is_visible: boolean;
 };
 
 export type Project = {
     id: number;
     title: string;
     slug: string;
+    /** Whether this project is shown on the company home page or the About page. */
+    context: ProjectContext;
     summary: string | null;
     description: string | null;
     cover_image_path: string | null;
@@ -184,6 +260,18 @@ export type PortfolioStats = {
     projects: number;
     skills: number;
     yearsExperience: number;
+};
+
+/**
+ * Headline numbers for the public company pages. A figure the studio has no
+ * claim to is null rather than 0, so a page never prints "0 clients served";
+ * every consumer drops the null figures instead of rendering them.
+ */
+export type CompanyStats = {
+    projects: number | null;
+    clients: number | null;
+    foundedYear: number | null;
+    yearsInBusiness: number | null;
 };
 
 /** Laravel's length-aware paginator payload. */

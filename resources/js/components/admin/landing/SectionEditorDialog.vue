@@ -22,7 +22,12 @@ import type { LandingSection, LandingSectionType } from '@/types';
 
 type Props = {
     open: boolean;
-    landingPageId: number;
+    /**
+     * The section's owner: a project's landing page, or the company home page.
+     * Exactly one of the two is set, matching the database constraint.
+     */
+    landingPageId?: number | null;
+    companyId?: number | null;
     /** Editing an existing section, or null when adding a new one. */
     section: LandingSection | null;
     /** Type for a new section. Ignored when `section` is provided. */
@@ -39,6 +44,13 @@ const activeType = computed<LandingSectionType | null>(
 
 const schema = computed(() =>
     activeType.value ? sectionSchemas[activeType.value] : null,
+);
+
+/** A new section needs an owner; the dialog refuses to save without one. */
+const hasOwner = computed(
+    () =>
+        typeof props.landingPageId === 'number' ||
+        typeof props.companyId === 'number',
 );
 
 const form = reactive({
@@ -85,7 +97,7 @@ function close() {
 }
 
 function submit() {
-    if (!activeType.value) {
+    if (!activeType.value || !hasOwner.value) {
         return;
     }
 
@@ -130,7 +142,8 @@ function submit() {
         '/admin/landing-sections',
         {
             ...(payload as object),
-            landing_page_id: props.landingPageId,
+            landing_page_id: props.landingPageId ?? null,
+            company_id: props.companyId ?? null,
             type: activeType.value,
         } as unknown as RequestPayload,
         options,
@@ -202,7 +215,11 @@ function submit() {
                 <Button type="button" variant="outline" @click="close"
                     >Cancel</Button
                 >
-                <Button type="button" :disabled="processing" @click="submit">
+                <Button
+                    type="button"
+                    :disabled="processing || !hasOwner"
+                    @click="submit"
+                >
                     {{ props.section ? 'Save section' : 'Add section' }}
                 </Button>
             </DialogFooter>

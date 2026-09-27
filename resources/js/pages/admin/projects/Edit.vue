@@ -10,6 +10,8 @@ import ProjectForm from './ProjectForm.vue';
 
 type Props = {
     project: Project;
+    /** `ProjectContext::options()`, for the context select. */
+    contexts: { value: string; label: string }[];
 };
 
 defineProps<Props>();
@@ -48,6 +50,7 @@ defineOptions({
         <ProjectForm
             :project="project"
             :action="ProjectController.update.form(project.slug)"
+            :contexts="contexts"
             submit-label="Save changes"
         />
     </div>

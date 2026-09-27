@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\LandingSectionType;
+use App\Models\Company;
 use App\Models\LandingSection;
 use App\Models\Project;
 use App\Models\ProjectLandingPage;
@@ -195,4 +196,101 @@ test('deleting a landing page cascades to its sections', function () {
     $this->landingPage->delete();
 
     expect(LandingSection::count())->toBe(0);
+});
+
+test('a section can belong to the company instead of a landing page', function () {
+    $company = Company::current();
+
+    $this->actingAs($this->admin)
+        ->post('/admin/landing-sections', [
+            'company_id' => $company->id,
+            'type' => 'features',
+            'is_visible' => true,
+            'data' => LandingSectionFactory::sampleData(LandingSectionType::Features),
+        ])
+        ->assertRedirect();
+
+    $section = LandingSection::sole();
+
+    expect($section->company_id)->toBe($company->id)
+        ->and($section->landing_page_id)->toBeNull()
+        ->and($section->company->is($company))->toBeTrue();
+});
+
+test('a section must have exactly one owner', function () {
+    $company = Company::current();
+
+    $this->actingAs($this->admin)
+        ->post('/admin/landing-sections', [
+            'landing_page_id' => $this->landingPage->id,
+            'company_id' => $company->id,
+            'type' => 'features',
+            'data' => LandingSectionFactory::sampleData(LandingSectionType::Features),
+        ])
+        ->assertSessionHasErrors(['landing_page_id', 'company_id']);
+
+    expect(LandingSection::count())->toBe(0);
+});
+
+test('a section with no owner is rejected', function () {
+    $this->actingAs($this->admin)
+        ->post('/admin/landing-sections', [
+            'type' => 'features',
+            'data' => LandingSectionFactory::sampleData(LandingSectionType::Features),
+        ])
+        ->assertSessionHasErrors(['landing_page_id', 'company_id']);
+});
+
+test('a section cannot be moved to another owner on update', function () {
+    $section = LandingSection::factory()->for($this->landingPage, 'landingPage')->create();
+    $company = Company::current();
+
+    $this->actingAs($this->admin)
+        ->put("/admin/landing-sections/{$section->id}", [
+            'landing_page_id' => null,
+            'company_id' => $company->id,
+            'is_visible' => true,
+            'data' => LandingSectionFactory::sampleData(LandingSectionType::Features),
+        ])
+        ->assertRedirect();
+
+    $section->refresh();
+
+    expect($section->landing_page_id)->toBe($this->landingPage->id)
+        ->and($section->company_id)->toBeNull();
+});
+
+test('the company home page only shows visible company sections in order', function () {
+    $company = Company::current();
+    $other = Company::factory()->create();
+
+    LandingSection::factory()->onCompany($company)->create([
+        'sort_order' => 1,
+        'heading' => 'Second',
+        'is_visible' => true,
+    ]);
+    LandingSection::factory()->onCompany($company)->create([
+        'sort_order' => 0,
+        'heading' => 'First',
+        'is_visible' => true,
+    ]);
+    LandingSection::factory()->onCompany($company)->create([
+        'sort_order' => 2,
+        'heading' => 'Hidden',
+        'is_visible' => false,
+    ]);
+    LandingSection::factory()->onCompany($other)->create([
+        'sort_order' => 3,
+        'heading' => 'Other company',
+        'is_visible' => true,
+    ]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('public/Home')
+            ->has('sections', 2)
+            ->where('sections.0.heading', 'First')
+            ->where('sections.1.heading', 'Second'),
+        );
 });

@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\Company;
 use App\Models\ContactMessage;
 use App\Models\Education;
 use App\Models\Experience;
+use App\Models\LandingSection;
 use App\Models\Profile;
 use App\Models\Skill;
 use App\Models\User;
@@ -114,6 +116,71 @@ test('a malformed social URL is rejected', function () {
             'socials' => ['github' => 'not a url'],
         ])
         ->assertSessionHasErrors('socials.github');
+});
+
+test('an admin can store the founder message', function () {
+    $this->actingAs($this->admin)
+        ->post('/admin/profile', [
+            'name' => 'Ada Lovelace',
+            'founder_message' => "I started the studio because\n\ngood software deserves better.",
+        ])
+        ->assertRedirect();
+
+    expect(Profile::current()->founder_message)
+        ->toBe("I started the studio because\n\ngood software deserves better.");
+});
+
+test('an admin can update the company', function () {
+    $this->actingAs($this->admin)
+        ->post('/admin/company', [
+            'name' => 'Sheikh Nabil',
+            'headline' => 'Software studio',
+            'tagline' => 'We build the systems our clients depend on.',
+            'mission' => 'Software should outlive the project that paid for it.',
+            'founded_year' => '2019',
+            'hero_title' => '{{name}} builds software that ships.',
+            'primary_cta_label' => 'Start a project',
+            'primary_cta_url' => '#contact',
+            'accepting_projects' => true,
+            'public_email' => 'hello@example.com',
+            'socials' => ['github' => 'https://github.com/org'],
+        ])
+        ->assertRedirect();
+
+    $company = Company::current();
+
+    expect($company->name)->toBe('Sheikh Nabil')
+        ->and($company->mission)->toBe('Software should outlive the project that paid for it.')
+        ->and($company->accepting_projects)->toBeTrue()
+        ->and($company->socials['github'])->toBe('https://github.com/org');
+
+    // The singleton must never be duplicated.
+    expect(Company::count())->toBe(1);
+});
+
+test('a company founding year must look like a year', function () {
+    $this->actingAs($this->admin)
+        ->post('/admin/company', [
+            'name' => 'Sheikh Nabil',
+            'founded_year' => 'last spring',
+        ])
+        ->assertSessionHasErrors('founded_year');
+});
+
+test('the company edit page loads its blocks and section types', function () {
+    $company = Company::current();
+    $section = LandingSection::factory()->onCompany($company)->create();
+
+    $this->actingAs($this->admin)
+        ->get('/admin/company')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('admin/Company')
+            ->where('company.id', $company->id)
+            ->has('sectionTypes')
+            ->has('sections', 1)
+            ->where('sections.0.id', $section->id),
+        );
 });
 
 test('opening a message marks it read and the unread count drops', function () {

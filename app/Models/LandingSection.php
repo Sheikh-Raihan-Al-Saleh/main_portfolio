@@ -14,8 +14,15 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 /**
+ * One composable block of a marketing page.
+ *
+ * A section hangs off exactly one owner: the company's home page, or a single
+ * project's landing page. Both use the same block types and the same admin
+ * editor; only the owner column differs.
+ *
  * @property int $id
- * @property int $landing_page_id
+ * @property int|null $landing_page_id
+ * @property int|null $company_id
  * @property LandingSectionType $type
  * @property string|null $eyebrow
  * @property string|null $heading
@@ -27,19 +34,46 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read ProjectLandingPage|null $landingPage
+ * @property-read Company|null $company
  */
 #[Fillable([
-    'type', 'eyebrow', 'heading', 'subheading', 'body', 'data', 'sort_order', 'is_visible',
+    'landing_page_id', 'company_id', 'type', 'eyebrow', 'heading', 'subheading',
+    'body', 'data', 'sort_order', 'is_visible',
 ])]
 class LandingSection extends Model
 {
     /** @use HasFactory<LandingSectionFactory> */
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        // The two owner columns are alternatives, so enforce that at the model
+        // level too: a section with both or neither would be invisible to every
+        // page and could never be reached from the admin either.
+        static::saving(function (self $section): void {
+            $owners = array_filter([
+                $section->landing_page_id === null ? null : 'landing_page_id',
+                $section->company_id === null ? null : 'company_id',
+            ]);
+
+            if (count($owners) !== 1) {
+                throw new \InvalidArgumentException(
+                    'A landing section must belong to exactly one of landing_page_id or company_id.',
+                );
+            }
+        });
+    }
+
     /** @return BelongsTo<ProjectLandingPage, $this> */
     public function landingPage(): BelongsTo
     {
         return $this->belongsTo(ProjectLandingPage::class, 'landing_page_id');
+    }
+
+    /** @return BelongsTo<Company, $this> */
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class, 'company_id');
     }
 
     /**

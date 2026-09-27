@@ -3,15 +3,33 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { motion } from 'motion-v';
 import { computed } from 'vue';
 import SocialIcon from '@/components/portfolio/SocialIcon.vue';
+import { getInitials } from '@/composables/useInitials';
+import { useSiteOwner } from '@/composables/useSiteOwner';
 import { EASE_OUT, inViewOnce } from '@/lib/motion';
-import type { FooterColumn, FooterLink, Profile } from '@/types';
+import type { FooterColumn, FooterLink } from '@/types';
 
 const page = usePage();
-const profile = computed(() => page.props.profile as Profile | undefined);
 
+/**
+ * The footer belongs to whichever face of the site is being rendered: the
+ * company on its own routes, the founder on About.
+ */
+const { scope, owner, company, profile } = useSiteOwner();
+
+const isCompanySite = computed(() => scope.value === 'company');
 const isHome = computed(() => page.url === '/' || page.url.startsWith('/?'));
+const isAboutRoute = computed(() => page.url.startsWith('/about'));
+const isFounderRoute = computed(() => page.url.startsWith('/founder'));
 const year = new Date().getFullYear();
-const footer = computed(() => profile.value?.footer);
+const footer = computed(() => owner.value?.footer);
+
+/**
+ * The anchors each non-home page owns, kept explicit so a footer link either
+ * scrolls within the page being read or travels to the page that has the
+ * section. `work` and `contact` are the two the default footers point at.
+ */
+const aboutAnchors = ['top', 'clients', 'founder', 'contact'];
+const founderAnchors = ['top', 'about', 'skills', 'projects', 'experience', 'contact'];
 
 const cardVariants = {
     hidden: { opacity: 0, rotateX: 12, y: 80, scale: 0.92 },
@@ -59,27 +77,26 @@ function columnVariants(delay: number) {
     };
 }
 
-const initials = computed(() =>
-    profile.value?.name
-        ?.split(' ')
-        .slice(0, 2)
-        .map((part) => part.charAt(0).toUpperCase())
-        .join(''),
+const initials = computed(() => getInitials(owner.value?.name));
+
+/** Website logo from Admin → Founder; the studio logo is the fallback. */
+const brandLogoUrl = computed(
+    () => profile.value?.logo_url ?? company.value?.logo_url ?? null,
 );
 
 function waPhone(): string | null {
-    const phone = profile.value?.phone?.replace(/[^0-9]/g, '');
+    const phone = owner.value?.phone?.replace(/[^0-9]/g, '');
 
     return phone ? `https://wa.me/${phone}` : null;
 }
 
 /**
- * Resolve {{placeholder}} tokens in footer admin text against the profile.
- * Unresolved tokens (missing socials, phone, etc.) become empty strings so
- * that links referencing them are silently dropped.
+ * Resolve {{placeholder}} tokens in footer admin text against whichever record
+ * owns this page. Unresolved tokens (missing socials, phone, etc.) become empty
+ * strings so that links referencing them are silently dropped.
  */
 function resolve(text: string): string {
-    const p = profile.value;
+    const p = owner.value;
     const tokens: Record<string, string> = {
         year: String(year),
         name: p?.name ?? '',
@@ -105,9 +122,33 @@ function resolve(text: string): string {
 function normalizeHref(url: string): string {
     const trimmed = url.trim();
 
-    // Section anchors should point at the current scrolled page on the home
-    // route and at the home page from anywhere else.
-    return trimmed.startsWith('#') && !isHome.value ? `/${trimmed}` : trimmed;
+    if (! trimmed.startsWith('#')) {
+        return trimmed;
+    }
+
+    if (isHome.value) {
+        return trimmed;
+    }
+
+    // Each page keeps the anchors it actually owns — the About page has its own
+    // contact block, the home page owns the company chapters — and everything
+    // else travels to the page that does own it.
+    const ownsAnchor = isAboutRoute.value
+        ? aboutAnchors
+        : isFounderRoute.value
+          ? founderAnchors
+          : [];
+
+    if (ownsAnchor.includes(trimmed.slice(1))) {
+        return trimmed;
+    }
+
+    return `${isCompanySite.value ? '/' : '/founder'}${trimmed}`;
+}
+
+/** Smoothly returns to the top; the href is the no-JS fallback. */
+function scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function isExternal(url: string): boolean {
@@ -152,7 +193,7 @@ const columns = computed<RenderedColumn[]>(() =>
 );
 
 const socialLinks = computed(() => {
-    const socials = profile.value?.socials ?? {};
+    const socials = owner.value?.socials ?? {};
 
     return [
         { href: socials.github, name: 'github' as const, label: 'GitHub' },
@@ -172,8 +213,19 @@ const legalLinks = computed<RenderedLink[]>(() =>
         .filter((link): link is RenderedLink => link !== null),
 );
 
+/**
+ * Availability differs per face: the company advertises whether it is taking
+ * work, the founder whether he is looking for a role.
+ */
+const isAvailable = computed(
+    () =>
+        owner.value?.accepting_projects ??
+        owner.value?.available_for_work ??
+        false,
+);
+
 const statusText = computed(() => {
-    const text = profile.value?.available_for_work
+    const text = isAvailable.value
         ? (footer.value?.status_text ?? '')
         : (footer.value?.status_text_unavailable ?? '');
 
@@ -220,24 +272,34 @@ const backToTop = computed(() =>
                             <Link
                                 href="/"
                                 class="footer-logo-link"
-                                :aria-label="profile?.name ?? 'Home'"
+                                :aria-label="owner?.name ?? 'Home'"
                             >
-                                <span class="footer-logo-icon">{{
-                                    initials ?? '{ }'
-                                }}</span>
-                                <span class="footer-logo-text">{{
-                                    profile?.name
-                                }}</span>
+                                <span
+                                    v-if="brandLogoUrl"
+                                    class="footer-logo-image"
+                                >
+                                    <img
+                                        :src="brandLogoUrl"
+                                        :alt="owner?.name ?? 'Home'"
+                                    />
+                                </span>
+                                <template v-else>
+                                    <span class="footer-logo-icon">{{
+                                        initials || '{ }'
+                                    }}</span>
+                                    <span class="footer-logo-text">{{
+                                        owner?.name
+                                    }}</span>
+                                </template>
                             </Link>
-                            <p v-if="profile?.tagline" class="footer-tagline">
-                                {{ profile.tagline }}
+                            <p v-if="owner?.tagline" class="footer-tagline">
+                                {{ owner.tagline }}
                             </p>
                             <div v-if="statusText" class="footer-status">
                                 <span
                                     class="footer-status-dot"
                                     :class="{
-                                        'footer-status-dot--off':
-                                            !profile?.available_for_work,
+                                        'footer-status-dot--off': !isAvailable,
                                     }"
                                 />
                                 <span class="footer-status-text">{{
@@ -325,7 +387,7 @@ const backToTop = computed(() =>
                     </div>
 
                     <!-- <div
-                        v-if="profile?.name"
+                        v-if="owner?.name"
                         class="footer-watermark-wrap"
                         aria-hidden="true"
                     >
@@ -336,7 +398,7 @@ const backToTop = computed(() =>
                             :in-view-options="inViewOnce"
                             class="footer-watermark"
                         >
-                            {{ profile.name?.toUpperCase() }}
+                            {{ owner.name?.toUpperCase() }}
                         </motion.p>
                     </div> -->
 
@@ -383,10 +445,11 @@ const backToTop = computed(() =>
                             </div>
 
                             <motion.a
-                                href="#hero"
+                                href="#top"
                                 class="footer-back-top"
                                 while-hover="{ y: -3 }"
                                 whileTap="{ scale: 0.95 }"
+                                @click.prevent="scrollToTop"
                             >
                                 <svg
                                     class="size-3.5"

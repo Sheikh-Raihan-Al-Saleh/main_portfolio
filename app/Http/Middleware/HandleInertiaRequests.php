@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Company;
 use App\Models\ContactMessage;
 use App\Models\Profile;
 use Illuminate\Http\Request;
@@ -46,6 +47,10 @@ class HandleInertiaRequests extends Middleware
             // Shared on every request so the layout's nav and footer always
             // have profile data, whatever page is being rendered.
             'profile' => fn () => Profile::current(),
+            // Likewise for the company, so the public header and footer can
+            // brand themselves as the studio on the home route and as the
+            // founder on /about without each page re-sending them.
+            'company' => fn () => Company::current(),
             // Only queried for signed-in admins, so public page loads stay query-free.
             'unreadMessages' => fn () => $request->user()?->is_admin
                 ? ContactMessage::unread()->count()

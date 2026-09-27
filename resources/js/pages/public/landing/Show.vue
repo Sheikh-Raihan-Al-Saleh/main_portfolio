@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Sparkles } from '@lucide/vue';
 import { motion, useTransform } from 'motion-v';
 import { computed, ref } from 'vue';
 import HeroDevicesCarousel from '@/components/landing/HeroDevicesCarousel.vue';
-import { resolveSection } from '@/components/landing/sectionRegistry';
+import SectionList from '@/components/landing/SectionList.vue';
 import TechBadge from '@/components/portfolio/TechBadge.vue';
 import { Button } from '@/components/ui/button';
 import { useScrollProgress } from '@/composables/useScrollProgress';
@@ -333,14 +333,7 @@ const heroScale = useTransform(progress, [0, 1], [1, 0.985]);
 
         <!-- Composed sections — new clean 3D -->
         <div class="bg-[#fcfdff]">
-            <template v-for="section in sections" :key="section.id">
-                <component
-                    :is="resolveSection(section.type)"
-                    v-if="resolveSection(section.type)"
-                    :section="section"
-                    :anchor="anchorFor(section)"
-                />
-            </template>
+            <SectionList :sections="sections" :anchor-for="anchorFor" />
         </div>
     </div>
 </template>

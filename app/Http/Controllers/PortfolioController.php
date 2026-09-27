@@ -15,17 +15,23 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class PortfolioController extends Controller
 {
     /**
-     * The public landing page: every section of the portfolio on one scroll.
+     * The founder's own portfolio, on its own route.
+     *
+     * Reached from the founder card on the company About page. Every part of
+     * the personal portfolio is on one scroll, with the company work
+     * deliberately excluded so the two never blur together. His work is shown
+     * in full: this page is the archive for it, so nothing is held back and
+     * there is no second page for the reader to hunt for.
      */
-    public function index(): Response
+    public function founder(): Response
     {
-        return inertia('public/Home', [
-            'projects' => Project::query()->published()->ordered()->take(6)->get(),
+        return inertia('public/Founder', [
+            'projects' => Project::query()->published()->personalWork()->ordered()->get(),
             'skillGroups' => $this->skillGroups(),
             'experiences' => Experience::query()->ordered()->get(),
             'educations' => Education::query()->ordered()->get(),
             'stats' => [
-                'projects' => Project::query()->published()->count(),
+                'projects' => Project::query()->published()->personalWork()->count(),
                 'skills' => Skill::query()->count(),
                 'yearsExperience' => $this->yearsOfExperience(),
             ],
@@ -33,17 +39,17 @@ class PortfolioController extends Controller
     }
 
     /**
-     * The full project archive.
+     * The full company work archive.
      *
-     * Every published project ships in one payload and the technology filter is
-     * applied client-side, so switching tags is instant. The incoming `tech`
-     * query string only seeds the initial selection.
+     * Every published company project ships in one payload and the technology
+     * filter is applied client-side, so switching tags is instant. The incoming
+     * `tech` query string only seeds the initial selection.
      */
     public function projects(Request $request): Response
     {
         $tech = $request->string('tech')->trim()->value();
 
-        $projects = Project::query()->published()->ordered()->get();
+        $projects = Project::query()->published()->companyWork()->ordered()->get();
 
         $technologies = $projects
             ->flatMap(fn (Project $project): array => $project->tech_stack ?? [])
@@ -64,6 +70,13 @@ class PortfolioController extends Controller
         ]);
     }
 
+    /**
+     * A single project.
+     *
+     * Deliberately not scoped by context: a project detail link can be shared
+     * from either site, and hiding a published project because the reader
+     * arrived from the "wrong" one would only break the link.
+     */
     public function showProject(Project $project): Response
     {
         abort_unless($project->is_published, 404);
@@ -72,6 +85,7 @@ class PortfolioController extends Controller
             'project' => $project,
             'related' => Project::query()
                 ->published()
+                ->where('context', $project->context->value)
                 ->whereKeyNot($project->id)
                 ->ordered()
                 ->take(3)

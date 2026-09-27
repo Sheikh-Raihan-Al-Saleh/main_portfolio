@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\ResolvesMediaUrls;
+use App\Enums\ProjectContext;
 use Database\Factories\ProjectFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -19,6 +20,7 @@ use Illuminate\Support\Str;
  * @property int $id
  * @property string $title
  * @property string $slug
+ * @property ProjectContext $context
  * @property string|null $summary
  * @property string|null $description
  * @property string|null $cover_image_path
@@ -41,7 +43,7 @@ use Illuminate\Support\Str;
  * @property-read ProjectLandingPage|null $landingPage
  */
 #[Fillable([
-    'title', 'slug', 'summary', 'description', 'cover_image_path', 'gallery',
+    'title', 'slug', 'context', 'summary', 'description', 'cover_image_path', 'gallery',
     'tech_stack', 'repo_url', 'live_url', 'role', 'is_featured', 'is_published',
     'sort_order', 'started_at', 'completed_at',
 ])]
@@ -56,12 +58,13 @@ class Project extends Model
 
     /**
      * Mirrors the column default so a project that has not been reloaded still
-     * reports false rather than null.
+     * reports the personal context rather than null.
      *
      * @var array<string, mixed>
      */
     protected $attributes = [
         'has_landing_page' => false,
+        'context' => ProjectContext::Personal->value,
     ];
 
     protected static function booted(): void
@@ -141,6 +144,28 @@ class Project extends Model
         $query->where('is_published', true);
     }
 
+    /**
+     * Work delivered for the company, shown on the home route.
+     *
+     * @param  Builder<Project>  $query
+     */
+    #[Scope]
+    protected function companyWork(Builder $query): void
+    {
+        $query->where('context', ProjectContext::Company->value);
+    }
+
+    /**
+     * The founder's own work, shown on the About route.
+     *
+     * @param  Builder<Project>  $query
+     */
+    #[Scope]
+    protected function personalWork(Builder $query): void
+    {
+        $query->where('context', ProjectContext::Personal->value);
+    }
+
     /** @param  Builder<Project>  $query */
     #[Scope]
     protected function featured(Builder $query): void
@@ -163,6 +188,7 @@ class Project extends Model
         return [
             'gallery' => 'array',
             'tech_stack' => 'array',
+            'context' => ProjectContext::class,
             'is_featured' => 'boolean',
             'is_published' => 'boolean',
             'has_landing_page' => 'boolean',

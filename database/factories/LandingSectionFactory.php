@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\LandingSectionType;
+use App\Models\Company;
 use App\Models\LandingSection;
 use App\Models\ProjectLandingPage;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -46,6 +47,18 @@ class LandingSectionFactory extends Factory
     public function hidden(): static
     {
         return $this->state(fn () => ['is_visible' => false]);
+    }
+
+    /**
+     * Move the section off the default project landing page and onto the given
+     * company, so it composes part of the home route instead of a case study.
+     */
+    public function onCompany(Company $company): static
+    {
+        return $this->state(fn (): array => [
+            'landing_page_id' => null,
+            'company_id' => $company->getKey(),
+        ]);
     }
 
     /**

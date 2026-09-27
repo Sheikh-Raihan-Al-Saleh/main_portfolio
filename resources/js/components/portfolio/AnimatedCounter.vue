@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useInView } from 'motion-v';
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 type Props = {
     value: number;
@@ -12,9 +12,31 @@ const { value, duration = 1400 } = defineProps<Props>();
 
 const element = ref<HTMLElement | null>(null);
 const inView = useInView(element);
-const displayed = ref(0);
+// Start from the real figure so the server-rendered HTML (and any visitor
+// without JavaScript) never sees a placeholder zero.
+const displayed = ref(value);
 // useInView has no `once` option, so latch the first entry ourselves.
 let hasRun = false;
+
+function prefersReducedMotion() {
+    return (
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+}
+
+onMounted(() => {
+    const rect = element.value?.getBoundingClientRect();
+    const visibleOnArrival =
+        rect !== undefined && rect.top < window.innerHeight && rect.bottom > 0;
+
+    // Already on screen, or motion is unwelcome: show the final value rather
+    // than snapping it back to zero in front of the visitor.
+    if (visibleOnArrival || prefersReducedMotion()) {
+        displayed.value = value;
+        hasRun = true;
+    }
+});
 
 /**
  * Counts up the first time the element scrolls into view. Honours reduced
@@ -27,15 +49,13 @@ watch(inView, (visible) => {
 
     hasRun = true;
 
-    const reduced =
-        typeof window !== 'undefined' &&
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (reduced || value === 0) {
+    if (prefersReducedMotion() || value === 0) {
         displayed.value = value;
 
         return;
     }
+
+    displayed.value = 0;
 
     const start = performance.now();
 

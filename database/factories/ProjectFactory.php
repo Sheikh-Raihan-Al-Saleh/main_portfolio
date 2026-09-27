@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ProjectContext;
 use App\Models\Project;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -23,6 +24,7 @@ class ProjectFactory extends Factory
         return [
             'title' => $title,
             'slug' => Str::slug($title),
+            'context' => ProjectContext::Personal->value,
             'summary' => fake()->sentence(12),
             'description' => fake()->paragraphs(4, true),
             'tech_stack' => fake()->randomElements(
@@ -48,5 +50,17 @@ class ProjectFactory extends Factory
     public function featured(): static
     {
         return $this->state(fn () => ['is_featured' => true]);
+    }
+
+    /** Client work delivered by the studio, shown on the home route. */
+    public function companyWork(): static
+    {
+        return $this->state(fn () => ['context' => ProjectContext::Company->value]);
+    }
+
+    /** The founder's own work, shown on the About route. */
+    public function personalWork(): static
+    {
+        return $this->state(fn () => ['context' => ProjectContext::Personal->value]);
     }
 }

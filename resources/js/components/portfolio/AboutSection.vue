@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Briefcase, Mail, MapPin, Phone } from '@lucide/vue';
+import { Briefcase, Mail, MapPin, Phone, Quote } from '@lucide/vue';
 import { motion } from 'motion-v';
 import { computed } from 'vue';
 import SectionHeading from '@/components/portfolio/SectionHeading.vue';
+import { getInitials } from '@/composables/useInitials';
 import { contentConfig } from '@/lib/content';
 import { fadeUp, inViewOnce, stagger } from '@/lib/motion';
 import type { Profile } from '@/types';
@@ -17,6 +18,18 @@ const content = computed(() => contentConfig(props.profile));
 
 const paragraphs = computed(() =>
     (props.profile.bio ?? '')
+        .split(/\n\s*\n/)
+        .map((paragraph) => paragraph.trim())
+        .filter(Boolean),
+);
+
+/**
+ * The founder's note, split on blank lines so it reads as paragraphs. Kept
+ * separate from the bio: the bio describes his career, this is why the company
+ * exists at all.
+ */
+const messageParagraphs = computed(() =>
+    (props.profile.founder_message ?? '')
         .split(/\n\s*\n/)
         .map((paragraph) => paragraph.trim())
         .filter(Boolean),
@@ -67,6 +80,63 @@ const facts = computed(() =>
                 :highlight="content.sections.about.highlight"
                 :description="content.sections.about.description"
             />
+
+            <!-- Founder's note — the reason the company exists -->
+            <motion.blockquote
+                v-if="messageParagraphs.length"
+                :variants="stagger(0.1)"
+                initial="hidden"
+                while-in-view="visible"
+                :in-view-options="inViewOnce"
+                class="relative mb-14 overflow-hidden rounded-lg border border-brand/20 bg-brand/[0.03] p-6 sm:p-8"
+            >
+                <div
+                    class="pointer-events-none absolute -top-10 -right-6 text-brand/10"
+                    aria-hidden="true"
+                >
+                    <Quote class="size-32" />
+                </div>
+
+                <motion.p
+                    :variants="fadeUp"
+                    class="relative mb-4 inline-flex items-center gap-2 font-mono text-xs text-brand uppercase"
+                >
+                    <span class="size-1.5 animate-pulse rounded-full bg-brand" />
+                    {{ content.sections.about.message_label }}
+                </motion.p>
+
+                <div class="relative flex flex-col gap-4">
+                    <motion.p
+                        v-for="(paragraph, index) in messageParagraphs"
+                        :key="index"
+                        :variants="fadeUp"
+                        class="text-lg leading-relaxed text-pretty text-foreground/80"
+                    >
+                        {{ paragraph }}
+                    </motion.p>
+                </div>
+
+                <motion.footer
+                    :variants="fadeUp"
+                    class="relative mt-6 flex items-center gap-3 border-t border-brand/15 pt-4"
+                >
+                    <span
+                        class="grid size-9 shrink-0 place-items-center rounded-lg bg-brand/10 font-mono text-xs font-bold text-brand"
+                    >
+                        {{ getInitials(props.profile.name) }}
+                    </span>
+                    <span class="flex flex-col">
+                        <span class="text-sm font-semibold">{{
+                            profile.name
+                        }}</span>
+                        <span
+                            class="text-xs text-muted-foreground"
+                        >
+                            {{ profile.headline ?? 'Founder' }}
+                        </span>
+                    </span>
+                </motion.footer>
+            </motion.blockquote>
 
             <div
                 class="grid items-start gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16"

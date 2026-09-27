@@ -143,9 +143,9 @@ const content = computed(() => contentConfig(props.profile));
 
 <template>
     <section
-        id="hero"
+        id="top"
         ref="heroRef"
-        class="bg-noise relative min-h-screen overflow-hidden"
+        class="bg-noise relative min-h-screen scroll-mt-20 overflow-hidden"
     >
         <!-- Animated Background — 3D depth + aurora orbs -->
         <div class="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -562,7 +562,7 @@ const content = computed(() => contentConfig(props.profile));
             </div>
 
             <!-- Marquee at bottom -->
-            <div class="border-t border-border py-3">
+            <div class="overflow-hidden border-t border-border py-3">
                 <div class="animate-marquee flex items-center">
                     <template
                         v-for="(item, index) in [

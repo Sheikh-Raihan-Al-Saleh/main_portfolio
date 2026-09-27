@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\ClientController;
+use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EducationController;
@@ -21,6 +23,7 @@ Route::middleware(['auth', 'verified', 'admin'])
         Route::post('skills/reorder', [SkillController::class, 'reorder'])->name('skills.reorder');
         Route::post('experiences/reorder', [ExperienceController::class, 'reorder'])->name('experiences.reorder');
         Route::post('educations/reorder', [EducationController::class, 'reorder'])->name('educations.reorder');
+        Route::post('clients/reorder', [ClientController::class, 'reorder'])->name('clients.reorder');
 
         // Declared before the projects resource so `projects/{project}/landing`
         // is not swallowed by the resource's own wildcard routes.
@@ -46,11 +49,19 @@ Route::middleware(['auth', 'verified', 'admin'])
         Route::resource('skills', SkillController::class)->except('show');
         Route::resource('experiences', ExperienceController::class)->except('show');
         Route::resource('educations', EducationController::class)->except('show');
+        Route::resource('clients', ClientController::class)->only(['store', 'update', 'destroy']);
 
         Route::get('messages', [ContactMessageController::class, 'index'])->name('messages.index');
         Route::get('messages/{message}', [ContactMessageController::class, 'show'])->name('messages.show');
         Route::patch('messages/{message}/unread', [ContactMessageController::class, 'markUnread'])->name('messages.unread');
         Route::delete('messages/{message}', [ContactMessageController::class, 'destroy'])->name('messages.destroy');
+
+        // The company home page and the founder behind it are separate records,
+        // so each gets its own editor.
+        Route::get('company', [CompanyController::class, 'edit'])->name('company.edit');
+        Route::post('company', [CompanyController::class, 'update'])->name('company.update');
+
+        Route::get('clients', [ClientController::class, 'index'])->name('clients.index');
 
         Route::get('profile', [SiteProfileController::class, 'edit'])->name('profile.edit');
         Route::post('profile', [SiteProfileController::class, 'update'])->name('profile.update');

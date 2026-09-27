@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, Link } from '@inertiajs/vue3';
 import {
     ExternalLink,
     FileText,
@@ -24,6 +24,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import profileRoutes from '@/routes/admin/profile';
+import settingsProfileRoutes from '@/routes/profile';
 import type { Profile } from '@/types';
 
 type Props = {
@@ -37,28 +38,46 @@ const heroTitlePlaceholder = "Hi, I'm {{name}}.";
 
 defineOptions({
     layout: {
-        breadcrumbs: [{ title: 'Site profile', href: profileRoutes.edit() }],
+        breadcrumbs: [{ title: 'Founder', href: profileRoutes.edit() }],
     },
 });
 </script>
 
 <template>
-    <Head title="Site profile" />
+    <Head title="Founder" />
 
     <div class="p-4 sm:p-6">
         <AdminPageHeader
-            title="Site profile"
-            description="The name, bio, links and files that drive the public site."
+            title="Founder"
+            description="Your personal portfolio at /founder, and the founder card shown on the studio's pages."
         >
             <template #actions>
                 <Button as-child variant="outline" size="sm">
-                    <a href="/" target="_blank" rel="noopener">
+                    <a href="/founder" target="_blank" rel="noopener">
                         <ExternalLink class="size-4" />
-                        View site
+                        View portfolio
                     </a>
                 </Button>
             </template>
         </AdminPageHeader>
+
+        <!-- This form edits the public founder record, not the login account. -->
+        <p
+            class="mt-4 flex max-w-3xl flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground"
+        >
+            <User class="size-4 shrink-0" aria-hidden="true" />
+            <span>
+                This is the public founder profile. Your sign-in name, email and
+                password live in
+            </span>
+            <Link
+                :href="settingsProfileRoutes.edit()"
+                class="font-medium text-brand hover:underline"
+            >
+                account settings
+            </Link>
+            <span>.</span>
+        </p>
 
         <Form
             v-bind="SiteProfileController.update.form()"
@@ -139,6 +158,22 @@ defineOptions({
                         paragraphs.
                     </p>
                     <InputError :message="errors.bio" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="founder_message">Founder's message</Label>
+                    <Textarea
+                        id="founder_message"
+                        name="founder_message"
+                        rows="6"
+                        :default-value="profile.founder_message ?? ''"
+                    />
+                    <p class="text-xs text-muted-foreground">
+                        Shown as a pull quote at the top of the About section,
+                        above your bio. This is where you explain why the company
+                        exists. Blank lines become separate paragraphs.
+                    </p>
+                    <InputError :message="errors.founder_message" />
                 </div>
 
                 <div
@@ -295,6 +330,17 @@ defineOptions({
                     hint="Shown in the hero. Square images work best, up to 2 MB."
                 />
                 <InputError :message="errors.avatar" />
+
+                <FileField
+                    name="logo"
+                    label="Website logo"
+                    remove-name="remove_logo"
+                    :current-url="profile.logo_url"
+                    accept="image/*"
+                    preview
+                    hint="Shown in the studio and founder navbars and footers, and the admin sidebar. A wide transparent PNG works best, up to 2 MB."
+                />
+                <InputError :message="errors.logo" />
 
                 <FileField
                     name="resume"

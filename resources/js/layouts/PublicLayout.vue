@@ -2,7 +2,7 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import { Menu, X } from '@lucide/vue';
 import { useWindowScroll } from '@vueuse/core';
-import { AnimatePresence, MotionConfig, motion } from 'motion-v';
+import { MotionConfig } from 'motion-v';
 import { computed, ref } from 'vue';
 import ScrollProgressBar from '@/components/motion/ScrollProgressBar.vue';
 import FooterSection from '@/components/portfolio/FooterSection.vue';
@@ -10,40 +10,164 @@ import ThemeToggle from '@/components/portfolio/ThemeToggle.vue';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { Toaster } from '@/components/ui/sonner';
+import { getInitials } from '@/composables/useInitials';
 import { useScrollSpy } from '@/composables/useScrollSpy';
+import { useSiteOwner } from '@/composables/useSiteOwner';
 import { cn } from '@/lib/utils';
-import type { Profile } from '@/types';
 
 const page = usePage();
 
-const profile = computed(() => page.props.profile as Profile | undefined);
+const { scope, owner, profile, company } = useSiteOwner();
+
+const isCompanySite = computed(() => scope.value === 'company');
 const isHome = computed(() => page.url === '/' || page.url.startsWith('/?'));
 const isProjectsRoute = computed(() => page.url.startsWith('/projects'));
+const isAboutRoute = computed(() => page.url.startsWith('/about'));
+const isFounderRoute = computed(() => page.url.startsWith('/founder'));
 
-const sections = [
-    { id: 'about', label: 'About' },
-    { id: 'skills', label: 'Skills' },
-    { id: 'projects', label: 'Work' },
-    { id: 'experience', label: 'Experience' },
-    { id: 'contact', label: 'Contact' },
-];
+/**
+ * Navigation follows the current face of the site, and only lists sections that
+ * actually exist on the page being rendered — a link to a missing anchor is
+ * worse than no link at all. The client strip is only offered when there are
+ * clients to show, because it renders nothing otherwise.
+ */
+const hasClients = computed(
+    () => ((page.props as { clients?: unknown[] }).clients?.length ?? 0) > 0,
+);
 
-const activeSection = useScrollSpy(sections.map((s) => s.id));
+const sections = computed(() => {
+    if (!isCompanySite.value) {
+        return [
+            { id: 'about', label: 'About' },
+            { id: 'skills', label: 'Skills' },
+            { id: 'projects', label: 'Work' },
+            { id: 'experience', label: 'Experience' },
+            { id: 'contact', label: 'Contact' },
+        ];
+    }
+
+    const clients = hasClients.value ? [{ id: 'clients', label: 'Clients' }] : [];
+
+    // The About page has its own chapters; the home page has its own.
+    if (isAboutRoute.value) {
+        return [...clients, { id: 'founder', label: 'Founder' }, { id: 'contact', label: 'Contact' }];
+    }
+
+    if (isHome.value) {
+        return [
+            { id: 'work', label: 'Work' },
+            ...clients,
+            { id: 'contact', label: 'Contact' },
+        ];
+    }
+
+    // The archive and project pages have no chapters of their own, so these
+    // point back at the home page sections they name.
+    return [
+        { id: 'work', label: 'Work' },
+        { id: 'contact', label: 'Contact' },
+    ];
+});
+
+/**
+ * Whole-page links, kept separate from the in-page section links so the same
+ * label is never shown twice: any destination the section links already cover
+ * is dropped, and a link to the page you are already on is dropped.
+ */
+const pageLinks = computed(() => {
+    const links = isCompanySite.value
+        ? [
+              { id: 'about', label: 'About' },
+              { id: 'archive', label: 'Archive' },
+              { id: 'founder', label: 'Founder' },
+          ]
+        : [{ id: 'studio', label: 'Studio' }];
+
+    const sectionLabels = sections.value.map((section) => section.label);
+
+    return links.filter(
+        (link) =>
+            !sectionLabels.includes(link.label) && pageLinkHref(link.id) !== null,
+    );
+});
+
+const navSectionIds = computed(() => sections.value.map((section) => section.id));
+
+/**
+ * Home page chapters that have no navbar link of their own. They are observed
+ * anyway so the highlight is switched off while the reader is inside them,
+ * rather than leaving the previous section lit.
+ */
+const unlinkedRegions = computed(() => (isHome.value ? ['about', 'founder-work'] : []));
+
+const observedId = useScrollSpy(() => [...navSectionIds.value, ...unlinkedRegions.value]);
+
+/** Only a section that owns a navbar link may be highlighted. */
+const activeSection = computed(() =>
+    navSectionIds.value.includes(observedId.value ?? '') ? observedId.value : null,
+);
+
 const mobileOpen = ref(false);
 
 const { y: scrollY } = useWindowScroll();
 const scrolled = computed(() => scrollY.value > 12);
 
-const initials = computed(() =>
-    profile.value?.name
-        ?.split(' ')
-        .slice(0, 2)
-        .map((part) => part.charAt(0).toUpperCase())
-        .join(''),
+const initials = computed(() => getInitials(owner.value?.name));
+
+/**
+ * The website logo, managed in Admin → Founder → Website logo. The studio
+ * logo stays as a fallback for older uploads. The white chip keeps
+ * dark-on-light artwork legible in dark mode. Null means no logo was
+ * uploaded; the initials mark is shown.
+ */
+const brandLogoUrl = computed(
+    () => profile.value?.logo_url ?? company.value?.logo_url ?? null,
 );
 
+/** The route that owns a given section, so anchors stay on the right page. */
+const sectionBase = computed(() => (isCompanySite.value ? '/' : '/founder'));
+
+/**
+ * Sections scroll on the page that owns them and jump back to that page from
+ * anywhere else. Both the home page and the About page own their own ids, so
+ * each anchors to itself.
+ */
 function sectionHref(id: string): string {
-    return isHome.value ? `#${id}` : `/#${id}`;
+    if (isHome.value || isAboutRoute.value) {
+        return `#${id}`;
+    }
+
+    return `${sectionBase.value}#${id}`;
+}
+
+/** The destination of a whole-page link, or null when it is the current page. */
+function pageLinkHref(id: string): string | null {
+    switch (id) {
+        case 'about':
+            return isAboutRoute.value ? null : '/about';
+        case 'archive':
+            return isProjectsRoute.value ? null : '/projects';
+        case 'founder':
+            return isFounderRoute.value ? null : '/founder';
+        case 'studio':
+            return isCompanySite.value ? null : '/';
+        default:
+            return null;
+    }
+}
+
+/** Whether a whole-page link points at the page the visitor is already on. */
+function isCurrentPageLink(id: string): boolean {
+    switch (id) {
+        case 'about':
+            return isAboutRoute.value;
+        case 'archive':
+            return isProjectsRoute.value;
+        case 'founder':
+            return isFounderRoute.value;
+        default:
+            return false;
+    }
 }
 
 function closeMobile() {
@@ -77,23 +201,38 @@ function closeMobile() {
                 >
                     <!-- Logo -->
                     <Link
-                        href="/"
+                        :href="sectionBase"
                         class="group flex items-center gap-2.5"
-                        :aria-label="profile?.name ?? 'Home'"
+                        :aria-label="
+                            (isCompanySite ? owner?.name : 'Personal portfolio') ??
+                            'Home'
+                        "
                     >
                         <span
-                            class="grid size-9 place-items-center rounded-lg bg-foreground font-display text-sm font-bold text-background transition-opacity duration-150 group-hover:opacity-90"
+                            v-if="brandLogoUrl"
+                            class="flex h-12 items-center rounded-lg bg-white px-2.5 py-1 shadow-sm ring-1 ring-border/60"
                         >
-                            {{ initials ?? '{ }' }}
+                            <img
+                                :src="brandLogoUrl"
+                                :alt="owner?.name ?? 'Home'"
+                                class="h-10 w-auto max-w-44 object-contain sm:max-w-64"
+                            />
                         </span>
-                        <span
-                            class="hidden text-sm font-semibold tracking-tight sm:inline"
-                        >
-                            {{ profile?.name ?? 'portfolio' }}
-                        </span>
+                        <template v-else>
+                            <span
+                                class="grid size-9 place-items-center rounded-lg bg-foreground font-display text-sm font-bold text-background transition-opacity duration-150 group-hover:opacity-90"
+                            >
+                                {{ initials || '{ }' }}
+                            </span>
+                            <span
+                                class="hidden text-sm font-semibold tracking-tight sm:inline"
+                            >
+                                {{ owner?.name ?? 'portfolio' }}
+                            </span>
+                        </template>
                     </Link>
 
-                    <!-- Section links -->
+                    <!-- Section links, then a divider, then whole-page links -->
                     <nav
                         class="ml-auto hidden items-center gap-1 md:flex"
                         aria-label="Primary"
@@ -103,20 +242,33 @@ function closeMobile() {
                             :key="section.id"
                             :href="sectionHref(section.id)"
                             :data-active="
-                                isHome && activeSection === section.id
-                                    ? 'true'
-                                    : undefined
+                                activeSection === section.id ? 'true' : undefined
+                            "
+                            :aria-current="
+                                activeSection === section.id ? 'true' : undefined
                             "
                             class="rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground data-[active=true]:text-foreground"
                         >
                             {{ section.label }}
                         </a>
+                        <span
+                            v-if="pageLinks.length"
+                            aria-hidden="true"
+                            class="mx-1 h-4 w-px shrink-0 rounded-full bg-border"
+                        />
                         <Link
-                            href="/projects"
-                            :data-active="isProjectsRoute ? 'true' : undefined"
+                            v-for="link in pageLinks"
+                            :key="link.id"
+                            :href="pageLinkHref(link.id) ?? '/'"
+                            :data-active="
+                                isCurrentPageLink(link.id) ? 'true' : undefined
+                            "
+                            :aria-current="
+                                isCurrentPageLink(link.id) ? 'page' : undefined
+                            "
                             class="rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground data-[active=true]:text-foreground"
                         >
-                            Archive
+                            {{ link.label }}
                         </Link>
                     </nav>
 
@@ -149,20 +301,15 @@ function closeMobile() {
             </header>
 
             <main id="main" class="relative">
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        :key="page.url"
-                        :initial="{ opacity: 0, y: 12 }"
-                        :animate="{ opacity: 1, y: 0 }"
-                        :exit="{ opacity: 0, y: -12 }"
-                        :transition="{
-                            duration: 0.35,
-                            ease: [0.16, 1, 0.3, 1],
-                        }"
-                    >
-                        <slot />
-                    </motion.div>
-                </AnimatePresence>
+                <!--
+                    Plain page wrapper. Motion-based page transitions unmounted
+                    the outgoing route unsafely during Inertia visits and left
+                    stale content behind, so page changes use no JS animation
+                    here. Descendant components may still animate themselves.
+                -->
+                <div :key="page.url">
+                    <slot />
+                </div>
 
                 <FooterSection />
             </main>
@@ -177,7 +324,7 @@ function closeMobile() {
                         class="flex items-center justify-between px-4 pt-4 text-sm font-semibold"
                     >
                         <span>{{
-                            profile?.name?.split(' ')[0] ?? 'Menu'
+                            owner?.name?.split(' ')[0] ?? 'Menu'
                         }}</span>
                         <button
                             type="button"
@@ -188,22 +335,44 @@ function closeMobile() {
                             <X class="size-4" />
                         </button>
                     </SheetTitle>
-                    <nav class="mt-4 flex flex-col gap-1 px-2">
+                    <nav
+                        class="mt-4 flex flex-col gap-1 px-2"
+                        aria-label="Mobile"
+                    >
                         <a
                             v-for="section in sections"
                             :key="section.id"
                             :href="sectionHref(section.id)"
-                            class="rounded-lg px-4 py-2.5 text-sm transition-colors hover:bg-muted"
+                            :data-active="
+                                activeSection === section.id ? 'true' : undefined
+                            "
+                            :aria-current="
+                                activeSection === section.id ? 'true' : undefined
+                            "
+                            class="rounded-lg px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground data-[active=true]:font-medium data-[active=true]:text-foreground"
                             @click="closeMobile"
                         >
                             {{ section.label }}
                         </a>
+                        <span
+                            v-if="pageLinks.length"
+                            aria-hidden="true"
+                            class="my-2 h-px w-full rounded-full bg-border"
+                        />
                         <Link
-                            href="/projects"
-                            class="rounded-lg px-4 py-2.5 text-sm transition-colors hover:bg-muted"
+                            v-for="link in pageLinks"
+                            :key="link.id"
+                            :href="pageLinkHref(link.id) ?? '/'"
+                            :data-active="
+                                isCurrentPageLink(link.id) ? 'true' : undefined
+                            "
+                            :aria-current="
+                                isCurrentPageLink(link.id) ? 'page' : undefined
+                            "
+                            class="rounded-lg px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground data-[active=true]:font-medium data-[active=true]:text-foreground"
                             @click="closeMobile"
                         >
-                            Archive
+                            {{ link.label }}
                         </Link>
                     </nav>
                     <div

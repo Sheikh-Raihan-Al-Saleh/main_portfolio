@@ -5,6 +5,13 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import projects from '@/routes/admin/projects';
 import ProjectForm from './ProjectForm.vue';
 
+type Props = {
+    /** `ProjectContext::options()`, for the context select. */
+    contexts: { value: string; label: string }[];
+};
+
+defineProps<Props>();
+
 defineOptions({
     layout: {
         breadcrumbs: [
@@ -26,6 +33,7 @@ defineOptions({
 
         <ProjectForm
             :action="ProjectController.store.form()"
+            :contexts="contexts"
             submit-label="Create project"
         />
     </div>

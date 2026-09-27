@@ -19,10 +19,12 @@ use Illuminate\Support\Carbon;
  * @property string|null $headline
  * @property string|null $tagline
  * @property string|null $bio
+ * @property string|null $founder_message
  * @property string|null $location
  * @property string|null $public_email
  * @property string|null $phone
  * @property string|null $avatar_path
+ * @property string|null $logo_path
  * @property string|null $resume_path
  * @property string|null $og_image_path
  * @property bool $available_for_work
@@ -35,16 +37,17 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read string|null $avatar_url
+ * @property-read string|null $logo_url
  * @property-read string|null $resume_url
  * @property-read string|null $og_image_url
  */
 #[Fillable([
-    'name', 'hero_title', 'hero_statement', 'headline', 'tagline', 'bio',
-    'location', 'public_email', 'phone', 'avatar_path', 'resume_path',
+    'name', 'hero_title', 'hero_statement', 'headline', 'tagline', 'bio', 'founder_message',
+    'location', 'public_email', 'phone', 'avatar_path', 'logo_path', 'resume_path',
     'og_image_path', 'available_for_work', 'socials', 'roles', 'footer',
     'content', 'meta_title', 'meta_description',
 ])]
-#[Appends(['avatar_url', 'resume_url', 'og_image_url'])]
+#[Appends(['avatar_url', 'logo_url', 'resume_url', 'og_image_url'])]
 class Profile extends Model
 {
     use ResolvesMediaUrls;
@@ -52,6 +55,11 @@ class Profile extends Model
     protected function getAvatarUrlAttribute(): ?string
     {
         return $this->mediaUrl($this->avatar_path);
+    }
+
+    protected function getLogoUrlAttribute(): ?string
+    {
+        return $this->mediaUrl($this->logo_path);
     }
 
     protected function getResumeUrlAttribute(): ?string
@@ -166,10 +174,11 @@ class Profile extends Model
         return [
             'sections' => [
                 'about' => [
-                    'eyebrow' => 'About',
+                    'eyebrow' => 'About us',
                     'title' => 'Engineer by craft, builder by nature',
                     'highlight' => 'craft',
-                    'description' => 'A quick note on who I am and how I work.',
+                    'description' => 'A note from the founder, and how he works.',
+                    'message_label' => "Founder's note",
                 ],
                 'skills' => [
                     'eyebrow' => 'Skills',

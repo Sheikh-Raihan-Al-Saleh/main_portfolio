@@ -11,9 +11,15 @@ import type { Profile, Project } from '@/types';
 
 type Props = {
     projects: Project[];
+    /**
+     * Where "view full archive" goes. The founder's portfolio passes null: that
+     * page already lists all of his work, and /projects holds the company
+     * archive, which would send the reader somewhere unrelated.
+     */
+    archiveHref?: string | null;
 };
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), { archiveHref: '/projects' });
 
 const page = usePage<{ profile: Profile | null }>();
 const content = computed(() => contentConfig(page.props.profile));
@@ -399,9 +405,13 @@ function openProject(project: Project) {
                 </div>
 
                 <!-- Archive link -->
-                <motion.div :variants="fadeUp" class="mt-12 text-center">
+                <motion.div
+                    v-if="archiveHref"
+                    :variants="fadeUp"
+                    class="mt-12 text-center"
+                >
                     <a
-                        href="/projects"
+                        :href="archiveHref"
                         class="btn-laravel group inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold"
                     >
                         view full archive

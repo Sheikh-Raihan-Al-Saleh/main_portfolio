@@ -53,7 +53,7 @@ function filterBy(tech: string | null) {
         />
     </Head>
 
-    <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+    <div id="top" class="mx-auto max-w-6xl scroll-mt-20 px-4 py-20 sm:px-6">
         <SectionHeading
             eyebrow="Archive"
             title="All projects"
@@ -115,7 +115,7 @@ function filterBy(tech: string | null) {
             :in-view-options="inViewOnce"
             class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
         >
-            <AnimatePresence mode="popLayout">
+            <AnimatePresence>
                 <motion.div
                     v-for="project in visibleProjects"
                     :key="project.id"

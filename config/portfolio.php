@@ -20,6 +20,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Public Identity
+    |--------------------------------------------------------------------------
+    |
+    | The person and inbox shown on the public site. Deliberately separate from
+    | the admin account above: the account you log in with is not the name that
+    | belongs on a public portfolio, and sharing the two leaks placeholder
+    | credentials ("Admin", "admin@example.com") into rendered pages.
+    |
+    */
+
+    'public_identity' => [
+        'founder_name' => env('FOUNDER_NAME', 'Sheikh Nabil'),
+        'contact_email' => env('CONTACT_EMAIL', 'hello@sheikhnabil.com'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Landing Page Demo Embeds
     |--------------------------------------------------------------------------
     |

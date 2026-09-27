@@ -103,7 +103,7 @@ watch(search, (value) => {
             :variants="fadeUp"
             initial="hidden"
             animate="visible"
-            class="overflow-hidden rounded-xl border border-border"
+            class="overflow-x-auto rounded-xl border border-border"
         >
             <Table>
                 <TableHeader>
@@ -113,6 +113,7 @@ watch(search, (value) => {
                         <TableHead class="hidden md:table-cell"
                             >Stack</TableHead
                         >
+                        <TableHead class="w-32">Context</TableHead>
                         <TableHead class="w-32">Status</TableHead>
                         <TableHead class="w-32 text-right">Actions</TableHead>
                     </TableRow>
@@ -179,6 +180,23 @@ watch(search, (value) => {
                                     {{ tech }}
                                 </Badge>
                             </div>
+                        </TableCell>
+
+                        <TableCell>
+                            <Badge
+                                variant="outline"
+                                :class="
+                                    project.context === 'company'
+                                        ? 'border-0 bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                                        : 'border-0 bg-violet-500/10 text-violet-600 dark:text-violet-400'
+                                "
+                            >
+                                {{
+                                    project.context === 'company'
+                                        ? 'Company'
+                                        : 'Personal'
+                                }}
+                            </Badge>
                         </TableCell>
 
                         <TableCell>
@@ -275,7 +293,7 @@ watch(search, (value) => {
 
                     <TableRow v-if="!items.length">
                         <TableCell
-                            colspan="5"
+                            colspan="6"
                             class="py-12 text-center text-muted-foreground"
                         >
                             <div class="flex flex-col items-center gap-2">
@@ -289,6 +307,17 @@ watch(search, (value) => {
                                             : 'No projects yet — create your first one.'
                                     }}
                                 </p>
+                                <Button
+                                    v-if="!filters.search"
+                                    as-child
+                                    size="sm"
+                                    class="mt-1"
+                                >
+                                    <Link :href="projectRoutes.create()">
+                                        <Plus class="size-4" />
+                                        New project
+                                    </Link>
+                                </Button>
                             </div>
                         </TableCell>
                     </TableRow>

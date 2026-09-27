@@ -2,13 +2,14 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import {
     Briefcase,
+    Building2,
     ExternalLink,
     FolderKanban,
     GraduationCap,
     LayoutGrid,
     Mail,
-    Settings,
     Sparkles,
+    Users,
     UserRound,
 } from '@lucide/vue';
 import { computed } from 'vue';
@@ -21,11 +22,10 @@ import {
     SidebarContent,
     SidebarFooter,
     SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes/admin';
+import clients from '@/routes/admin/clients';
+import company from '@/routes/admin/company';
 import educations from '@/routes/admin/educations';
 import experiences from '@/routes/admin/experiences';
 import messages from '@/routes/admin/messages';
@@ -40,12 +40,29 @@ const unreadMessages = computed(
     () => (page.props.unreadMessages as number) ?? 0,
 );
 
-const contentNavItems = computed<NavItem[]>(() => [
-    { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
+/**
+ * The admin edits two sites, not one. Content is grouped by which site it
+ * appears on so it is obvious where a change will show up: the studio's own
+ * pages first, then the founder's portfolio.
+ */
+const companyNavItems = computed<NavItem[]>(() => [
+    { title: 'Company', href: company.edit(), icon: Building2 },
+    { title: 'Clients', href: clients.index(), icon: Users },
     { title: 'Projects', href: projects.index(), icon: FolderKanban },
+]);
+
+const founderNavItems: NavItem[] = [
+    { title: 'Founder', href: profile.edit(), icon: UserRound },
     { title: 'Skills', href: skills.index(), icon: Sparkles },
     { title: 'Experience', href: experiences.index(), icon: Briefcase },
     { title: 'Education', href: educations.index(), icon: GraduationCap },
+];
+
+const dashboardNavItems: NavItem[] = [
+    { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
+];
+
+const messageNavItems = computed<NavItem[]>(() => [
     {
         title: 'Messages',
         href: messages.index(),
@@ -53,11 +70,6 @@ const contentNavItems = computed<NavItem[]>(() => [
         badge: unreadMessages.value,
     },
 ]);
-
-const siteNavItems: NavItem[] = [
-    { title: 'Site profile', href: profile.edit(), icon: UserRound },
-    { title: 'Settings', href: profile.edit(), icon: Settings },
-];
 
 const footerNavItems: NavItem[] = [
     { title: 'View live site', href: '/', icon: ExternalLink },
@@ -67,20 +79,19 @@ const footerNavItems: NavItem[] = [
 <template>
     <Sidebar collapsible="icon" variant="inset">
         <SidebarHeader>
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
-                            <AppLogo />
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
+            <Link
+                :href="dashboard()"
+                class="flex h-14 items-center gap-2 rounded-lg px-2 transition-colors hover:bg-sidebar-accent group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+            >
+                <AppLogo />
+            </Link>
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :items="contentNavItems" label="Content" />
-            <NavMain :items="siteNavItems" label="Site" class="mt-4" />
+            <NavMain :items="dashboardNavItems" label="Overview" />
+            <NavMain :items="companyNavItems" label="Studio site" class="mt-4" />
+            <NavMain :items="founderNavItems" label="Founder portfolio" class="mt-4" />
+            <NavMain :items="messageNavItems" label="Inbox" class="mt-4" />
         </SidebarContent>
 
         <SidebarFooter>

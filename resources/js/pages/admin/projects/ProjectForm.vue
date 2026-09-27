@@ -6,6 +6,13 @@ import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import projects from '@/routes/admin/projects';
@@ -16,9 +23,11 @@ type Props = {
     /** Wayfinder form props: `ProjectController.store.form()` or `.update.form(id)`. */
     action: Record<string, unknown>;
     submitLabel: string;
+    /** `ProjectContext::options()`, for the context select. */
+    contexts: { value: string; label: string }[];
 };
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 function dateValue(value: string | null | undefined): string {
     return value ? value.slice(0, 10) : '';
@@ -52,6 +61,32 @@ function dateValue(value: string | null | undefined): string {
                 placeholder="Leave blank to generate from the title"
             />
             <InputError :message="errors.slug" />
+        </div>
+
+        <div class="grid gap-2">
+            <Label for="context">Appears on</Label>
+            <Select
+                name="context"
+                :default-value="props.project?.context ?? 'company'"
+            >
+                <SelectTrigger id="context">
+                    <SelectValue placeholder="Pick a context" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem
+                        v-for="option in contexts"
+                        :key="option.value"
+                        :value="option.value"
+                    >
+                        {{ option.label }}
+                    </SelectItem>
+                </SelectContent>
+            </Select>
+            <p class="text-xs text-muted-foreground">
+                Company work appears on the home page and in the projects
+                archive. Personal work appears on the About page.
+            </p>
+            <InputError :message="errors.context" />
         </div>
 
         <div class="grid gap-2">

@@ -8,10 +8,11 @@ import type { ContentConfig, Profile } from '@/types';
 export const contentDefaults: ContentConfig = {
     sections: {
         about: {
-            eyebrow: 'About',
+            eyebrow: 'About us',
             title: 'Engineer by craft, builder by nature',
             highlight: 'craft',
-            description: 'A quick note on who I am and how I work.',
+            description: 'A note from the founder, and how he works.',
+            message_label: "Founder's note",
         },
         skills: {
             eyebrow: 'Skills',

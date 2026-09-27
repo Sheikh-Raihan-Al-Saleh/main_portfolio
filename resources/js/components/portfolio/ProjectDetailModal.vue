@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ArrowUpRight, Code, ExternalLink, X } from '@lucide/vue';
 import { AnimatePresence, motion } from 'motion-v';
-import { watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { Button } from '@/components/ui/button';
 import type { Project } from '@/types';
 
@@ -15,6 +15,17 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
     'update:open': [value: boolean];
 }>();
+
+/*
+ * The dialog is portaled to <body>. Render the portal only after hydration so
+ * the server HTML and the first client render agree; otherwise every card's
+ * closed modal leaves mismatched anchors that later break page unmounts.
+ */
+const mounted = ref(false);
+
+onMounted(() => {
+    mounted.value = true;
+});
 
 function close() {
     emit('update:open', false);
@@ -41,7 +52,7 @@ watch(
 </script>
 
 <template>
-    <Teleport to="body">
+    <Teleport v-if="mounted" to="body">
         <AnimatePresence>
             <motion.div
                 v-if="open && project"

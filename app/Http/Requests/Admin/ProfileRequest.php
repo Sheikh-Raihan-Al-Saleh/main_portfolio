@@ -23,6 +23,7 @@ class ProfileRequest extends FormRequest
             'headline' => ['nullable', 'string', 'max:150'],
             'tagline' => ['nullable', 'string', 'max:250'],
             'bio' => ['nullable', 'string', 'max:5000'],
+            'founder_message' => ['nullable', 'string', 'max:5000'],
             'location' => ['nullable', 'string', 'max:120'],
             'public_email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:40'],
@@ -53,6 +54,7 @@ class ProfileRequest extends FormRequest
             'content.sections.*.title' => ['nullable', 'string', 'max:180'],
             'content.sections.*.highlight' => ['nullable', 'string', 'max:120'],
             'content.sections.*.description' => ['nullable', 'string', 'max:300'],
+            'content.sections.about.message_label' => ['nullable', 'string', 'max:80'],
             'content.hero.primary_cta_label' => ['nullable', 'string', 'max:60'],
             'content.hero.primary_cta_url' => ['nullable', 'string', 'max:120'],
             'content.hero.secondary_cta_label' => ['nullable', 'string', 'max:60'],
@@ -73,9 +75,11 @@ class ProfileRequest extends FormRequest
             'meta_title' => ['nullable', 'string', 'max:70'],
             'meta_description' => ['nullable', 'string', 'max:180'],
             'avatar' => ['nullable', 'image', 'max:2048'],
+            'logo' => ['nullable', 'image', 'max:2048'],
             'og_image' => ['nullable', 'image', 'max:4096'],
             'resume' => ['nullable', 'file', 'mimes:pdf', 'max:8192'],
             'remove_avatar' => ['boolean'],
+            'remove_logo' => ['boolean'],
             'remove_og_image' => ['boolean'],
             'remove_resume' => ['boolean'],
         ];
@@ -86,6 +90,7 @@ class ProfileRequest extends FormRequest
         $this->merge([
             'available_for_work' => $this->boolean('available_for_work'),
             'remove_avatar' => $this->boolean('remove_avatar'),
+            'remove_logo' => $this->boolean('remove_logo'),
             'remove_og_image' => $this->boolean('remove_og_image'),
             'remove_resume' => $this->boolean('remove_resume'),
         ]);

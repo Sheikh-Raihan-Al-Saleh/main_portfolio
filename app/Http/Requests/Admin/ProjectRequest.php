@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\ProjectContext;
 use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -26,6 +27,7 @@ class ProjectRequest extends FormRequest
                 'nullable', 'string', 'max:200', 'alpha_dash',
                 Rule::unique('projects', 'slug')->ignore($projectId),
             ],
+            'context' => ['required', Rule::enum(ProjectContext::class)],
             'summary' => ['nullable', 'string', 'max:300'],
             'description' => ['nullable', 'string', 'max:20000'],
             'cover_image' => ['nullable', 'image', 'max:4096'],
@@ -52,7 +54,7 @@ class ProjectRequest extends FormRequest
     public function projectAttributes(): array
     {
         $data = $this->safe()->only([
-            'title', 'summary', 'description', 'tech_stack', 'repo_url',
+            'title', 'context', 'summary', 'description', 'tech_stack', 'repo_url',
             'live_url', 'role', 'is_featured', 'is_published', 'started_at', 'completed_at',
         ]);
 
