@@ -39,7 +39,7 @@ const { items, move, saving } = useReorder<Skill>(
 );
 
 const categoryColors: Record<string, string> = {
-    frontend: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    frontend: 'bg-primary/10 text-primary',
     backend: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
     devops: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
     database: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',

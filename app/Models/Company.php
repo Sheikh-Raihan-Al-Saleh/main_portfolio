@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\ResolvesMediaUrls;
+use App\Support\StudioContent;
 use Database\Factories\CompanyFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -42,6 +43,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $accepting_projects
  * @property array<string, string|null>|null $socials
  * @property array<string, mixed>|null $footer
+ * @property array<string, mixed>|null $content
+ * @property-read array<string, mixed> $studio_content
  * @property string|null $meta_title
  * @property string|null $meta_description
  * @property-read string|null $logo_url
@@ -52,9 +55,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'public_email', 'phone', 'website', 'founded_year', 'logo_path', 'og_image_path',
     'hero_eyebrow', 'hero_title', 'hero_statement', 'primary_cta_label',
     'primary_cta_url', 'secondary_cta_label', 'secondary_cta_url', 'status_text',
-    'accepting_projects', 'socials', 'footer', 'meta_title', 'meta_description',
+    'accepting_projects', 'socials', 'footer', 'content', 'meta_title', 'meta_description',
 ])]
-#[Appends(['logo_url', 'og_image_url'])]
+#[Appends(['logo_url', 'og_image_url', 'studio_content'])]
 class Company extends Model
 {
     /** @use HasFactory<CompanyFactory> */
@@ -170,6 +173,17 @@ class Company extends Model
         return $this->hasMany(Client::class, 'company_id');
     }
 
+    /**
+     * The studio's fixed-section copy: stored edits merged over the defaults,
+     * so every key is always present for the public pages and the editor.
+     *
+     * @return array<string, mixed>
+     */
+    public function getStudioContentAttribute(): array
+    {
+        return StudioContent::merge($this->content);
+    }
+
     protected function getLogoUrlAttribute(): ?string
     {
         return $this->mediaUrl($this->logo_path);
@@ -189,6 +203,7 @@ class Company extends Model
             'accepting_projects' => 'boolean',
             'socials' => 'array',
             'footer' => 'array',
+            'content' => 'array',
         ];
     }
 }

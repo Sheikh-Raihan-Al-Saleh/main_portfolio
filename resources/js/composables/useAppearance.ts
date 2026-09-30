@@ -1,32 +1,38 @@
 import type { ComputedRef, Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
-import type { Appearance, ResolvedAppearance } from '@/types';
+import type { Appearance, ResolvedAppearance, ThemeAppearance } from '@/types';
 
-export type { Appearance, ResolvedAppearance };
+export type { Appearance, ResolvedAppearance, ThemeAppearance };
+
+const ADMIN_THEMES = ['colorful', 'aesthetic', 'modern'] as const;
 
 export type UseAppearanceReturn = {
-    appearance: Ref<Appearance>;
+    appearance: Ref<ThemeAppearance>;
     resolvedAppearance: ComputedRef<ResolvedAppearance>;
-    updateAppearance: (value: Appearance) => void;
+    updateAppearance: (value: ThemeAppearance) => void;
 };
 
-export function updateTheme(value: Appearance): void {
+export function updateTheme(value: ThemeAppearance): void {
     if (typeof window === 'undefined') {
         return;
     }
 
-    if (value === 'system') {
-        const mediaQueryList = window.matchMedia(
-            '(prefers-color-scheme: dark)',
-        );
-        const systemTheme = mediaQueryList.matches ? 'dark' : 'light';
+    const isDark =
+        value === 'system'
+            ? window.matchMedia('(prefers-color-scheme: dark)').matches
+            : value === 'dark';
 
-        document.documentElement.classList.toggle(
-            'dark',
-            systemTheme === 'dark',
-        );
-    } else {
-        document.documentElement.classList.toggle('dark', value === 'dark');
+    const isAdminTheme = (ADMIN_THEMES as readonly string[]).includes(value);
+
+    document.documentElement.classList.toggle('dark', isDark);
+
+    for (const theme of ADMIN_THEMES) {
+        document.documentElement.classList.toggle(theme, value === theme);
+    }
+
+    // Admin color palettes are defined for light surfaces only.
+    if (isAdminTheme) {
+        document.documentElement.classList.remove('dark');
     }
 }
 
@@ -48,12 +54,12 @@ const mediaQuery = () => {
     return window.matchMedia('(prefers-color-scheme: dark)');
 };
 
-const getStoredAppearance = () => {
+const getStoredAppearance = (): ThemeAppearance | null => {
     if (typeof window === 'undefined') {
         return null;
     }
 
-    return localStorage.getItem('appearance') as Appearance | null;
+    return localStorage.getItem('appearance') as ThemeAppearance | null;
 };
 
 const prefersDark = (): boolean => {
@@ -83,13 +89,11 @@ export function initializeTheme(): void {
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);
 }
 
-const appearance = ref<Appearance>('system');
+const appearance = ref<ThemeAppearance>('system');
 
 export function useAppearance(): UseAppearanceReturn {
     onMounted(() => {
-        const savedAppearance = localStorage.getItem(
-            'appearance',
-        ) as Appearance | null;
+        const savedAppearance = getStoredAppearance();
 
         if (savedAppearance) {
             appearance.value = savedAppearance;
@@ -101,10 +105,14 @@ export function useAppearance(): UseAppearanceReturn {
             return prefersDark() ? 'dark' : 'light';
         }
 
-        return appearance.value;
+        if (appearance.value === 'dark') {
+            return 'dark';
+        }
+
+        return 'light';
     });
 
-    function updateAppearance(value: Appearance) {
+    function updateAppearance(value: ThemeAppearance) {
         appearance.value = value;
 
         // Store in localStorage for client-side persistence...

@@ -209,6 +209,7 @@ const paragraphs = computed(() =>
     <!-- Clients -->
     <ClientLogosSection
         :clients="clients"
+        :company="company"
         index="02"
         eyebrow="Clients"
         heading="Who we work with"

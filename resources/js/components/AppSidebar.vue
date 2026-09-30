@@ -7,6 +7,7 @@ import {
     FolderKanban,
     GraduationCap,
     LayoutGrid,
+    LayoutTemplate,
     Mail,
     Sparkles,
     Users,
@@ -23,6 +24,7 @@ import {
     SidebarFooter,
     SidebarHeader,
 } from '@/components/ui/sidebar';
+import { useAppearance } from '@/composables/useAppearance';
 import { dashboard } from '@/routes/admin';
 import clients from '@/routes/admin/clients';
 import company from '@/routes/admin/company';
@@ -32,6 +34,7 @@ import messages from '@/routes/admin/messages';
 import profile from '@/routes/admin/profile';
 import projects from '@/routes/admin/projects';
 import skills from '@/routes/admin/skills';
+import studioSections from '@/routes/admin/studio-sections';
 import type { NavItem } from '@/types';
 
 const page = usePage();
@@ -47,6 +50,11 @@ const unreadMessages = computed(
  */
 const companyNavItems = computed<NavItem[]>(() => [
     { title: 'Company', href: company.edit(), icon: Building2 },
+    {
+        title: 'Home sections',
+        href: studioSections.edit(),
+        icon: LayoutTemplate,
+    },
     { title: 'Clients', href: clients.index(), icon: Users },
     { title: 'Projects', href: projects.index(), icon: FolderKanban },
 ]);
@@ -74,14 +82,28 @@ const messageNavItems = computed<NavItem[]>(() => [
 const footerNavItems: NavItem[] = [
     { title: 'View live site', href: '/', icon: ExternalLink },
 ];
+
+const { appearance } = useAppearance();
+
+const sidebarVariant = computed(() => {
+    if (appearance.value === 'colorful') {
+        return 'sidebar' as const;
+    }
+
+    if (appearance.value === 'aesthetic') {
+        return 'floating' as const;
+    }
+
+    return 'inset' as const;
+});
 </script>
 
 <template>
-    <Sidebar collapsible="icon" variant="inset">
+    <Sidebar :variant="sidebarVariant" collapsible="icon">
         <SidebarHeader>
             <Link
                 :href="dashboard()"
-                class="flex h-14 items-center gap-2 rounded-lg px-2 transition-colors hover:bg-sidebar-accent group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+                class="flex h-14 items-center gap-2 rounded-lg px-2 transition-colors group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 hover:bg-sidebar-accent"
             >
                 <AppLogo />
             </Link>
@@ -89,8 +111,16 @@ const footerNavItems: NavItem[] = [
 
         <SidebarContent>
             <NavMain :items="dashboardNavItems" label="Overview" />
-            <NavMain :items="companyNavItems" label="Studio site" class="mt-4" />
-            <NavMain :items="founderNavItems" label="Founder portfolio" class="mt-4" />
+            <NavMain
+                :items="companyNavItems"
+                label="Studio site"
+                class="mt-4"
+            />
+            <NavMain
+                :items="founderNavItems"
+                label="Founder portfolio"
+                class="mt-4"
+            />
             <NavMain :items="messageNavItems" label="Inbox" class="mt-4" />
         </SidebarContent>
 

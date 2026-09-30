@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\LandingSectionController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\SiteProfileController;
 use App\Http\Controllers\Admin\SkillController;
+use App\Http\Controllers\Admin\StudioContentController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'admin'])
@@ -50,6 +51,12 @@ Route::middleware(['auth', 'verified', 'admin'])
         Route::resource('experiences', ExperienceController::class)->except('show');
         Route::resource('educations', EducationController::class)->except('show');
         Route::resource('clients', ClientController::class)->only(['store', 'update', 'destroy']);
+
+        // The studio home page's fixed-section copy.
+        Route::get('studio-sections', [StudioContentController::class, 'edit'])
+            ->name('studio-sections.edit');
+        Route::post('studio-sections', [StudioContentController::class, 'update'])
+            ->name('studio-sections.update');
 
         Route::get('messages', [ContactMessageController::class, 'index'])->name('messages.index');
         Route::get('messages/{message}', [ContactMessageController::class, 'show'])->name('messages.show');

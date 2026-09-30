@@ -3,8 +3,9 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { Menu, X } from '@lucide/vue';
 import { useWindowScroll } from '@vueuse/core';
 import { MotionConfig } from 'motion-v';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import ScrollProgressBar from '@/components/motion/ScrollProgressBar.vue';
+import WaterIntro from '@/components/motion/WaterIntro.vue';
 import FooterSection from '@/components/portfolio/FooterSection.vue';
 import ThemeToggle from '@/components/portfolio/ThemeToggle.vue';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,69 @@ const isHome = computed(() => page.url === '/' || page.url.startsWith('/?'));
 const isProjectsRoute = computed(() => page.url.startsWith('/projects'));
 const isAboutRoute = computed(() => page.url.startsWith('/about'));
 const isFounderRoute = computed(() => page.url.startsWith('/founder'));
+
+/**
+ * Water intro.
+ *
+ * Shown once per browser session, on the home page only, and never for
+ * reduced-motion users — it is a greeting, not a gate. Because it is an
+ * overlay rather than its own route, the home page (its HTML, images and
+ * Inertia payload) is already loading underneath it, so the intro costs no
+ * round trip. The key below is what makes "once per session" true; clear it
+ * to see the intro again.
+ */
+const INTRO_SESSION_KEY = 'nabil:intro-played';
+
+/**
+ * The overlay is mounted.
+ *
+ * The page beneath is deliberately left visible rather than faded out: the
+ * overlay is opaque, so it already hides everything, and the scene's exit
+ * wipe is what reveals the page. Gating content visibility as well would add
+ * a second reveal to keep in step — and a way for the page to stay hidden if
+ * anything went wrong with it.
+ */
+const introActive = ref(false);
+
+/**
+ * The drain has begun. The page entrance is keyed off this rather than off
+ * mount time, so the content rises into place *as* the water clears instead
+ * of having finished its entrance behind an opaque overlay.
+ */
+const introDraining = ref(false);
+
+onMounted(() => {
+    if (!isHome.value) {
+        return;
+    }
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+    }
+
+    try {
+        if (window.sessionStorage.getItem(INTRO_SESSION_KEY) === '1') {
+            return;
+        }
+
+        window.sessionStorage.setItem(INTRO_SESSION_KEY, '1');
+    } catch {
+        // Storage unavailable (private mode, blocked cookies). Skip the intro
+        // rather than replaying it on every single navigation.
+        return;
+    }
+
+    introActive.value = true;
+});
+
+function onIntroExit() {
+    introDraining.value = true;
+}
+
+function onIntroDone() {
+    introActive.value = false;
+    introDraining.value = true;
+}
 
 /**
  * Navigation follows the current face of the site, and only lists sections that
@@ -94,11 +158,19 @@ const pageLinks = computed(() => {
 const navSectionIds = computed(() => sections.value.map((section) => section.id));
 
 /**
- * Home page chapters that have no navbar link of their own. They are observed
- * anyway so the highlight is switched off while the reader is inside them,
- * rather than leaving the previous section lit.
+ * Chapters that have no navbar link of their own. They are observed anyway so
+ * the highlight is switched off while the reader is inside them, rather than
+ * leaving the previous section lit.
+ *
+ * The company home page has grown a number of these, so the list is kept here
+ * rather than derived: adding a section to the page should not silently change
+ * what the navbar highlights.
  */
-const unlinkedRegions = computed(() => (isHome.value ? ['about', 'founder-work'] : []));
+const unlinkedRegions = computed(() =>
+    isHome.value
+        ? ['capabilities', 'engineering', 'why', 'about', 'founder-work', 'start']
+        : [],
+);
 
 const observedId = useScrollSpy(() => [...navSectionIds.value, ...unlinkedRegions.value]);
 
@@ -178,6 +250,15 @@ function closeMobile() {
 <template>
     <MotionConfig reduced-motion="user">
         <div class="min-h-screen bg-background text-foreground">
+            <!-- Water intro: the logo floating on water before the home page -->
+            <WaterIntro
+                v-if="introActive"
+                :logo-url="brandLogoUrl"
+                :name="owner?.name ?? company?.name ?? null"
+                @exit="onIntroExit"
+                @done="onIntroDone"
+            />
+
             <a
                 href="#main"
                 class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-100 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-foreground focus:ring-2 focus:ring-ring"
@@ -304,10 +385,19 @@ function closeMobile() {
                 <!--
                     Plain page wrapper. Motion-based page transitions unmounted
                     the outgoing route unsafely during Inertia visits and left
-                    stale content behind, so page changes use no JS animation
-                    here. Descendant components may still animate themselves.
+                    stale content behind, so page changes use a CSS entrance
+                    only (replaying as the key changes on navigation).
+                    Descendant components may still animate themselves.
                 -->
-                <div :key="page.url">
+                <!--
+                    The entrance is held back only while the water is still
+                    covering the page. It is never used to hide content, so a
+                    failure here costs an animation, not the page.
+                -->
+                <div
+                    :key="page.url"
+                    :class="introActive && !introDraining ? '' : 'page-enter'"
+                >
                     <slot />
                 </div>
 

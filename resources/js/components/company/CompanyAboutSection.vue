@@ -4,6 +4,7 @@ import { motion } from 'motion-v';
 import { computed } from 'vue';
 import FounderCard from '@/components/company/FounderCard.vue';
 import SectionHeading from '@/components/portfolio/SectionHeading.vue';
+import { useStudioContent } from '@/composables/useStudioContent';
 import { fadeUp, inViewOnce, stagger } from '@/lib/motion';
 import type { Company, Profile } from '@/types';
 
@@ -15,6 +16,8 @@ type Props = {
 };
 
 const props = withDefaults(defineProps<Props>(), { compact: false });
+
+const content = useStudioContent(props.company, 'about');
 
 /** The bio is authored as blank-line separated paragraphs. */
 const paragraphs = computed(() =>
@@ -28,14 +31,14 @@ const paragraphs = computed(() =>
 <template>
     <section
         id="about"
-        class="bg-noise scroll-mt-20 border-t border-border py-20 sm:py-24"
+        class="bg-noise cv-auto scroll-mt-20 border-t border-border py-20 sm:py-24"
     >
         <div class="container-laravel section-dashed-xl">
             <SectionHeading
-                index="02"
-                eyebrow="About us"
-                title="A small studio, deliberately"
-                highlight="small"
+                index="05"
+                :eyebrow="content.eyebrow"
+                :title="content.title"
+                :highlight="content.highlight"
                 :description="company.tagline ?? ''"
             />
 
@@ -62,7 +65,7 @@ const paragraphs = computed(() =>
                         <p
                             class="text-xs font-semibold tracking-widest text-brand uppercase"
                         >
-                            Our mission
+                            {{ content.mission_label }}
                         </p>
                         <p class="mt-2 leading-relaxed font-medium">
                             {{ company.mission }}
@@ -73,7 +76,7 @@ const paragraphs = computed(() =>
                         href="/about"
                         class="group mt-2 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-brand"
                     >
-                        more about the studio
+                        {{ content.more_label }}
                         <span
                             aria-hidden="true"
                             class="transition-transform duration-200 group-hover:translate-x-0.5"

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 // The company site: sheikhnabil.com.
 Route::get('/', [CompanyController::class, 'index'])->name('home');
+
 Route::get('about', [CompanyController::class, 'about'])->name('about');
 Route::get('projects', [PortfolioController::class, 'projects'])->name('projects.index');
 Route::get('projects/{project}', [PortfolioController::class, 'showProject'])->name('projects.show');

@@ -1,3 +1,5 @@
+import type { StudioContent } from './studio';
+
 export type Social = {
     github?: string | null;
     linkedin?: string | null;
@@ -131,10 +133,13 @@ export type Company = {
     accepting_projects: boolean;
     socials: Social | null;
     footer: FooterConfig | null;
+    content: Record<string, unknown> | null;
     meta_title: string | null;
     meta_description: string | null;
     logo_url: string | null;
     og_image_url: string | null;
+    /** Studio story-section copy: stored edits merged over the defaults. */
+    studio_content: StudioContent;
 };
 
 /**

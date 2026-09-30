@@ -58,14 +58,6 @@ class CompanyController extends Controller
         ]);
     }
 
-    /**
-     * The company About page: who the studio is, how it works, and a card for
-     * the founder that links out to his own portfolio.
-     *
-     * The home page's composed blocks are deliberately not repeated here — this
-     * page has its own chapters — and the founder's personal work lives on
-     * /founder, which the card sends the reader to.
-     */
     public function about(): Response
     {
         $company = Company::current();

@@ -2,6 +2,10 @@
 
 @import 'tw-animate-css';
 
+/* The company site's own visual layer. Nothing in it is referenced from the
+   founder's side, so the two identities stay separate. */
+@import './studio.css';
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
@@ -712,6 +716,10 @@
         .footer-border-glow {
             animation: none !important;
         }
+        /* Motion layer decorations: hide decorative elements entirely. */
+        .hero-blob {
+            display: none;
+        }
     }
 }
 
@@ -1259,8 +1267,8 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   LANDING 3D — CLEAN VISIBLE 3D ANIMATED SYSTEM
-   Light, high-contrast, depth-driven, fully animated
+   ADMIN PANEL DESIGN SYSTEM — A to Z Colorful & Motion
+   User-friendly, optimized, aesthetic, modern with motion graphics
    ═══════════════════════════════════════════════════════════ */
 
 /* Stage perspective */
@@ -1477,4 +1485,662 @@
 .landing-section-title {
     letter-spacing: -0.03em;
     line-height: 1.05;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADMIN PANEL DESIGN SYSTEM — A to Z Colorful & Motion
+   User-friendly, optimized, aesthetic, modern with motion graphics
+   ═══════════════════════════════════════════════════════════ */
+html.colorful {
+    --primary: hsl(221 83% 53%);
+    --primary-foreground: #ffffff;
+    --secondary: hsl(215 100% 96%);
+    --secondary-foreground: hsl(221 60% 20%);
+    --accent: hsl(340 90% 96%);
+    --accent-foreground: hsl(340 60% 25%);
+    --muted: hsl(220 40% 96%);
+    --muted-foreground: hsl(220 10% 45%);
+    --background: hsl(0 0% 98%);
+    --foreground: hsl(220 40% 10%);
+    --card: hsl(0 0% 98%);
+    --card-foreground: hsl(220 40% 10%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(220 40% 10%);
+    --border: hsl(220 20% 90%);
+    --input: hsl(220 20% 90%);
+    --ring: hsl(221 83% 53%);
+    --chart-1: hsl(221 83% 53%);
+    --chart-2: hsl(160 70% 40%);
+    --chart-3: hsl(340 75% 55%);
+    --chart-4: hsl(262 83% 58%);
+    --chart-5: hsl(188 90% 45%);
+    --brand: hsl(221 83% 53%);
+    --brand-foreground: #ffffff;
+    --brand-subtle: hsl(221 100% 96%);
+    --brand-accent: hsl(221 83% 45%);
+    --brand-glow: hsl(221 83% 53% / 0.4);
+    --gradient-start: hsl(221 83% 53%);
+    --gradient-mid: hsl(160 70% 45%);
+    --gradient-end: hsl(340 75% 55%);
+    --sidebar-background: hsl(220 50% 98%);
+    --sidebar-foreground: hsl(220 40% 12%);
+    --sidebar-primary: hsl(221 83% 53%);
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: hsl(215 100% 94%);
+    --sidebar-accent-foreground: hsl(221 60% 20%);
+    --sidebar-border: hsl(220 20% 90%);
+    --sidebar-ring: hsl(221 83% 53%);
+}
+
+html.aesthetic {
+    --primary: hsl(262 83% 58%);
+    --primary-foreground: #ffffff;
+    --secondary: hsl(180 60% 95%);
+    --secondary-foreground: hsl(180 60% 20%);
+    --accent: hsl(45 95% 92%);
+    --accent-foreground: hsl(30 60% 25%);
+    --muted: hsl(260 40% 97%);
+    --muted-foreground: hsl(260 10% 40%);
+    --background: hsl(0 0% 98%);
+    --foreground: hsl(255 30% 12%);
+    --card: hsl(0 0% 98%);
+    --card-foreground: hsl(255 30% 12%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(255 30% 12%);
+    --border: hsl(255 25% 91%);
+    --input: hsl(255 25% 91%);
+    --ring: hsl(262 83% 58%);
+    --chart-1: hsl(262 83% 58%);
+    --chart-2: hsl(178 75% 40%);
+    --chart-3: hsl(45 90% 50%);
+    --chart-4: hsl(205 85% 50%);
+    --chart-5: hsl(315 65% 55%);
+    --brand: hsl(262 83% 58%);
+    --brand-foreground: #ffffff;
+    --brand-subtle: hsl(262 100% 96%);
+    --brand-accent: hsl(262 83% 48%);
+    --brand-glow: hsl(262 83% 58% / 0.4);
+    --gradient-start: hsl(262 83% 58%);
+    --gradient-mid: hsl(178 75% 45%);
+    --gradient-end: hsl(45 90% 55%);
+    --sidebar-background: hsl(262 50% 98%);
+    --sidebar-foreground: hsl(255 30% 14%);
+    --sidebar-primary: hsl(262 83% 58%);
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: hsl(262 100% 95%);
+    --sidebar-accent-foreground: hsl(262 60% 25%);
+    --sidebar-border: hsl(255 25% 91%);
+    --sidebar-ring: hsl(262 83% 58%);
+}
+
+html.modern {
+    --primary: hsl(240 80% 58%);
+    --primary-foreground: #ffffff;
+    --secondary: hsl(240 40% 96%);
+    --secondary-foreground: hsl(240 40% 20%);
+    --accent: hsl(340 85% 95%);
+    --accent-foreground: hsl(340 65% 25%);
+    --muted: hsl(240 20% 96%);
+    --muted-foreground: hsl(240 10% 42%);
+    --background: hsl(0 0% 98%);
+    --foreground: hsl(240 30% 8%);
+    --card: hsl(0 0% 98%);
+    --card-foreground: hsl(240 30% 8%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(240 30% 8%);
+    --border: hsl(240 15% 88%);
+    --input: hsl(240 15% 88%);
+    --ring: hsl(240 80% 58%);
+    --chart-1: hsl(240 80% 58%);
+    --chart-2: hsl(340 80% 58%);
+    --chart-3: hsl(175 70% 42%);
+    --chart-4: hsl(35 90% 52%);
+    --chart-5: hsl(275 70% 60%);
+    --brand: hsl(240 80% 58%);
+    --brand-foreground: #ffffff;
+    --brand-subtle: hsl(240 100% 96%);
+    --brand-accent: hsl(240 80% 48%);
+    --brand-glow: hsl(240 80% 58% / 0.4);
+    --gradient-start: hsl(240 80% 58%);
+    --gradient-mid: hsl(340 80% 62%);
+    --gradient-end: hsl(275 70% 65%);
+    --sidebar-background: hsl(240 50% 98%);
+    --sidebar-foreground: hsl(240 30% 10%);
+    --sidebar-primary: hsl(240 80% 58%);
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: hsl(240 100% 95%);
+    --sidebar-accent-foreground: hsl(240 60% 22%);
+    --sidebar-border: hsl(240 15% 88%);
+    --sidebar-ring: hsl(240 80% 58%);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOTION GRAPHICS UTILITIES
+   ═══════════════════════════════════════════════════════════ */
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slide-down {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade-scale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse-glow {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes border-beam {
+    0% {
+        left: 0%;
+        width: 2px;
+    }
+    50% {
+        left: 100%;
+        width: 8px;
+    }
+    100% {
+        left: 0%;
+        width: 2px;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+    100% {
+        background-position: 200% center;
+    }
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes bounce-subtle {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Slide-up entrance animation */
+.slide-up {
+    animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Slide-down entrance animation */
+.slide-down {
+    animation: slide-down 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Fade-scale entrance animation */
+.fade-scale {
+    animation: fade-scale 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Pulse glow animation */
+.pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Border beam animation */
+.border-beam {
+    animation: border-beam 3s linear infinite;
+}
+
+/* Shimmer effect */
+.shimmer {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+}
+
+/* Marquee animation */
+.animate-marquee {
+    animation: marquee 20s linear infinite;
+}
+
+.animate-marquee:hover {
+    animation-play-state: paused;
+}
+
+/* Subtle bounce */
+.animate-bounce-subtle {
+    animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+/* Stagger entrance */
+@keyframes stagger-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stagger > * {
+    animation: stagger-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stagger > *:nth-child(1) {
+    animation-delay: 0ms;
+}
+.stagger > *:nth-child(2) {
+    animation-delay: 50ms;
+}
+.stagger > *:nth-child(3) {
+    animation-delay: 100ms;
+}
+.stagger > *:nth-child(4) {
+    animation-delay: 150ms;
+}
+.stagger > *:nth-child(5) {
+    animation-delay: 200ms;
+}
+.stagger > *:nth-child(6) {
+    animation-delay: 250ms;
+}
+.stagger > *:nth-child(7) {
+    animation-delay: 300ms;
+}
+.stagger > *:nth-child(8) {
+    animation-delay: 350ms;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CONTEMPORARY MOTION LAYER — CSS-FIRST, NEAR-ZERO RUNTIME COST
+   ═══════════════════════════════════════════════════════════
+   Aesthetic polish with no continuous JavaScript work: GPU-only
+   CSS animations, static gradient accents, instant perceived
+   speed. Decorative effects are disabled under reduced motion. */
+
+/* ── Hero ambient blobs ───────────────────────────────
+   Pre-blurred radial gradients (no runtime filter) drifting on
+   transform alone — the cheapest way to keep a hero alive.
+   Recolours automatically with the theme. */
+.hero-blob {
+    position: absolute;
+    border-radius: 9999px;
+    will-change: transform;
+}
+
+.hero-blob-a {
+    width: 40rem;
+    height: 40rem;
+    top: -12rem;
+    left: -12rem;
+    background: radial-gradient(circle at 35% 35%, var(--brand-glow), transparent 65%);
+    animation: blob-drift-a 26s ease-in-out infinite;
+}
+
+.hero-blob-b {
+    width: 32rem;
+    height: 32rem;
+    top: 30%;
+    right: -10rem;
+    background: radial-gradient(circle at 60% 40%, color-mix(in oklab, var(--gradient-end) 30%, transparent), transparent 65%);
+    animation: blob-drift-b 34s ease-in-out infinite;
+    animation-delay: -12s;
+}
+
+.hero-blob-c {
+    width: 26rem;
+    height: 26rem;
+    bottom: -9rem;
+    left: 28%;
+    background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--chart-3, hsl(200 80% 50%)) 18%, transparent), transparent 68%);
+    animation: blob-drift-c 40s ease-in-out infinite;
+    animation-delay: -22s;
+    opacity: 0.7;
+}
+
+@keyframes blob-drift-a {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(4%, 6%, 0) scale(1.07); }
+}
+
+@keyframes blob-drift-b {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(-5%, -4%, 0) scale(1.06); }
+}
+
+@keyframes blob-drift-c {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(3%, -5%, 0) scale(1.1); }
+}
+
+/* ── Scroll-driven parallax veils ────────────────────────
+   Layers that drift as the page scrolls, so the hero reads as depth
+   rather than a flat picture. Driven by native CSS scroll timelines:
+   the browser maps scroll position straight onto the animation, which
+   means the compositor does the work and no JavaScript runs per frame.
+
+   Browsers without scroll timelines (and reduced-motion users) simply
+   render the layers static, which still looks intentional. */
+.hero-veil {
+    position: absolute;
+    /* Oversized so the drift never exposes an edge. */
+    inset: -8%;
+}
+
+@supports (animation-timeline: scroll(root)) {
+    @media (prefers-reduced-motion: no-preference) {
+        .hero-veil-ambient {
+            animation: veil-ambient linear both;
+            animation-duration: 1s; /* superseded by the timeline below */
+            animation-timeline: scroll(root block);
+        }
+
+        .hero-veil-grid {
+            animation: veil-grid linear both;
+            animation-duration: 1s;
+            animation-timeline: scroll(root block);
+        }
+    }
+}
+
+/* Ambient gradient drifts down and away — the slowest layer. */
+@keyframes veil-ambient {
+    from {
+        transform: translate3d(0, -1.5%, 0) scale(1.02);
+    }
+    to {
+        transform: translate3d(0, 7%, 0) scale(1.06);
+    }
+}
+
+/* The grid moves further, so it reads as the near layer. */
+@keyframes veil-grid {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+    to {
+        transform: translate3d(0, 12%, 0);
+    }
+}
+
+/* ── Gradient accent text ─────────────────────────────
+   Static brand-gradient fill for a single headline word. No
+   animation, no repaint — pure paint-time style. */
+.text-gradient-accent {
+    background: linear-gradient(120deg,
+            var(--brand) 10%,
+            var(--gradient-mid, hsl(24 90% 55%)) 55%,
+            var(--gradient-end, hsl(340 75% 55%)) 90%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* ── Page fade-in ─────────────────────────────────────
+   One short entrance for the whole page instead of a blocking
+   splash screen: content is visible and interactive at once. */
+/* No fill mode: after the entrance, styles return to natural so no
+   lingering transform creates a containing block over fixed elements
+   (toast popups, etc.). */
+.page-enter {
+    animation: page-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes page-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Freeze the page behind the water intro so a scroll gesture does not move
+   a page the visitor cannot see yet. The rule lives here because a scoped
+   component style cannot reach the root element. */
+html.water-intro-lock {
+    overflow: hidden;
+}
+
+/* ── Skip rendering offscreen sections ──────────────────
+   The browser skips layout and paint for far-below-fold sections
+   until they approach the viewport, cutting initial render cost
+   on long pages. Content stays in the DOM, so anchors and
+   in-page search keep working. */
+.cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 720px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-blob,
+    .hero-veil,
+    .page-enter {
+        animation: none;
+    }
+}
+/* ════════════════════════════════════════════════════════════
+   COLORFUL GRADIENT BACKGROUNDS
+   ═══════════════════════════════════════════════════════════ */
+.bg-gradient-primary {
+    background: linear-gradient(
+        135deg,
+        var(--primary) 0%,
+        var(--secondary) 100%
+    );
+}
+
+.bg-gradient-secondary {
+    background: linear-gradient(
+        135deg,
+        var(--secondary) 0%,
+        var(--primary) 100%
+    );
+}
+
+.bg-gradient-accent {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--brand) 100%);
+}
+
+.bg-gradient-brand {
+    background: linear-gradient(
+        135deg,
+        var(--brand) 0%,
+        var(--brand-accent) 100%
+    );
+}
+
+.bg-gradient-chart-1 {
+    background: linear-gradient(135deg, var(--chart-1) 0%, var(--chart-2) 100%);
+}
+
+.bg-gradient-chart-2 {
+    background: linear-gradient(135deg, var(--chart-2) 0%, var(--chart-3) 100%);
+}
+
+.bg-gradient-chart-3 {
+    background: linear-gradient(135deg, var(--chart-3) 0%, var(--chart-4) 100%);
+}
+
+.bg-gradient-chart-4 {
+    background: linear-gradient(135deg, var(--chart-4) 0%, var(--chart-5) 100%);
+}
+
+.bg-gradient-chart-5 {
+    background: linear-gradient(135deg, var(--chart-5) 0%, var(--chart-1) 100%);
+}
+
+/* Colorful card backgrounds */
+.card-colorful {
+    background: linear-gradient(
+        135deg,
+        hsl(221 83% 53% / 0.1) 0%,
+        hsl(160 70% 35% / 0.1) 100%
+    );
+}
+
+.card-aesthetic {
+    background: linear-gradient(
+        135deg,
+        hsl(262 83% 58% / 0.1) 0%,
+        hsl(180 98% 50% / 0.1) 100%
+    );
+}
+
+.card-modern {
+    background: linear-gradient(
+        135deg,
+        hsl(221 83% 53% / 0.1) 0%,
+        hsl(340 75% 55% / 0.1) 100%
+    );
+}
+
+/* ════════════════════════════════════════════════════════════
+   ADMIN-SPECIFIC ANIMATED ELEMENTS
+   ════════════════════════════════════════════════════════════ */
+.btn-admin {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-admin::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+}
+.btn-admin:hover::before {
+    transform: translateX(100%);
+}
+.btn-admin:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+}
+
+.input-admin {
+    transition: all 0.3s ease;
+}
+.input-admin:focus {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.select-admin {
+    transition: all 0.3s ease;
+}
+.select-admin:focus {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.card-admin {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-admin:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+/* Pulse action button */
+.pulse-action {
+    position: relative;
+    overflow: hidden;
+}
+.pulse-action::after {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        transparent 10%,
+        var(--primary) 30%
+    );
+    transform: translate(-50%, -50%) rotate(45deg);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.pulse-action:hover::after {
+    opacity: 0.1;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .slide-up,
+    .slide-down,
+    .fade-scale,
+    .pulse-glow,
+    .border-beam,
+    .shimmer,
+    .animate-marquee,
+    .animate-float,
+    .animate-bounce-subtle,
+    .stagger > * {
+        animation: none !important;
+        transition: none !important;
+    }
 }

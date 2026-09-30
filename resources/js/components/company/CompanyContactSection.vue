@@ -6,6 +6,7 @@ import { toast } from 'vue-sonner';
 import ContactForm from '@/components/portfolio/ContactForm.vue';
 import SectionHeading from '@/components/portfolio/SectionHeading.vue';
 import SocialIcon from '@/components/portfolio/SocialIcon.vue';
+import { useStudioContent } from '@/composables/useStudioContent';
 import { fadeUp, inViewOnce, stagger } from '@/lib/motion';
 import type { Company } from '@/types';
 
@@ -14,6 +15,8 @@ type Props = {
 };
 
 const props = defineProps<Props>();
+
+const content = useStudioContent(props.company, 'contact');
 
 const socialLinks = computed(() => {
     const socials = props.company.socials ?? {};
@@ -45,10 +48,7 @@ const statusText = computed(
 );
 
 const intro = computed(() =>
-    [
-        'Describe the problem and we will tell you honestly whether software is the fix, what it would take, and what it would cost.',
-        props.company.mission,
-    ]
+    [content.value.description, props.company.mission]
         .filter(Boolean)
         .join(' '),
 );
@@ -63,17 +63,17 @@ function handleSuccess() {
 <template>
     <section
         id="contact"
-        class="bg-noise relative scroll-mt-20 border-t border-border pt-20 sm:pt-24"
+        class="bg-noise cv-auto relative scroll-mt-20 border-t border-border pt-20 sm:pt-24"
     >
         <div class="corner-dot corner-dot-tl" aria-hidden="true" />
         <div class="corner-dot corner-dot-tr" aria-hidden="true" />
 
         <div class="container-laravel section-dashed-xl">
             <SectionHeading
-                index="04"
-                eyebrow="Start a project"
-                title="Tell us what needs building"
-                highlight="building"
+                index="07"
+                :eyebrow="content.eyebrow"
+                :title="content.title"
+                :highlight="content.highlight"
                 :description="intro"
             />
 
@@ -108,7 +108,7 @@ function handleSuccess() {
                             class="flex flex-col gap-4"
                         >
                             <h3 class="text-2xl font-bold tracking-tight">
-                                Prefer email?
+                                {{ content.email_heading }}
                             </h3>
                             <a
                                 v-if="company.public_email"
@@ -125,8 +125,7 @@ function handleSuccess() {
                             <p
                                 class="text-sm leading-relaxed text-white/60 dark:text-muted-foreground"
                             >
-                                Every enquiry gets a written reply with a rough
-                                scope and an honest estimate. No sales calls.
+                                {{ content.email_note }}
                             </p>
                         </motion.div>
 
@@ -171,10 +170,10 @@ function handleSuccess() {
                     <div class="rounded-lg border border-border p-5 sm:p-6">
                         <ContactForm
                             :recipient="company.public_email"
-                            message-placeholder="A few lines about your business and what is not working…"
-                            submit-label="Send enquiry"
+                            :message-placeholder="content.form_placeholder"
+                            :submit-label="content.form_submit"
                             processing-label="Sending…"
-                            reply-note="usually replies within a day"
+                            :reply-note="content.form_reply_note"
                             @sent="handleSuccess"
                         />
                     </div>

@@ -5,16 +5,20 @@ import { motion } from 'motion-v';
 import { computed } from 'vue';
 import ProjectCard from '@/components/portfolio/ProjectCard.vue';
 import SectionHeading from '@/components/portfolio/SectionHeading.vue';
+import { useStudioContent } from '@/composables/useStudioContent';
 import { fadeUp, inViewOnce, stagger } from '@/lib/motion';
-import type { Project } from '@/types';
+import type { Company, Project } from '@/types';
 
 type Props = {
+    company?: Company;
     projects: Project[];
     /** Published personal projects in total, so the copy can be honest. */
     totalProjects?: number;
 };
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), { company: undefined });
+
+const content = useStudioContent(props.company, 'founder_work');
 
 const remaining = computed(
     () => (props.totalProjects ?? props.projects.length) - props.projects.length,
@@ -24,15 +28,15 @@ const remaining = computed(
 <template>
     <section
         id="founder-work"
-        class="bg-noise scroll-mt-20 border-t border-border py-20 sm:py-24"
+        class="bg-noise cv-auto scroll-mt-20 border-t border-border py-20 sm:py-24"
     >
         <div class="container-laravel section-dashed-xl">
             <SectionHeading
-                index="03"
-                eyebrow="The founder's own work"
-                title="Built outside"
-                highlight="client"
-                description="Side projects and open source the founder builds in his own time. His full portfolio, resume and full project history live on his own site."
+                index="06"
+                :eyebrow="content.eyebrow"
+                :title="content.title"
+                :highlight="content.highlight"
+                :description="content.description"
             />
 
             <motion.div
@@ -57,7 +61,7 @@ const remaining = computed(
                     :variants="fadeUp"
                     class="rounded-lg border border-dashed border-border py-16 text-center text-sm text-muted-foreground"
                 >
-                    No personal projects published yet.
+                    {{ content.empty_text }}
                 </motion.p>
 
                 <motion.div :variants="fadeUp" class="mt-14 text-center">
@@ -74,7 +78,7 @@ const remaining = computed(
                         href="/founder"
                         class="btn-laravel group inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold"
                     >
-                        view full portfolio
+                        {{ content.archive_label }}
                         <ArrowUpRight
                             class="size-4 text-brand transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                             aria-hidden="true"

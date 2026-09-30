@@ -123,9 +123,10 @@ function editSection(section: LandingSection) {
                 <p
                     class="mb-4 text-sm text-muted-foreground"
                 >
-                    Composed between the work grid and the contact form. The
-                    hero is always the company record itself, and the work grid
-                    shows published projects filed as company work.
+                    Composed between the founder-work preview and the closing
+                    CTA. The hero and the numbered story sections are edited
+                    under Home sections; the work grid shows published projects
+                    filed as company work.
                 </p>
 
                 <div class="mb-4 flex items-center justify-end gap-4">

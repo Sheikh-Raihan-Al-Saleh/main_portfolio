@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import { motion } from 'motion-v';
+import { computed } from 'vue';
 import SectionHeading from '@/components/portfolio/SectionHeading.vue';
+import { useStudioContent } from '@/composables/useStudioContent';
 import { fadeUp, inViewOnce, stagger } from '@/lib/motion';
-import type { Client } from '@/types';
+import type { Client, Company } from '@/types';
 
 type Props = {
     clients: Client[];
-    /** Eyebrow above the heading, e.g. "Trusted by". */
+    company?: Company;
+    /**
+     * Heading overrides, used by the About page which presents the same logo
+     * wall differently. Empty strings fall through to the stored copy.
+     */
     eyebrow?: string;
     heading?: string;
     description?: string;
@@ -20,14 +26,22 @@ type Props = {
     bare?: boolean;
 };
 
-withDefaults(defineProps<Props>(), {
-    eyebrow: 'Trusted by',
-    heading: 'Teams we build for',
-    description:
-        'The studios, founders and product teams who trusted a small team with their platform.',
+const props = withDefaults(defineProps<Props>(), {
+    company: undefined,
+    eyebrow: '',
+    heading: '',
+    description: '',
     index: '',
     bare: false,
 });
+
+const content = useStudioContent(props.company, 'clients');
+
+const eyebrowText = computed(() => props.eyebrow || content.value.eyebrow);
+const headingText = computed(() => props.heading || content.value.title);
+const descriptionText = computed(
+    () => props.description || content.value.description,
+);
 </script>
 
 <template>
@@ -39,10 +53,10 @@ withDefaults(defineProps<Props>(), {
         <div :class="bare ? 'container-laravel' : 'container-laravel section-dashed-xl'">
             <SectionHeading
                 :index="index"
-                :eyebrow="eyebrow"
-                :title="heading"
-                :highlight="heading.split(' ').pop() ?? ''"
-                :description="description"
+                :eyebrow="eyebrowText"
+                :title="headingText"
+                :highlight="headingText.split(' ').pop() ?? ''"
+                :description="descriptionText"
             />
 
             <motion.ul
