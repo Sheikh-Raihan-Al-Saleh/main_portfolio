@@ -184,7 +184,7 @@ class Profile extends Model
                     'eyebrow' => 'Skills',
                     'title' => 'A production-grade toolkit',
                     'highlight' => 'toolkit',
-                    'description' => 'Select a module to see the tools I reach for on the job — and how comfortable I am with each one.',
+                    'description' => 'The tools I reach for on the job — and how comfortable I am with each one.',
                 ],
                 'projects' => [
                     'eyebrow' => 'Projects',

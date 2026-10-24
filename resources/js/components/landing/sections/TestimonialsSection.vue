@@ -44,7 +44,7 @@ function initials(name: string) {
                 <figure class="card-3d flex h-full flex-col p-6">
                     <div class="mb-3 flex items-center gap-2">
                         <span
-                            class="grid size-8 place-items-center rounded-full bg-slate-900 text-white"
+                            class="grid size-8 place-items-center rounded-full bg-foreground text-background"
                             ><Quote class="size-4"
                         /></span>
                         <span class="flex gap-0.5 text-amber-400">
@@ -52,12 +52,12 @@ function initials(name: string) {
                         </span>
                     </div>
                     <blockquote
-                        class="flex-1 text-sm leading-relaxed text-slate-600"
+                        class="flex-1 text-sm leading-relaxed text-muted-foreground"
                     >
                         “{{ item.quote }}”
                     </blockquote>
                     <figcaption
-                        class="mt-5 flex items-center gap-3 border-t border-slate-100 pt-4"
+                        class="mt-5 flex items-center gap-3 border-t border-line pt-4"
                     >
                         <img
                             v-if="item.avatar_path"
@@ -68,17 +68,17 @@ function initials(name: string) {
                         />
                         <span
                             v-else
-                            class="grid size-9 place-items-center rounded-full bg-slate-900 text-xs font-bold text-white"
+                            class="grid size-9 place-items-center rounded-full bg-foreground text-xs font-bold text-background"
                             >{{ initials(item.name) }}</span
                         >
                         <span>
                             <span
-                                class="block text-sm font-semibold text-slate-900"
+                                class="block text-sm font-semibold text-foreground"
                                 >{{ item.name }}</span
                             >
                             <span
                                 v-if="item.role"
-                                class="block text-xs text-slate-500"
+                                class="block text-xs text-muted-foreground"
                                 >{{ item.role }}</span
                             >
                         </span>

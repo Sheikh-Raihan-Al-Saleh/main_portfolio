@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import AboutSection from '@/components/portfolio/AboutSection.vue';
-import ContactSection from '@/components/portfolio/ContactSection.vue';
-import ExperienceSection from '@/components/portfolio/ExperienceSection.vue';
-import HeroSection from '@/components/portfolio/HeroSection.vue';
-import ProjectsSection from '@/components/portfolio/ProjectsSection.vue';
-import SkillsSection from '@/components/portfolio/SkillsSection.vue';
+import FounderAbout from '@/components/founder/FounderAbout.vue';
+import FounderContact from '@/components/founder/FounderContact.vue';
+import FounderExperience from '@/components/founder/FounderExperience.vue';
+import FounderHero from '@/components/founder/FounderHero.vue';
+import FounderProjects from '@/components/founder/FounderProjects.vue';
+import FounderSkills from '@/components/founder/FounderSkills.vue';
 import type {
     Education,
     Experience,
@@ -33,7 +33,7 @@ const title = computed(
         `${props.profile.name} — ${props.profile.headline ?? 'About'}`,
 );
 
-/** A short slice of skill names to float as badges in the hero. */
+/** A short slice of skill names for the hero's portrait pane. */
 const heroHighlights = computed(() =>
     props.skillGroups
         .flatMap((group) => group.skills.map((skill) => skill.name))
@@ -62,14 +62,14 @@ const heroHighlights = computed(() =>
         <meta name="twitter:card" content="summary_large_image" />
     </Head>
 
-    <HeroSection
+    <FounderHero
         :profile="profile"
         :stats="stats"
         :highlights="heroHighlights"
     />
-    <AboutSection :profile="profile" />
-    <SkillsSection :skill-groups="skillGroups" />
-    <ProjectsSection :projects="projects" :archive-href="null" />
-    <ExperienceSection :experiences="experiences" :educations="educations" />
-    <ContactSection :profile="profile" />
+    <FounderAbout :profile="profile" />
+    <FounderSkills :skill-groups="skillGroups" />
+    <FounderProjects :projects="projects" />
+    <FounderExperience :experiences="experiences" :educations="educations" />
+    <FounderContact :profile="profile" />
 </template>

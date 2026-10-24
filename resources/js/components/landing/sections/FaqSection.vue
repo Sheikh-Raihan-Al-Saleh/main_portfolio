@@ -33,12 +33,12 @@ const items = computed(() => props.section.data.items ?? []);
                     class="card-3d overflow-hidden border-0 px-2"
                 >
                     <AccordionTrigger
-                        class="px-4 text-left text-[15px] font-semibold text-slate-900 hover:no-underline"
+                        class="px-4 text-left text-[15px] font-semibold text-foreground hover:no-underline"
                     >
                         {{ item.question }}
                     </AccordionTrigger>
                     <AccordionContent
-                        class="px-4 pb-4 text-sm leading-relaxed text-slate-500"
+                        class="px-4 pb-4 text-sm leading-relaxed text-muted-foreground"
                     >
                         {{ item.answer }}
                     </AccordionContent>

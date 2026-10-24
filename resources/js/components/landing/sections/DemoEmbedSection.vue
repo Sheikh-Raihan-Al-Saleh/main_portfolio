@@ -69,9 +69,7 @@ async function requestFullscreen() {
                         :url="data.url"
                     >
                         <div
-                            :class="
-                                cn('relative w-full bg-slate-50', aspectClass)
-                            "
+                            :class="cn('relative w-full bg-muted', aspectClass)"
                         >
                             <iframe
                                 v-if="activated"
@@ -87,22 +85,24 @@ async function requestFullscreen() {
                             />
                             <div
                                 v-else
-                                class="absolute inset-0 grid place-items-center bg-white"
+                                class="absolute inset-0 grid place-items-center bg-card"
                             >
                                 <div
                                     class="flex flex-col items-center gap-3 text-center"
                                 >
                                     <MonitorPlay
-                                        class="size-8 text-slate-400"
+                                        class="size-8 text-muted-foreground"
                                     />
                                     <Button
                                         type="button"
                                         size="lg"
-                                        class="rounded-full bg-slate-900 px-6 text-white"
+                                        class="rounded-full bg-foreground px-6 text-background"
                                         @click="activated = true"
                                         >Load live demo</Button
                                     >
-                                    <p class="max-w-xs text-xs text-slate-500">
+                                    <p
+                                        class="max-w-xs text-xs text-muted-foreground"
+                                    >
                                         Loads the real application from
                                         {{ data.url }} in a sandboxed frame.
                                     </p>
@@ -112,7 +112,7 @@ async function requestFullscreen() {
                     </BrowserFrame>
                     <div
                         v-else
-                        :class="cn('relative w-full bg-slate-50', aspectClass)"
+                        :class="cn('relative w-full bg-muted', aspectClass)"
                     >
                         <iframe
                             v-if="activated"
@@ -126,12 +126,12 @@ async function requestFullscreen() {
                         />
                         <div
                             v-else
-                            class="absolute inset-0 grid place-items-center bg-white"
+                            class="absolute inset-0 grid place-items-center bg-card"
                         >
                             <Button
                                 type="button"
                                 size="lg"
-                                class="rounded-full bg-slate-900 px-6 text-white"
+                                class="rounded-full bg-foreground px-6 text-background"
                                 @click="activated = true"
                                 >Load live demo</Button
                             >

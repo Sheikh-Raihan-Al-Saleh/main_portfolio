@@ -30,7 +30,7 @@ const props = withDefaults(defineProps<Props>(), {
         :class="
             cn(
                 'relative scroll-mt-24 overflow-hidden py-16 sm:py-20',
-                props.muted ? 'bg-slate-50/70' : 'bg-white',
+                props.muted ? 'bg-muted/60' : 'bg-background',
                 props.class,
             )
         "
@@ -38,7 +38,7 @@ const props = withDefaults(defineProps<Props>(), {
         <!-- subtle depth glow -->
         <div class="pointer-events-none absolute inset-0" aria-hidden="true">
             <div
-                class="absolute top-0 left-1/2 h-[420px] w-[900px] -translate-x-1/2 bg-gradient-to-b from-[#2563eb]/[0.03] to-transparent blur-2xl"
+                class="absolute top-0 left-1/2 h-[420px] w-[900px] -translate-x-1/2 bg-gradient-to-b from-signal/[0.04] to-transparent blur-2xl"
             />
         </div>
 
@@ -68,10 +68,10 @@ const props = withDefaults(defineProps<Props>(), {
                     class="flex justify-center"
                 >
                     <span
-                        class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold tracking-widest text-[#2563eb] uppercase shadow-sm"
+                        class="inline-flex items-center gap-1.5 rounded-full border border-line bg-card px-3 py-1 text-xs font-semibold tracking-widest text-brand uppercase shadow-sm"
                     >
                         <span
-                            class="size-1.5 animate-pulse rounded-full bg-[#2563eb]"
+                            class="size-1.5 animate-pulse rounded-full bg-signal"
                         />
                         {{ props.eyebrow }}
                     </span>
@@ -79,14 +79,14 @@ const props = withDefaults(defineProps<Props>(), {
                 <motion.h2
                     v-if="props.heading"
                     :variants="fadeUp"
-                    class="landing-section-title mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
+                    class="landing-section-title mt-4 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl"
                 >
                     {{ props.heading }}
                 </motion.h2>
                 <motion.p
                     v-if="props.subheading"
                     :variants="fadeUp"
-                    class="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-slate-500 sm:text-lg"
+                    class="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
                 >
                     {{ props.subheading }}
                 </motion.p>

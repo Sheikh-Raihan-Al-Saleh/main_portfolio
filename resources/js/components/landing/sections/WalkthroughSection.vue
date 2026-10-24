@@ -58,11 +58,11 @@ function select(index: number) {
     >
         <ol v-if="reduced" class="space-y-10">
             <li v-for="(step, index) in steps" :key="index" class="space-y-3">
-                <h3 class="text-lg font-bold text-slate-900">
-                    <span class="mr-2 text-[#2563eb]">{{ index + 1 }}.</span
+                <h3 class="text-lg font-bold text-foreground">
+                    <span class="mr-2 text-brand">{{ index + 1 }}.</span
                     >{{ step.title }}
                 </h3>
-                <p v-if="step.caption" class="text-sm text-slate-500">
+                <p v-if="step.caption" class="text-sm text-muted-foreground">
                     {{ step.caption }}
                 </p>
                 <component :is="frameComponent" v-bind="frameProps"
@@ -117,8 +117,8 @@ function select(index: number) {
                             cn(
                                 'w-full rounded-2xl border p-5 text-left transition-all duration-300 [transform-style:preserve-3d]',
                                 index === activeIndex
-                                    ? 'card-3d border-[#2563eb]/20 bg-white shadow-lg'
-                                    : 'border-transparent bg-white/60 opacity-60 hover:bg-white hover:opacity-100',
+                                    ? 'card-3d border-brand/30 bg-card shadow-lg'
+                                    : 'border-transparent bg-card/60 opacity-60 hover:bg-card hover:opacity-100',
                             )
                         "
                         @click="select(index)"
@@ -130,20 +130,20 @@ function select(index: number) {
                                     cn(
                                         'grid size-8 shrink-0 place-items-center rounded-full text-xs font-bold transition-colors',
                                         index === activeIndex
-                                            ? 'bg-[#2563eb] text-white shadow-md'
-                                            : 'bg-slate-100 text-slate-500',
+                                            ? 'bg-signal text-signal-foreground shadow-md'
+                                            : 'bg-muted text-muted-foreground',
                                     )
                                 "
                             >
                                 {{ index + 1 }}
                             </span>
-                            <h3 class="text-base font-bold text-slate-900">
+                            <h3 class="text-base font-bold text-foreground">
                                 {{ step.title }}
                             </h3>
                         </div>
                         <p
                             v-if="step.caption"
-                            class="mt-2 text-sm leading-relaxed text-slate-500"
+                            class="mt-2 text-sm leading-relaxed text-muted-foreground"
                         >
                             {{ step.caption }}
                         </p>

@@ -1,15 +1,11 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeft, ArrowRight, Sparkles } from '@lucide/vue';
-import { motion, useTransform } from 'motion-v';
-import { computed, ref } from 'vue';
+import { ArrowLeft, ArrowUpRight } from '@lucide/vue';
+import { computed } from 'vue';
 import HeroDevicesCarousel from '@/components/landing/HeroDevicesCarousel.vue';
 import SectionList from '@/components/landing/SectionList.vue';
-import TechBadge from '@/components/portfolio/TechBadge.vue';
-import { Button } from '@/components/ui/button';
-import { useScrollProgress } from '@/composables/useScrollProgress';
+import CircuitBackground from '@/components/site/CircuitBackground.vue';
 import { useScrollSpy } from '@/composables/useScrollSpy';
-import { blurUp, fadeUp, stagger } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 import type {
     LandingSection,
@@ -27,15 +23,28 @@ type Props = {
 
 const props = defineProps<Props>();
 
+/**
+ * A project's marketing page. It belongs to whichever face owns the project
+ * (the layout resolves that from `project.context`), so the hero is set in
+ * that face's type: the studio's display face or the founder's monospace.
+ */
+const isPersonal = computed(() => props.project.context === 'personal');
+
 const title = computed(
     () =>
         props.landingPage.seo_title ??
         `${props.project.title} — ${props.profile.name}`,
 );
+
 const headline = computed(
     () => props.landingPage.headline ?? props.project.title,
 );
 
+const subheadline = computed(
+    () => props.landingPage.subheadline ?? props.project.summary ?? null,
+);
+
+/** The admin may give a page its own accent; it replaces the face's text accent. */
 const accentStyle = computed(() => {
     const style: Record<string, string> = {};
 
@@ -52,22 +61,22 @@ const accentStyle = computed(() => {
 
 const navSections = computed(() =>
     props.sections
-        .filter((s) => Boolean(s.heading))
-        .map((s) => ({ id: `section-${s.id}`, label: s.heading as string })),
+        .filter((section) => Boolean(section.heading))
+        .map((section) => ({
+            id: `section-${section.id}`,
+            label: section.heading as string,
+        })),
 );
-const activeSection = useScrollSpy(navSections.value.map((e) => e.id));
+
+const activeSection = useScrollSpy(navSections.value.map((entry) => entry.id));
+
 function anchorFor(section: LandingSection) {
     return `section-${section.id}`;
 }
 
-const heroRef = ref<HTMLElement | null>(null);
-const { progress } = useScrollProgress({
-    target: heroRef,
-    offset: ['start start', 'end start'],
-});
-const heroY = useTransform(progress, [0, 1], [0, 80]);
-const heroOpacity = useTransform(progress, [0, 0.85], [1, 0]);
-const heroScale = useTransform(progress, [0, 1], [1, 0.985]);
+const backHref = computed(() =>
+    isPersonal.value ? '/founder#projects' : '/projects',
+);
 </script>
 
 <template>
@@ -91,226 +100,103 @@ const heroScale = useTransform(progress, [0, 1], [1, 0.985]);
         <meta name="twitter:card" content="summary_large_image" />
     </Head>
 
-    <div :style="accentStyle" class="bg-white">
-        <!-- HERO — CLEAN 3D -->
-        <section
-            ref="heroRef"
-            class="landing-stage relative overflow-hidden bg-white"
-        >
+    <div :style="accentStyle">
+        <!-- Hero -->
+        <section class="relative overflow-hidden pt-32 lg:pt-40">
             <div
-                class="hero-glow pointer-events-none absolute inset-0"
+                class="pointer-events-none absolute inset-x-0 top-0 h-[40rem]"
                 aria-hidden="true"
-            />
-            <div
-                class="hero-glow-2 pointer-events-none absolute inset-0"
-                aria-hidden="true"
-            />
-            <div
-                class="hero-glow-3 pointer-events-none absolute inset-0"
-                aria-hidden="true"
-            />
-            <!-- subtle grid -->
-            <div
-                class="pointer-events-none absolute inset-0 opacity-[0.035]"
-                aria-hidden="true"
-                style="
-                    background-image:
-                        linear-gradient(to right, #0f172a 1px, transparent 1px),
-                        linear-gradient(to bottom, #0f172a 1px, transparent 1px);
-                    background-size: 72px 72px;
-                "
-            />
-            <!-- top soft orb -->
-            <div
-                class="pointer-events-none absolute -top-32 left-1/2 h-[520px] w-[900px] -translate-x-1/2 rounded-full bg-gradient-to-r from-[#2563eb]/10 via-[#7c3aed]/10 to-[#06b6d4]/10 blur-3xl"
-                aria-hidden="true"
-            />
-
-            <motion.div
-                :style="{ y: heroY, opacity: heroOpacity, scale: heroScale }"
-                class="relative"
             >
-                <div
-                    class="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8"
+                <CircuitBackground />
+                <div class="ui-blob ui-blob-a -top-32 left-1/4 size-[30rem]" />
+                <div class="ui-blob ui-blob-b -top-10 right-1/4 size-[24rem]" />
+            </div>
+
+            <div
+                class="site-container relative flex flex-col items-center text-center"
+            >
+                <Link
+                    :href="backHref"
+                    class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
                 >
-                    <!-- top bar -->
-                    <div class="mb-8 flex items-center justify-between">
-                        <Link
-                            href="/projects"
-                            class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-900"
-                        >
-                            <ArrowLeft class="size-3.5" />
-                            All projects
-                        </Link>
-                        <span
-                            class="hidden items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 sm:inline-flex"
-                        >
-                            <span
-                                class="size-1.5 animate-pulse rounded-full bg-emerald-500"
-                            />
-                            Live preview
-                        </span>
-                    </div>
+                    <ArrowLeft class="size-4" />
+                    {{ isPersonal ? 'Back to portfolio' : 'All projects' }}
+                </Link>
 
-                    <motion.div
-                        :variants="stagger(0.09)"
-                        initial="hidden"
-                        animate="visible"
-                        class="mx-auto max-w-4xl text-center"
+                <span v-if="landingPage.eyebrow" class="ui-eyebrow mt-8">{{
+                    landingPage.eyebrow
+                }}</span>
+
+                <h1 class="ui-display ui-h1 mt-5 max-w-4xl">{{ headline }}</h1>
+
+                <p
+                    v-if="subheadline"
+                    class="mt-6 max-w-2xl text-lg leading-relaxed text-pretty text-muted-foreground sm:text-xl"
+                >
+                    {{ subheadline }}
+                </p>
+
+                <ul
+                    v-if="project.tech_stack?.length"
+                    class="mt-6 flex flex-wrap justify-center gap-1.5"
+                >
+                    <li
+                        v-for="tech in project.tech_stack.slice(0, 8)"
+                        :key="tech"
+                        class="ui-pill"
                     >
-                        <motion.div
-                            :variants="fadeUp"
-                            class="flex justify-center"
-                        >
-                            <span
-                                v-if="landingPage.eyebrow"
-                                class="inline-flex items-center gap-2 rounded-full border border-[#2563eb]/15 bg-[#2563eb]/5 px-4 py-1.5 text-xs font-semibold tracking-widest text-[#2563eb] uppercase"
-                            >
-                                <Sparkles class="size-3.5" />
-                                {{ landingPage.eyebrow }}
-                            </span>
-                            <span
-                                v-else
-                                class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-semibold tracking-widest text-slate-600 uppercase shadow-sm"
-                            >
-                                <Sparkles class="size-3.5 text-[#2563eb]" />
-                                Built for every screen
-                            </span>
-                        </motion.div>
+                        {{ tech }}
+                    </li>
+                </ul>
 
-                        <motion.h1
-                            :variants="blurUp"
-                            class="landing-section-title mx-auto mt-6 max-w-3xl text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-[56px]"
-                        >
-                            <span class="block">{{ headline }}</span>
-                            <span class="text-gradient-hero block"
-                                >Accessible Everywhere.</span
-                            >
-                        </motion.h1>
-
-                        <motion.p
-                            v-if="landingPage.subheadline"
-                            :variants="fadeUp"
-                            class="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-500 sm:text-lg"
-                        >
-                            {{ landingPage.subheadline }}
-                        </motion.p>
-                        <motion.p
-                            v-else
-                            :variants="fadeUp"
-                            class="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-500 sm:text-lg"
-                        >
-                            One dashboard, flawless on desktop, tablet and
-                            phone. Real-time sync, zero compromise — engineered
-                            for speed and clarity.
-                        </motion.p>
-
-                        <motion.div
-                            v-if="project.tech_stack?.length"
-                            :variants="fadeUp"
-                            class="mt-6 flex flex-wrap justify-center gap-2"
-                        >
-                            <TechBadge
-                                v-for="tech in project.tech_stack.slice(0, 8)"
-                                :key="tech"
-                                :label="tech"
-                            />
-                        </motion.div>
-
-                        <motion.div
-                            :variants="fadeUp"
-                            class="mt-8 flex flex-wrap items-center justify-center gap-3"
-                        >
-                            <Button
-                                v-if="landingPage.primary_cta_url"
-                                as-child
-                                size="lg"
-                                class="h-11 rounded-full bg-slate-900 px-7 text-white shadow-lg shadow-slate-900/20 transition hover:bg-black hover:shadow-xl"
-                            >
-                                <a
-                                    :href="landingPage.primary_cta_url"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    {{
-                                        landingPage.primary_cta_label ??
-                                        'View live'
-                                    }}
-                                    <ArrowRight class="size-4" />
-                                </a>
-                            </Button>
-                            <Button
-                                v-if="landingPage.secondary_cta_url"
-                                as-child
-                                size="lg"
-                                variant="outline"
-                                class="h-11 rounded-full border-slate-200 bg-white px-7 shadow-sm hover:bg-slate-50"
-                            >
-                                <a :href="landingPage.secondary_cta_url">
-                                    {{
-                                        landingPage.secondary_cta_label ??
-                                        'Get in touch'
-                                    }}
-                                </a>
-                            </Button>
-                            <Button
-                                v-if="
-                                    !landingPage.primary_cta_url &&
-                                    !landingPage.secondary_cta_url
-                                "
-                                as-child
-                                size="lg"
-                                class="h-11 rounded-full bg-slate-900 px-7 text-white shadow-lg"
-                            >
-                                <a href="#contact"
-                                    >Start project <ArrowRight class="size-4"
-                                /></a>
-                            </Button>
-                        </motion.div>
-
-                        <!-- trust row -->
-                        <motion.div
-                            :variants="fadeUp"
-                            class="mt-8 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400"
-                        >
-                            <span class="inline-flex items-center gap-1.5"
-                                ><span
-                                    class="size-1 rounded-full bg-emerald-500"
-                                />
-                                Works offline</span
-                            >
-                            <span class="size-1 rounded-full bg-slate-200" />
-                            <span>⚡ 100% responsive</span>
-                            <span class="size-1 rounded-full bg-slate-200" />
-                            <span>🔒 Secure & fast</span>
-                        </motion.div>
-                    </motion.div>
-
-                    <!-- 3D DEVICE STAGE — hero devices matching reference -->
-                    <motion.div
-                        :variants="fadeUp"
-                        initial="hidden"
-                        animate="visible"
-                        transition="{ delay: 0.3 }"
-                        class="mt-10 sm:mt-14"
+                <div class="mt-8 flex flex-wrap justify-center gap-3">
+                    <a
+                        v-if="landingPage.primary_cta_url"
+                        :href="landingPage.primary_cta_url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="ui-btn ui-btn-primary"
                     >
-                        <HeroDevicesCarousel
-                            :images="landingPage.hero_media_urls ?? []"
-                        />
-                    </motion.div>
+                        {{ landingPage.primary_cta_label ?? 'View live' }}
+                        <ArrowUpRight class="size-4" />
+                    </a>
+                    <a
+                        v-if="landingPage.secondary_cta_url"
+                        :href="landingPage.secondary_cta_url"
+                        class="ui-btn ui-btn-secondary"
+                    >
+                        {{ landingPage.secondary_cta_label ?? 'Get in touch' }}
+                    </a>
+                    <a
+                        v-if="
+                            !landingPage.primary_cta_url &&
+                            !landingPage.secondary_cta_url
+                        "
+                        :href="isPersonal ? '/founder#contact' : '/#contact'"
+                        class="ui-btn ui-btn-primary"
+                    >
+                        Start a project
+                        <ArrowUpRight class="size-4" />
+                    </a>
                 </div>
-            </motion.div>
+
+                <div class="mt-14 w-full sm:mt-20">
+                    <HeroDevicesCarousel
+                        :images="landingPage.hero_media_urls ?? []"
+                    />
+                </div>
+            </div>
         </section>
 
-        <!-- In-page navigation — pill glass -->
+        <!-- In-page navigation -->
         <nav
             v-if="navSections.length > 1"
-            class="sticky top-[60px] z-30 border-y border-slate-100 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/70"
+            class="sticky top-20 z-30 mt-16 lg:top-24"
             aria-label="Sections on this page"
         >
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="site-container">
                 <div
-                    class="mask-fade-x -mx-4 flex gap-1.5 overflow-x-auto px-4 py-3 sm:mx-0 sm:px-0"
+                    class="ui-glass mask-fade-x flex gap-1.5 overflow-x-auto rounded-full p-1.5 shadow-[var(--shadow-soft)]"
                 >
                     <a
                         v-for="entry in navSections"
@@ -318,10 +204,10 @@ const heroScale = useTransform(progress, [0, 1], [1, 0.985]);
                         :href="`#${entry.id}`"
                         :class="
                             cn(
-                                'shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium whitespace-nowrap transition',
+                                'shrink-0 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors',
                                 activeSection === entry.id
-                                    ? 'border-slate-900 bg-slate-900 text-white shadow-sm'
-                                    : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900',
+                                    ? 'bg-signal text-signal-foreground'
+                                    : 'text-muted-foreground hover:text-foreground',
                             )
                         "
                     >
@@ -331,9 +217,6 @@ const heroScale = useTransform(progress, [0, 1], [1, 0.985]);
             </div>
         </nav>
 
-        <!-- Composed sections — new clean 3D -->
-        <div class="bg-[#fcfdff]">
-            <SectionList :sections="sections" :anchor-for="anchorFor" />
-        </div>
+        <SectionList :sections="sections" :anchor-for="anchorFor" />
     </div>
 </template>

@@ -78,7 +78,7 @@ watch(search, (value) => {
             <template #actions>
                 <Button
                     as-child
-                    class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600"
+                    class="bg-gradient-to-r from-[var(--signal)] to-[var(--grad-to)] text-white shadow-[0_10px_24px_-12px_var(--brand-glow)] hover:opacity-95"
                 >
                     <Link :href="projectRoutes.create()">
                         <Plus class="size-4" />

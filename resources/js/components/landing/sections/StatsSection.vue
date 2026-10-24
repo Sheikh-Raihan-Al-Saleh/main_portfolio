@@ -37,21 +37,21 @@ const items = computed(() => props.section.data.items ?? []);
             >
                 <div class="card-3d relative overflow-hidden p-7 text-center">
                     <div
-                        class="pointer-events-none absolute -top-10 -right-10 size-24 rounded-full bg-gradient-to-br from-[#2563eb]/10 to-[#7c3aed]/10 blur-2xl"
+                        class="pointer-events-none absolute -top-10 -right-10 size-24 rounded-full bg-gradient-to-br from-signal/15 to-transparent blur-2xl"
                     />
                     <dd
-                        class="bg-gradient-to-br from-slate-900 to-slate-600 bg-clip-text text-4xl font-extrabold text-transparent tabular-nums sm:text-5xl"
+                        class="bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-4xl font-extrabold text-transparent tabular-nums sm:text-5xl"
                     >
                         <AnimatedCounter
                             :value="item.value"
                             :suffix="item.suffix ?? ''"
                         />
                     </dd>
-                    <dt class="mt-2 text-sm font-medium text-slate-500">
+                    <dt class="mt-2 text-sm font-medium text-muted-foreground">
                         {{ item.label }}
                     </dt>
                     <div
-                        class="mx-auto mt-3 h-1 w-8 rounded-full bg-gradient-to-r from-[#2563eb] to-[#7c3aed] opacity-60"
+                        class="mx-auto mt-3 h-1 w-8 rounded-full bg-gradient-to-r from-signal to-signal opacity-90"
                     />
                 </div>
             </motion.div>

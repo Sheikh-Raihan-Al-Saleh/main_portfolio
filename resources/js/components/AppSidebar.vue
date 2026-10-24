@@ -18,13 +18,13 @@ import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
+import CircuitBackground from '@/components/site/CircuitBackground.vue';
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
     SidebarHeader,
 } from '@/components/ui/sidebar';
-import { useAppearance } from '@/composables/useAppearance';
 import { dashboard } from '@/routes/admin';
 import clients from '@/routes/admin/clients';
 import company from '@/routes/admin/company';
@@ -82,30 +82,20 @@ const messageNavItems = computed<NavItem[]>(() => [
 const footerNavItems: NavItem[] = [
     { title: 'View live site', href: '/', icon: ExternalLink },
 ];
-
-const { appearance } = useAppearance();
-
-const sidebarVariant = computed(() => {
-    if (appearance.value === 'colorful') {
-        return 'sidebar' as const;
-    }
-
-    if (appearance.value === 'aesthetic') {
-        return 'floating' as const;
-    }
-
-    return 'inset' as const;
-});
 </script>
 
 <template>
-    <Sidebar :variant="sidebarVariant" collapsible="icon">
+    <Sidebar variant="floating" collapsible="icon">
         <SidebarHeader>
             <Link
                 :href="dashboard()"
-                class="flex h-14 items-center gap-2 rounded-lg px-2 transition-colors group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 hover:bg-sidebar-accent"
+                class="flex h-14 items-center gap-2 rounded-xl px-2 transition-colors group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
             >
                 <AppLogo />
+                <span
+                    class="ml-auto rounded-full bg-brand-subtle px-2 py-0.5 text-[0.65rem] font-semibold text-brand group-data-[collapsible=icon]:hidden"
+                    >Admin</span
+                >
             </Link>
         </SidebarHeader>
 
@@ -125,7 +115,35 @@ const sidebarVariant = computed(() => {
         </SidebarContent>
 
         <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
+            <!-- Live site card, with the public site's circuit motif -->
+            <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group relative mx-1 mb-1 overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--signal)] to-[var(--grad-to)] p-4 text-white group-data-[collapsible=icon]:hidden"
+            >
+                <div
+                    class="absolute inset-0 opacity-60 [--background:transparent] [--foreground:#ffffff] [--grad-from:#ffffff] [--grad-to:#ffffff]"
+                >
+                    <CircuitBackground />
+                </div>
+                <p class="relative text-sm font-semibold">
+                    Your sites are live
+                </p>
+                <p class="relative mt-0.5 text-xs text-white/75">
+                    Preview the studio and the portfolio.
+                </p>
+                <span
+                    class="relative mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-xs font-medium backdrop-blur transition-colors group-hover:bg-white/25"
+                >
+                    <ExternalLink class="size-3.5" />
+                    View live site
+                </span>
+            </a>
+            <NavFooter
+                :items="footerNavItems"
+                class="hidden group-data-[collapsible=icon]:block"
+            />
             <NavUser />
         </SidebarFooter>
     </Sidebar>

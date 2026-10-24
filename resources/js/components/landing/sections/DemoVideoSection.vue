@@ -145,7 +145,7 @@ function toggleMute() {
                         <button
                             v-if="data.autoplay"
                             type="button"
-                            class="absolute right-4 bottom-16 grid size-10 place-items-center rounded-full border border-white/20 bg-white/90 backdrop-blur"
+                            class="absolute right-4 bottom-16 grid size-10 place-items-center rounded-full border border-white/20 bg-card/90 backdrop-blur"
                             :aria-label="muted ? 'Unmute video' : 'Mute video'"
                             @click="toggleMute"
                         >
@@ -187,7 +187,7 @@ function toggleMute() {
                         />
                         <span class="absolute inset-0 grid place-items-center">
                             <span
-                                class="grid size-16 place-items-center rounded-full bg-white text-slate-900 shadow-2xl transition group-hover:scale-110"
+                                class="grid size-16 place-items-center rounded-full bg-card text-foreground shadow-2xl transition group-hover:scale-110"
                             >
                                 <Play
                                     class="size-6 translate-x-0.5 fill-current"
@@ -206,7 +206,7 @@ function toggleMute() {
             </div>
             <figcaption
                 v-if="data.caption"
-                class="text-center text-sm text-slate-500"
+                class="text-center text-sm text-muted-foreground"
             >
                 {{ data.caption }}
             </figcaption>

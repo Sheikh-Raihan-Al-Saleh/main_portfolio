@@ -70,15 +70,13 @@ const mailtoUrl = `mailto:${props.message.email}?subject=${encodeURIComponent(
         </AdminPageHeader>
 
         <div class="grid max-w-4xl gap-6 lg:grid-cols-[2fr_1fr]">
-            <article class="rounded-xl border border-border bg-card p-6">
+            <article class="ui-card p-6">
                 <p class="text-sm leading-relaxed whitespace-pre-wrap">
                     {{ message.message }}
                 </p>
             </article>
 
-            <dl
-                class="h-fit rounded-xl border border-border bg-card p-6 text-sm"
-            >
+            <dl class="ui-card h-fit p-6 text-sm">
                 <div class="mb-4">
                     <dt
                         class="text-xs tracking-wide text-muted-foreground uppercase"

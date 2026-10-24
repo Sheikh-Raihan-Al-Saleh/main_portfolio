@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { GraduationCap, Pencil, Plus } from '@lucide/vue';
 import { motion } from 'motion-v';
+import { ref } from 'vue';
+import EducationController from '@/actions/App/Http/Controllers/Admin/EducationController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
+import FormDialog from '@/components/admin/form/FormDialog.vue';
 import ReorderButtons from '@/components/admin/ReorderButtons.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,6 +21,7 @@ import { useReorder } from '@/composables/useReorder';
 import { fadeUp } from '@/lib/motion';
 import educationRoutes from '@/routes/admin/educations';
 import type { Education } from '@/types';
+import EducationForm from './EducationForm.vue';
 
 type Props = {
     educations: Education[];
@@ -42,6 +46,20 @@ function period(education: Education): string {
 
     return `${format(education.start_date)} — ${format(education.end_date)}`;
 }
+
+/** Create and edit happen in a modal, so the list stays in view. */
+const dialogOpen = ref(false);
+const editing = ref<Education | null>(null);
+
+function openCreate() {
+    editing.value = null;
+    dialogOpen.value = true;
+}
+
+function openEdit(education: Education) {
+    editing.value = education;
+    dialogOpen.value = true;
+}
 </script>
 
 <template>
@@ -54,13 +72,12 @@ function period(education: Education): string {
         >
             <template #actions>
                 <Button
-                    as-child
-                    class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600"
+                    class="bg-gradient-to-r from-[var(--signal)] to-[var(--grad-to)] text-white shadow-[0_10px_24px_-12px_var(--brand-glow)] hover:opacity-95"
+                    type="button"
+                    @click="openCreate"
                 >
-                    <Link :href="educationRoutes.create()">
-                        <Plus class="size-4" />
-                        New entry
-                    </Link>
+                    <Plus class="size-4" />
+                    New entry
                 </Button>
             </template>
         </AdminPageHeader>
@@ -130,18 +147,15 @@ function period(education: Education): string {
                         </TableCell>
 
                         <TableCell>
-                            <div
-                                class="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100"
-                            >
-                                <Button as-child variant="ghost" size="icon-sm">
-                                    <Link
-                                        :href="
-                                            educationRoutes.edit(education.id)
-                                        "
-                                        :aria-label="`Edit ${education.degree}`"
-                                    >
-                                        <Pencil class="size-4" />
-                                    </Link>
+                            <div class="flex items-center justify-end gap-1">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    :aria-label="`Edit ${education.degree}`"
+                                    @click="openEdit(education)"
+                                >
+                                    <Pencil class="size-4" />
                                 </Button>
                                 <DeleteAction
                                     :url="
@@ -164,11 +178,14 @@ function period(education: Education): string {
                                     class="size-8 text-muted-foreground/30"
                                 />
                                 <p>No education entries yet.</p>
-                                <Button as-child size="sm" class="mt-1">
-                                    <Link :href="educationRoutes.create()">
-                                        <Plus class="size-4" />
-                                        New entry
-                                    </Link>
+                                <Button
+                                    size="sm"
+                                    class="mt-1"
+                                    type="button"
+                                    @click="openCreate"
+                                >
+                                    <Plus class="size-4" />
+                                    New entry
                                 </Button>
                             </div>
                         </TableCell>
@@ -176,5 +193,25 @@ function period(education: Education): string {
                 </TableBody>
             </Table>
         </motion.div>
+
+        <FormDialog
+            v-model:open="dialogOpen"
+            :title="editing ? 'Edit education' : 'New education'"
+            :icon="GraduationCap"
+        >
+            <EducationForm
+                :key="editing?.id ?? 'new'"
+                mode="dialog"
+                :education="editing ?? undefined"
+                :action="
+                    editing
+                        ? EducationController.update.form(editing.id)
+                        : EducationController.store.form()
+                "
+                :submit-label="editing ? 'Save changes' : 'Create education'"
+                @saved="dialogOpen = false"
+                @cancel="dialogOpen = false"
+            />
+        </FormDialog>
     </div>
 </template>

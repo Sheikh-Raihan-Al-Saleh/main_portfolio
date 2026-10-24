@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { Briefcase, Pencil, Plus } from '@lucide/vue';
 import { motion } from 'motion-v';
+import { ref } from 'vue';
+import ExperienceController from '@/actions/App/Http/Controllers/Admin/ExperienceController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
+import FormDialog from '@/components/admin/form/FormDialog.vue';
 import ReorderButtons from '@/components/admin/ReorderButtons.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,6 +22,7 @@ import { useReorder } from '@/composables/useReorder';
 import { fadeUp } from '@/lib/motion';
 import experienceRoutes from '@/routes/admin/experiences';
 import type { Experience } from '@/types';
+import ExperienceForm from './ExperienceForm.vue';
 
 type Props = {
     experiences: Experience[];
@@ -48,6 +52,20 @@ function period(experience: Experience): string {
 
     return `${format(experience.start_date)} — ${format(experience.end_date)}`;
 }
+
+/** Create and edit happen in a modal, so the list stays in view. */
+const dialogOpen = ref(false);
+const editing = ref<Experience | null>(null);
+
+function openCreate() {
+    editing.value = null;
+    dialogOpen.value = true;
+}
+
+function openEdit(experience: Experience) {
+    editing.value = experience;
+    dialogOpen.value = true;
+}
 </script>
 
 <template>
@@ -60,13 +78,12 @@ function period(experience: Experience): string {
         >
             <template #actions>
                 <Button
-                    as-child
-                    class="bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"
+                    class="bg-gradient-to-r from-[var(--signal)] to-[var(--grad-to)] text-white shadow-[0_10px_24px_-12px_var(--brand-glow)] hover:opacity-95"
+                    type="button"
+                    @click="openCreate"
                 >
-                    <Link :href="experienceRoutes.create()">
-                        <Plus class="size-4" />
-                        New role
-                    </Link>
+                    <Plus class="size-4" />
+                    New role
                 </Button>
             </template>
         </AdminPageHeader>
@@ -139,18 +156,15 @@ function period(experience: Experience): string {
                         </TableCell>
 
                         <TableCell>
-                            <div
-                                class="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100"
-                            >
-                                <Button as-child variant="ghost" size="icon-sm">
-                                    <Link
-                                        :href="
-                                            experienceRoutes.edit(experience.id)
-                                        "
-                                        :aria-label="`Edit ${experience.role}`"
-                                    >
-                                        <Pencil class="size-4" />
-                                    </Link>
+                            <div class="flex items-center justify-end gap-1">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    :aria-label="`Edit ${experience.role}`"
+                                    @click="openEdit(experience)"
+                                >
+                                    <Pencil class="size-4" />
                                 </Button>
                                 <DeleteAction
                                     :url="
@@ -173,11 +187,14 @@ function period(experience: Experience): string {
                                     class="size-8 text-muted-foreground/30"
                                 />
                                 <p>No roles yet — add your first one.</p>
-                                <Button as-child size="sm" class="mt-1">
-                                    <Link :href="experienceRoutes.create()">
-                                        <Plus class="size-4" />
-                                        New role
-                                    </Link>
+                                <Button
+                                    size="sm"
+                                    class="mt-1"
+                                    type="button"
+                                    @click="openCreate"
+                                >
+                                    <Plus class="size-4" />
+                                    New role
                                 </Button>
                             </div>
                         </TableCell>
@@ -185,5 +202,25 @@ function period(experience: Experience): string {
                 </TableBody>
             </Table>
         </motion.div>
+
+        <FormDialog
+            v-model:open="dialogOpen"
+            :title="editing ? 'Edit experience' : 'New experience'"
+            :icon="Briefcase"
+        >
+            <ExperienceForm
+                :key="editing?.id ?? 'new'"
+                mode="dialog"
+                :experience="editing ?? undefined"
+                :action="
+                    editing
+                        ? ExperienceController.update.form(editing.id)
+                        : ExperienceController.store.form()
+                "
+                :submit-label="editing ? 'Save changes' : 'Create experience'"
+                @saved="dialogOpen = false"
+                @cancel="dialogOpen = false"
+            />
+        </FormDialog>
     </div>
 </template>

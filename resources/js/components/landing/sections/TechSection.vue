@@ -36,18 +36,18 @@ const useMarquee = computed(() => items.value.length >= 8);
             <span
                 v-for="tech in items"
                 :key="tech"
-                class="card-3d inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700"
+                class="card-3d inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground"
             >
-                <span class="size-2 rounded-full bg-[#2563eb]" /> {{ tech }}
+                <span class="size-2 rounded-full bg-signal" /> {{ tech }}
             </span>
         </motion.div>
         <MarqueeRow v-else :duration="32">
             <span
                 v-for="tech in items"
                 :key="tech"
-                class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm"
+                class="inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm"
             >
-                <span class="size-2 rounded-full bg-[#2563eb]" /> {{ tech }}
+                <span class="size-2 rounded-full bg-signal" /> {{ tech }}
             </span>
         </MarqueeRow>
         <div

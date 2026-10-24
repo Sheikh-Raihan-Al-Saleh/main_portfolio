@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import Heading from '@/components/Heading.vue';
+import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
@@ -29,16 +29,16 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
 </script>
 
 <template>
-    <div class="px-4 py-6">
-        <Heading
+    <div class="p-4 sm:p-6">
+        <AdminPageHeader
             title="Settings"
-            description="Manage your profile and account settings"
+            description="Manage your profile, security and appearance."
         />
 
         <div class="flex flex-col lg:flex-row lg:space-x-12">
-            <aside class="w-full max-w-xl lg:w-48">
+            <aside class="w-full max-w-xl lg:w-56">
                 <nav
-                    class="flex flex-col space-y-1 space-x-0"
+                    class="ui-card flex flex-col gap-1 p-2"
                     aria-label="Settings"
                 >
                     <Button
@@ -46,8 +46,11 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
                         :key="toUrl(item.href)"
                         variant="ghost"
                         :class="[
-                            'w-full justify-start',
-                            { 'bg-muted': isCurrentOrParentUrl(item.href) },
+                            'w-full justify-start rounded-xl',
+                            {
+                                'bg-brand-subtle text-brand hover:bg-brand-subtle':
+                                    isCurrentOrParentUrl(item.href),
+                            },
                         ]"
                         as-child
                     >
@@ -62,7 +65,7 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
             <Separator class="my-6 lg:hidden" />
 
             <div class="flex-1 md:max-w-2xl">
-                <section class="max-w-xl space-y-12">
+                <section class="ui-card max-w-xl space-y-12 p-6 sm:p-8">
                     <slot />
                 </section>
             </div>

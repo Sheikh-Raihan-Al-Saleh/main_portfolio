@@ -24,12 +24,12 @@ function resolveIcon(name: string | null): Component {
     return registry[name] ?? Sparkles;
 }
 const gradients = [
-    'from-[#2563eb] to-[#7c3aed]',
-    'from-[#f97316] to-[#fb923c]',
-    'from-[#22c55e] to-[#4ade80]',
-    'from-[#06b6d4] to-[#22d3ee]',
-    'from-[#ec4899] to-[#f43f5e]',
-    'from-[#8b5cf6] to-[#a78bfa]',
+    'from-signal to-signal',
+    'from-foreground to-foreground',
+    'from-signal to-signal',
+    'from-foreground to-foreground',
+    'from-signal to-signal',
+    'from-foreground to-foreground',
 ];
 </script>
 
@@ -57,7 +57,7 @@ const gradients = [
                     <div class="mb-4 flex items-center gap-3">
                         <div
                             :class="[
-                                'grid size-11 place-items-center rounded-xl bg-gradient-to-br text-white shadow-md',
+                                'grid size-11 place-items-center rounded-xl bg-gradient-to-br text-white mix-blend-normal shadow-md [&.from-foreground]:text-background [&.from-signal]:text-signal-foreground',
                                 gradients[idx % gradients.length],
                             ]"
                         >
@@ -67,20 +67,20 @@ const gradients = [
                             />
                         </div>
                         <div
-                            class="h-px flex-1 bg-gradient-to-r from-slate-200 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+                            class="h-px flex-1 bg-gradient-to-r from-muted to-transparent opacity-0 transition-opacity group-hover:opacity-100"
                         />
                     </div>
-                    <h3 class="text-base font-bold text-slate-900">
+                    <h3 class="text-base font-bold text-foreground">
                         {{ item.title }}
                     </h3>
                     <p
                         v-if="item.text"
-                        class="mt-2 text-sm leading-relaxed text-slate-500"
+                        class="mt-2 text-sm leading-relaxed text-muted-foreground"
                     >
                         {{ item.text }}
                     </p>
                     <div
-                        class="mt-4 flex items-center gap-1 text-xs font-medium text-[#2563eb] opacity-0 transition group-hover:opacity-100"
+                        class="mt-4 flex items-center gap-1 text-xs font-medium text-brand opacity-0 transition group-hover:opacity-100"
                     >
                         Learn more <span aria-hidden="true">→</span>
                     </div>

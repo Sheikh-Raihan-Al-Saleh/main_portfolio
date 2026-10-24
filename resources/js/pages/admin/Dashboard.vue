@@ -160,9 +160,10 @@ const messagesTotal = computed(() =>
     props.activity.messages.reduce((sum, value) => sum + value, 0),
 );
 
-const hasActivity = computed(() =>
-    props.activity.messages.some((value) => value > 0) ||
-    props.activity.projects.some((value) => value > 0),
+const hasActivity = computed(
+    () =>
+        props.activity.messages.some((value) => value > 0) ||
+        props.activity.projects.some((value) => value > 0),
 );
 
 const donutColors = ['#ef4444', '#f97316', '#8b5cf6', '#06b6d4', '#22c55e'];
@@ -245,7 +246,7 @@ function formatDate(value: string): string {
             >
                 <Link
                     :href="card.href"
-                    class="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-500 hover:translate-y-1 hover:border-transparent hover:shadow-lg hover:shadow-primary/20"
+                    class="group ui-card ui-card-hover relative flex flex-col gap-3 overflow-hidden p-6"
                 >
                     <div
                         :class="[
@@ -297,13 +298,15 @@ function formatDate(value: string): string {
                 :variants="fadeUp"
                 initial="hidden"
                 animate="visible"
-                class="rounded-2xl border border-border bg-card p-6 xl:col-span-2"
+                class="ui-card p-6 xl:col-span-2"
             >
                 <header
                     class="mb-4 flex flex-wrap items-center justify-between gap-2 border-b pb-4"
                 >
                     <div>
-                        <h2 class="flex items-center gap-2 text-lg font-semibold">
+                        <h2
+                            class="flex items-center gap-2 text-lg font-semibold"
+                        >
                             <span class="rounded-lg bg-primary/10 p-1.5">
                                 <TrendingUp class="size-4 text-primary" />
                             </span>
@@ -312,8 +315,22 @@ function formatDate(value: string): string {
                         <p class="mt-1 text-sm text-muted-foreground">
                             {{ messagesTotal }}
                             {{ messagesTotal === 1 ? 'enquiry' : 'enquiries' }}
-                            received, {{ activity.projects.reduce((sum, value) => sum + value, 0) }}
-                            content {{ activity.projects.reduce((sum, value) => sum + value, 0) === 1 ? 'update' : 'updates' }}.
+                            received,
+                            {{
+                                activity.projects.reduce(
+                                    (sum, value) => sum + value,
+                                    0,
+                                )
+                            }}
+                            content
+                            {{
+                                activity.projects.reduce(
+                                    (sum, value) => sum + value,
+                                    0,
+                                ) === 1
+                                    ? 'update'
+                                    : 'updates'
+                            }}.
                         </p>
                     </div>
                     <Button as-child variant="ghost" size="sm">
@@ -354,7 +371,7 @@ function formatDate(value: string): string {
                 :variants="fadeUp"
                 initial="hidden"
                 animate="visible"
-                class="rounded-2xl border border-border bg-card p-6"
+                class="ui-card p-6"
             >
                 <header class="mb-6 border-b pb-4">
                     <h2 class="text-lg font-semibold">Content health</h2>
@@ -388,7 +405,7 @@ function formatDate(value: string): string {
                 :variants="fadeUp"
                 initial="hidden"
                 animate="visible"
-                class="rounded-2xl border border-border bg-card p-6"
+                class="ui-card p-6"
             >
                 <header class="mb-4 border-b pb-4">
                     <h2 class="flex items-center gap-2 text-lg font-semibold">
@@ -422,7 +439,7 @@ function formatDate(value: string): string {
                 :variants="fadeUp"
                 initial="hidden"
                 animate="visible"
-                class="rounded-2xl border border-border bg-card p-6"
+                class="ui-card p-6"
             >
                 <header class="flex items-center justify-between border-b pb-4">
                     <h2 class="flex items-center gap-2 text-lg font-semibold">
@@ -442,14 +459,8 @@ function formatDate(value: string): string {
                     </Button>
                 </header>
 
-                <ul
-                    v-if="recentMessages.length"
-                    class="divide-y divide-border"
-                >
-                    <li
-                        v-for="message in recentMessages"
-                        :key="message.id"
-                    >
+                <ul v-if="recentMessages.length" class="divide-y divide-border">
+                    <li v-for="message in recentMessages" :key="message.id">
                         <Link
                             :href="messages.show(message.id)"
                             class="flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-primary/20"
@@ -496,7 +507,7 @@ function formatDate(value: string): string {
             :variants="fadeUp"
             initial="hidden"
             animate="visible"
-            class="mt-6 rounded-2xl border border-border bg-card p-6"
+            class="ui-card mt-6 p-6"
         >
             <header class="flex items-center justify-between border-b pb-4">
                 <h2 class="flex items-center gap-2 text-lg font-semibold">
@@ -518,7 +529,9 @@ function formatDate(value: string): string {
                         :href="projects.edit(project.slug)"
                         class="flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-primary/20"
                     >
-                        <span class="min-w-0 flex-1 truncate text-sm font-medium">
+                        <span
+                            class="min-w-0 flex-1 truncate text-sm font-medium"
+                        >
                             {{ project.title }}
                         </span>
                         <span
@@ -539,10 +552,7 @@ function formatDate(value: string): string {
                     </Link>
                 </li>
             </ul>
-            <p
-                v-else
-                class="py-8 text-center text-sm text-muted-foreground"
-            >
+            <p v-else class="py-8 text-center text-sm text-muted-foreground">
                 No projects yet.
             </p>
         </motion.section>

@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { Pencil, Plus, Sparkles } from '@lucide/vue';
 import { motion } from 'motion-v';
+import { ref } from 'vue';
+import SkillController from '@/actions/App/Http/Controllers/Admin/SkillController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
+import FormDialog from '@/components/admin/form/FormDialog.vue';
 import ReorderButtons from '@/components/admin/ReorderButtons.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,6 +22,7 @@ import { useReorder } from '@/composables/useReorder';
 import { fadeUp } from '@/lib/motion';
 import skillRoutes from '@/routes/admin/skills';
 import type { Skill } from '@/types';
+import SkillForm from './SkillForm.vue';
 
 type Props = {
     skills: Skill[];
@@ -46,6 +50,20 @@ const categoryColors: Record<string, string> = {
     design: 'bg-pink-500/10 text-pink-600 dark:text-pink-400',
     mobile: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
 };
+
+/** Create and edit happen in a modal, so the list stays in view. */
+const dialogOpen = ref(false);
+const editing = ref<Skill | null>(null);
+
+function openCreate() {
+    editing.value = null;
+    dialogOpen.value = true;
+}
+
+function openEdit(skill: Skill) {
+    editing.value = skill;
+    dialogOpen.value = true;
+}
 </script>
 
 <template>
@@ -58,13 +76,12 @@ const categoryColors: Record<string, string> = {
         >
             <template #actions>
                 <Button
-                    as-child
-                    class="bg-gradient-to-r from-violet-500 to-purple-500 text-white hover:from-violet-600 hover:to-purple-600"
+                    class="bg-gradient-to-r from-[var(--signal)] to-[var(--grad-to)] text-white shadow-[0_10px_24px_-12px_var(--brand-glow)] hover:opacity-95"
+                    type="button"
+                    @click="openCreate"
                 >
-                    <Link :href="skillRoutes.create()">
-                        <Plus class="size-4" />
-                        New skill
-                    </Link>
+                    <Plus class="size-4" />
+                    New skill
                 </Button>
             </template>
         </AdminPageHeader>
@@ -142,7 +159,7 @@ const categoryColors: Record<string, string> = {
                                     class="h-2 w-full max-w-24 overflow-hidden rounded-full bg-muted"
                                 >
                                     <div
-                                        class="h-full rounded-full bg-gradient-to-r from-violet-500 to-purple-500"
+                                        class="h-full rounded-full bg-gradient-to-r from-[var(--grad-from)] to-[var(--grad-to)]"
                                         :style="{
                                             width: `${skill.proficiency}%`,
                                         }"
@@ -157,16 +174,15 @@ const categoryColors: Record<string, string> = {
                         </TableCell>
 
                         <TableCell>
-                            <div
-                                class="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100"
-                            >
-                                <Button as-child variant="ghost" size="icon-sm">
-                                    <Link
-                                        :href="skillRoutes.edit(skill.id)"
-                                        :aria-label="`Edit ${skill.name}`"
-                                    >
-                                        <Pencil class="size-4" />
-                                    </Link>
+                            <div class="flex items-center justify-end gap-1">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    :aria-label="`Edit ${skill.name}`"
+                                    @click="openEdit(skill)"
+                                >
+                                    <Pencil class="size-4" />
                                 </Button>
                                 <DeleteAction
                                     :url="skillRoutes.destroy(skill.id).url"
@@ -186,11 +202,14 @@ const categoryColors: Record<string, string> = {
                                     class="size-8 text-muted-foreground/30"
                                 />
                                 <p>No skills yet — add your first one.</p>
-                                <Button as-child size="sm" class="mt-1">
-                                    <Link :href="skillRoutes.create()">
-                                        <Plus class="size-4" />
-                                        New skill
-                                    </Link>
+                                <Button
+                                    size="sm"
+                                    class="mt-1"
+                                    type="button"
+                                    @click="openCreate"
+                                >
+                                    <Plus class="size-4" />
+                                    New skill
                                 </Button>
                             </div>
                         </TableCell>
@@ -198,5 +217,26 @@ const categoryColors: Record<string, string> = {
                 </TableBody>
             </Table>
         </motion.div>
+
+        <FormDialog
+            v-model:open="dialogOpen"
+            :title="editing ? 'Edit skill' : 'New skill'"
+            :icon="Sparkles"
+        >
+            <SkillForm
+                :key="editing?.id ?? 'new'"
+                mode="dialog"
+                :skill="editing ?? undefined"
+                :categories="categories"
+                :action="
+                    editing
+                        ? SkillController.update.form(editing.id)
+                        : SkillController.store.form()
+                "
+                :submit-label="editing ? 'Save changes' : 'Create skill'"
+                @saved="dialogOpen = false"
+                @cancel="dialogOpen = false"
+            />
+        </FormDialog>
     </div>
 </template>

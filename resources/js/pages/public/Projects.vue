@@ -2,9 +2,9 @@
 import { Head, router } from '@inertiajs/vue3';
 import { AnimatePresence, motion } from 'motion-v';
 import { computed, ref } from 'vue';
-import ProjectCard from '@/components/portfolio/ProjectCard.vue';
-import SectionHeading from '@/components/portfolio/SectionHeading.vue';
-import { inViewOnce, stagger } from '@/lib/motion';
+import CircuitBackground from '@/components/site/CircuitBackground.vue';
+import ProjectCard from '@/components/site/ProjectCard.vue';
+import Reveal from '@/components/site/Reveal.vue';
 import { cn } from '@/lib/utils';
 import projectRoutes from '@/routes/projects';
 import type { Profile, Project } from '@/types';
@@ -53,88 +53,86 @@ function filterBy(tech: string | null) {
         />
     </Head>
 
-    <div id="top" class="mx-auto max-w-6xl scroll-mt-20 px-4 py-20 sm:px-6">
-        <SectionHeading
-            eyebrow="Archive"
-            title="All projects"
-            highlight="projects"
-            description="Everything I've published, newest and most notable first."
-        />
-
-        <div v-if="technologies.length" class="mb-10 flex flex-wrap gap-2">
-            <button
-                type="button"
-                :aria-pressed="activeTech === null"
-                :class="
-                    cn(
-                        'relative rounded-full border px-3 py-1.5 text-sm transition-colors',
-                        activeTech === null
-                            ? 'border-brand text-brand-foreground'
-                            : 'border-border/70 text-muted-foreground hover:border-brand/50 hover:text-foreground',
-                    )
-                "
-                @click="filterBy(null)"
-            >
-                <!-- Shared layout id: the pill slides between chips instead of
-                     blinking out of one and into the next. -->
-                <motion.span
-                    v-if="activeTech === null"
-                    layout-id="tech-filter-pill"
-                    class="absolute inset-0 rounded-full bg-brand"
-                />
-                <span class="relative">All</span>
-            </button>
-            <button
-                v-for="tech in technologies"
-                :key="tech"
-                type="button"
-                :aria-pressed="activeTech === tech"
-                :class="
-                    cn(
-                        'relative rounded-full border px-3 py-1.5 text-sm transition-colors',
-                        activeTech === tech
-                            ? 'border-brand text-brand-foreground'
-                            : 'border-border/70 text-muted-foreground hover:border-brand/50 hover:text-foreground',
-                    )
-                "
-                @click="filterBy(tech)"
-            >
-                <motion.span
-                    v-if="activeTech === tech"
-                    layout-id="tech-filter-pill"
-                    class="absolute inset-0 rounded-full bg-brand"
-                />
-                <span class="relative">{{ tech }}</span>
-            </button>
+    <section class="relative overflow-hidden pt-36 pb-24 lg:pt-44">
+        <div
+            class="pointer-events-none absolute inset-x-0 top-0 h-[32rem]"
+            aria-hidden="true"
+        >
+            <CircuitBackground />
+            <div class="ui-blob ui-blob-a -top-32 left-1/3 size-[28rem]" />
         </div>
 
-        <motion.div
-            :variants="stagger(0.05)"
-            initial="hidden"
-            while-in-view="visible"
-            :in-view-options="inViewOnce"
-            class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        >
-            <AnimatePresence>
-                <motion.div
-                    v-for="project in visibleProjects"
-                    :key="project.id"
-                    layout
-                    :initial="{ opacity: 0, scale: 0.96 }"
-                    :animate="{ opacity: 1, scale: 1 }"
-                    :exit="{ opacity: 0, scale: 0.96 }"
-                    :transition="{ duration: 0.25 }"
+        <div class="site-container relative">
+            <div class="flex flex-col items-center gap-5 text-center">
+                <Reveal
+                    ><span class="ui-eyebrow"
+                        >Archive · {{ projects.length }} projects</span
+                    ></Reveal
                 >
-                    <ProjectCard :project="project" />
-                </motion.div>
-            </AnimatePresence>
-        </motion.div>
+                <Reveal :delay="0.05">
+                    <h1 class="ui-display ui-h1">
+                        All <span class="text-gradient">projects</span>
+                    </h1>
+                </Reveal>
+                <Reveal :delay="0.1">
+                    <p class="max-w-xl text-lg text-muted-foreground">
+                        Everything published, newest and most notable first.
+                    </p>
+                </Reveal>
+            </div>
 
-        <p
-            v-if="!visibleProjects.length"
-            class="py-16 text-center text-muted-foreground"
-        >
-            No projects match that filter.
-        </p>
-    </div>
+            <Reveal
+                v-if="technologies.length"
+                :delay="0.15"
+                class="mt-10 flex flex-wrap justify-center gap-2"
+            >
+                <div
+                    role="group"
+                    aria-label="Filter by technology"
+                    class="contents"
+                >
+                    <button
+                        v-for="tech in [null, ...technologies]"
+                        :key="tech ?? 'all'"
+                        type="button"
+                        :aria-pressed="activeTech === tech"
+                        :class="
+                            cn(
+                                'rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+                                activeTech === tech
+                                    ? 'border-transparent bg-signal text-signal-foreground shadow-[0_8px_20px_-10px_var(--brand-glow)]'
+                                    : 'border-border bg-card text-muted-foreground hover:text-foreground',
+                            )
+                        "
+                        @click="filterBy(tech)"
+                    >
+                        {{ tech ?? 'All' }}
+                    </button>
+                </div>
+            </Reveal>
+
+            <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <AnimatePresence>
+                    <motion.div
+                        v-for="project in visibleProjects"
+                        :key="project.id"
+                        layout
+                        :initial="{ opacity: 0, scale: 0.97 }"
+                        :animate="{ opacity: 1, scale: 1 }"
+                        :exit="{ opacity: 0, scale: 0.97 }"
+                        :transition="{ duration: 0.25 }"
+                    >
+                        <ProjectCard :project="project" class="h-full" />
+                    </motion.div>
+                </AnimatePresence>
+            </div>
+
+            <p
+                v-if="!visibleProjects.length"
+                class="py-20 text-center text-muted-foreground"
+            >
+                No projects match that filter.
+            </p>
+        </div>
+    </section>
 </template>

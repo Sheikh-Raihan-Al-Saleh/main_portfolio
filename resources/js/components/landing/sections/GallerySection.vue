@@ -49,7 +49,7 @@ function imageUrl(path: string) {
                 :key="image"
                 type="button"
                 :variants="perspectiveCard"
-                class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 text-left shadow-sm transition [transform-style:preserve-3d] hover:shadow-xl focus-visible:ring-2 focus-visible:ring-[#2563eb] focus-visible:outline-none"
+                class="group relative overflow-hidden rounded-2xl border border-line bg-card p-1.5 text-left shadow-sm transition [transform-style:preserve-3d] hover:shadow-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 @click="openIndex = index"
             >
                 <img

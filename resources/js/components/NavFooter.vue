@@ -26,7 +26,7 @@ defineProps<Props>();
                 <SidebarMenuItem v-for="item in items" :key="item.title">
                     <SidebarMenuButton
                         as-child
-                        class="flex items-center gap-2 rounded-md px-3 py-2 transition-colors hover:bg-primary/20 hover:text-primary data-[state=open]:bg-primary/30 data-[state=open]:text-primary"
+                        class="flex items-center gap-2 px-3"
                     >
                         <a
                             :href="toUrl(item.href)"
