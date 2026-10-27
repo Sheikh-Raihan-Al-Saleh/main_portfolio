@@ -106,10 +106,11 @@ class ProjectLandingPage extends Model
             $paths = [$this->hero_media_path];
         }
 
-        return array_filter(
+        // array_values keeps this a JSON list even when a slot is filtered out.
+        return array_values(array_filter(
             array_map(fn (string $path) => $this->mediaUrl($path), $paths),
             fn (?string $url): bool => $url !== null,
-        );
+        ));
     }
 
     protected function getOgImageUrlAttribute(): ?string

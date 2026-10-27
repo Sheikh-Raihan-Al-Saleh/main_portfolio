@@ -106,3 +106,26 @@ test('deleting a landing page clears the project flag and its media', function (
 
     Storage::disk('uploads')->assertMissing('landing/hero/example.jpg');
 });
+
+test('replacing hero slot 0 clears the legacy hero path that shared its file', function () {
+    Storage::fake('uploads');
+    Storage::disk('uploads')->put('landing/hero/legacy.png', 'x');
+
+    ProjectLandingPage::factory()->for($this->project)->create([
+        'hero_media_path' => 'landing/hero/legacy.png',
+        'hero_media_paths' => ['landing/hero/legacy.png'],
+    ]);
+
+    $this->actingAs($this->admin)
+        ->post("/admin/projects/{$this->project->slug}/landing", [
+            'headline' => 'Test',
+            'hero_media_paths' => [UploadedFile::fake()->image('new.jpg')],
+        ]);
+
+    $landingPage = ProjectLandingPage::sole();
+
+    expect($landingPage->hero_media_path)->toBeNull()
+        ->and($landingPage->hero_media_paths)->toHaveCount(1);
+    Storage::disk('uploads')->assertMissing('landing/hero/legacy.png');
+    Storage::disk('uploads')->assertExists($landingPage->hero_media_paths[0]);
+});

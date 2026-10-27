@@ -15,7 +15,7 @@ import { computed, ref } from 'vue';
 import StudioContentController from '@/actions/App/Http/Controllers/Admin/StudioContentController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import StudioContentSectionDialog from '@/components/admin/StudioContentSectionDialog.vue';
-import type {SectionKey} from '@/components/admin/StudioContentSectionDialog.vue';
+import type { SectionKey } from '@/components/admin/StudioContentSectionDialog.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

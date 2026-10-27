@@ -96,14 +96,14 @@ function hrefFor(missing: string): string {
                 />
             </svg>
 
-            <div
-                class="absolute inset-0 grid place-items-center"
-            >
+            <div class="absolute inset-0 grid place-items-center">
                 <div class="text-center">
                     <p class="text-2xl font-bold tabular-nums">
                         {{ props.percent }}%
                     </p>
-                    <p class="text-[10px] tracking-wide text-muted-foreground uppercase">
+                    <p
+                        class="text-[10px] tracking-wide text-muted-foreground uppercase"
+                    >
                         {{ props.label }}
                     </p>
                 </div>
@@ -111,10 +111,7 @@ function hrefFor(missing: string): string {
         </div>
 
         <ul v-if="props.missing.length" class="w-full space-y-1">
-            <li
-                v-for="missing in props.missing.slice(0, 4)"
-                :key="missing"
-            >
+            <li v-for="missing in props.missing.slice(0, 4)" :key="missing">
                 <a
                     :href="hrefFor(missing)"
                     class="inline-flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -123,7 +120,9 @@ function hrefFor(missing: string): string {
                         class="size-1.5 shrink-0 rounded-full bg-amber-500"
                         aria-hidden="true"
                     />
-                    <span class="truncate">Add {{ missing.toLowerCase() }}</span>
+                    <span class="truncate"
+                        >Add {{ missing.toLowerCase() }}</span
+                    >
                 </a>
             </li>
             <li

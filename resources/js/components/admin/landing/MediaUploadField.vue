@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { uploadUrl } from '@/lib/media';
 
 type Props = {
     modelValue: string | null;
@@ -26,9 +27,7 @@ const uploading = ref(false);
 const error = ref<string | null>(null);
 const inputRef = ref<HTMLInputElement | null>(null);
 
-const previewUrl = computed(() =>
-    props.modelValue ? `/uploads/${props.modelValue}` : null,
-);
+const previewUrl = computed(() => uploadUrl(props.modelValue));
 
 const isVideo = computed(() =>
     Boolean(props.modelValue && /\.(mp4|webm)$/i.test(props.modelValue)),

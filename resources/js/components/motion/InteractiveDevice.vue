@@ -81,9 +81,7 @@ const screenAspect = computed(() => {
             ref="elementRef"
             :class="cn('device-shell', props.class)"
             :style="glareStyle"
-            :animate="
-                props.tilt ? { rotateX, rotateY, scale } : undefined
-            "
+            :animate="props.tilt ? { rotateX, rotateY, scale } : undefined"
             :transition="SPRING_SOFT"
             @pointermove="onPointerMove"
             @pointerenter="onPointerEnter"
@@ -97,17 +95,22 @@ const screenAspect = computed(() => {
                         :alt="props.alt"
                         loading="lazy"
                         decoding="async"
-                        :class="cn(
-                            'size-full object-cover object-top',
-                            screenAspect,
-                        )"
+                        :class="
+                            cn(
+                                'size-full object-cover object-top',
+                                screenAspect,
+                            )
+                        "
                     />
                     <slot v-else name="screen">
                         <div :class="cn('bg-mesh w-full', screenAspect)" />
                     </slot>
                 </div>
 
-                <div v-if="props.device === 'laptop'" class="device-laptop-base" />
+                <div
+                    v-if="props.device === 'laptop'"
+                    class="device-laptop-base"
+                />
             </div>
         </motion.div>
     </div>

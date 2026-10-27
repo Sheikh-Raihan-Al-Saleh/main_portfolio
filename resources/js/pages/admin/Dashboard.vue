@@ -237,7 +237,7 @@ function formatDate(value: string): string {
             :variants="stagger(0.06)"
             initial="hidden"
             animate="visible"
-            class="grid gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-4"
+            class="grid grid-cols-2 gap-3 pt-4 sm:gap-4 lg:grid-cols-4"
         >
             <motion.div
                 v-for="card in cards"
@@ -246,7 +246,7 @@ function formatDate(value: string): string {
             >
                 <Link
                     :href="card.href"
-                    class="group ui-card ui-card-hover relative flex flex-col gap-3 overflow-hidden p-6"
+                    class="group ui-card ui-card-hover relative flex flex-col gap-3 overflow-hidden p-4 sm:p-6"
                 >
                     <div
                         :class="[
@@ -273,7 +273,7 @@ function formatDate(value: string): string {
                     </div>
                     <div>
                         <p
-                            class="text-3xl font-bold tracking-tight tabular-nums"
+                            class="text-2xl font-bold tracking-tight tabular-nums sm:text-3xl"
                         >
                             <AnimatedCounter
                                 :value="card.value"

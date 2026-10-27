@@ -17,9 +17,11 @@ const emit = defineEmits<{
 
 <template>
     <div class="flex items-center">
+        <!-- 32px tap targets on touch screens, compact with a mouse. -->
         <Button
             variant="ghost"
             size="icon-xs"
+            class="pointer-coarse:size-8"
             :disabled="index === 0 || disabled"
             aria-label="Move up"
             @click="emit('move', index, -1)"
@@ -29,6 +31,7 @@ const emit = defineEmits<{
         <Button
             variant="ghost"
             size="icon-xs"
+            class="pointer-coarse:size-8"
             :disabled="index === total - 1 || disabled"
             aria-label="Move down"
             @click="emit('move', index, 1)"

@@ -23,3 +23,20 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Compress text responses (HTML, JSON, JS, CSS, SVG).
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json image/svg+xml
+</IfModule>
+
+# Vite build assets carry content-hashed filenames, so a changed file always
+# gets a new URL and browsers can cache it for a year. Uploads are mostly
+# random names too, but seeded files reuse fixed names, so cache them a week.
+<IfModule mod_headers.c>
+    <If "%{REQUEST_URI} =~ m#^/build/assets/#">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </If>
+    <ElseIf "%{REQUEST_URI} =~ m#^/uploads/#">
+        Header set Cache-Control "public, max-age=604800"
+    </ElseIf>
+</IfModule>

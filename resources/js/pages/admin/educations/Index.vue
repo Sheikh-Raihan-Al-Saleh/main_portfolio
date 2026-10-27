@@ -115,10 +115,10 @@ function openEdit(education: Education) {
                             />
                         </TableCell>
 
-                        <TableCell>
+                        <TableCell class="w-full whitespace-normal">
                             <div class="flex items-center gap-3">
                                 <span
-                                    class="rounded-lg bg-emerald-500/10 p-1.5"
+                                    class="shrink-0 rounded-lg bg-emerald-500/10 p-1.5"
                                 >
                                     <GraduationCap
                                         class="size-3.5 text-emerald-600 dark:text-emerald-400"

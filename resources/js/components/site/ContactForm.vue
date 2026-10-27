@@ -53,7 +53,7 @@ const fields = [
 ] as const;
 
 const input =
-    'mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none transition-[border-color,box-shadow] placeholder:text-muted-foreground/70 focus:border-[var(--ring)] focus:ring-4 focus:ring-[var(--brand-glow)]';
+    'mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-base outline-none sm:text-sm transition-[border-color,box-shadow] placeholder:text-muted-foreground/70 focus:border-[var(--ring)] focus:ring-4 focus:ring-[var(--brand-glow)]';
 </script>
 
 <template>

@@ -28,10 +28,7 @@ const pad = { top: 12, right: 8, bottom: 22, left: 28 };
 const gradientId = useId();
 
 const maxValue = computed(() => {
-    const peak = Math.max(
-        1,
-        ...props.series.flatMap((serie) => serie.values),
-    );
+    const peak = Math.max(1, ...props.series.flatMap((serie) => serie.values));
 
     // Round the axis up to a friendly number.
     const magnitude = 10 ** Math.floor(Math.log10(peak));
@@ -73,7 +70,9 @@ function pathsFor(values: number[]): { line: string; area: string } {
     // Straight segments; with 30 points the difference is invisible and the
     // path math stays trivial.
     const line = points
-        .map((point, index) => `${index === 0 ? 'M' : 'L'}${point.x},${point.y}`)
+        .map(
+            (point, index) => `${index === 0 ? 'M' : 'L'}${point.x},${point.y}`,
+        )
         .join(' ');
 
     const baseline = pad.top + plotHeight.value;
@@ -127,8 +126,16 @@ const xTickIndexes = computed(() => {
                     x2="0"
                     y2="1"
                 >
-                    <stop offset="0%" :stop-color="serie.color" stop-opacity="0.25" />
-                    <stop offset="100%" :stop-color="serie.color" stop-opacity="0.02" />
+                    <stop
+                        offset="0%"
+                        :stop-color="serie.color"
+                        stop-opacity="0.25"
+                    />
+                    <stop
+                        offset="100%"
+                        :stop-color="serie.color"
+                        stop-opacity="0.02"
+                    />
                 </linearGradient>
             </defs>
 
@@ -154,7 +161,10 @@ const xTickIndexes = computed(() => {
             </g>
 
             <!-- Series -->
-            <template v-for="(serie, serieIndex) in props.series" :key="serie.name">
+            <template
+                v-for="(serie, serieIndex) in props.series"
+                :key="serie.name"
+            >
                 <path
                     :d="pathsFor(serie.values).area"
                     :fill="`url(#${gradientId}-fill-${serieIndex})`"
@@ -181,7 +191,9 @@ const xTickIndexes = computed(() => {
                     r="2.5"
                     class="opacity-0 transition-opacity hover:opacity-100 [&:hover]:opacity-100"
                 >
-                    <title>{{ `${props.labels[index]}: ${serie.name} ${value}` }}</title>
+                    <title>
+                        {{ `${props.labels[index]}: ${serie.name} ${value}` }}
+                    </title>
                 </circle>
             </template>
 

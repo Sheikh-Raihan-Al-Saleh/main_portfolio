@@ -138,6 +138,8 @@ const facts = computed(() =>
                             v-if="profile.avatar_url"
                             :src="profile.avatar_url"
                             :alt="''"
+                            loading="lazy"
+                            decoding="async"
                             class="size-10 rounded-full object-cover"
                         />
                         <span>

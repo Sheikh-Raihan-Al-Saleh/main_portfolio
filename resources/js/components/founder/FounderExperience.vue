@@ -79,6 +79,8 @@ function formatDate(value: string | null | undefined): string {
                                         v-if="job.logo_url"
                                         :src="job.logo_url"
                                         :alt="job.company"
+                                        loading="lazy"
+                                        decoding="async"
                                         class="size-11 rounded-xl border border-border bg-white object-contain p-1.5"
                                     />
                                     <span v-else class="ui-icon-tile"

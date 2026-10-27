@@ -66,7 +66,11 @@ const SECTION_DEFS = {
         fields: [
             { key: 'eyebrow', label: 'Eyebrow', required: true },
             { key: 'title', label: 'Heading', required: true },
-            { key: 'highlight', label: 'Highlighted words', placeholder: 'end to end' },
+            {
+                key: 'highlight',
+                label: 'Highlighted words',
+                placeholder: 'end to end',
+            },
             { key: 'description', label: 'Description', long: true },
             { key: 'kicker', label: 'Stack kicker' },
             { key: 'stack_heading', label: 'Stack heading', long: true },
@@ -79,9 +83,18 @@ const SECTION_DEFS = {
             label: 'Capability cards',
             addLabel: 'Add capability',
             fields: [
-                { key: 'icon', label: 'Lucide icon name', placeholder: 'Blocks' },
+                {
+                    key: 'icon',
+                    label: 'Lucide icon name',
+                    placeholder: 'Blocks',
+                },
                 { key: 'title', label: 'Title', required: true },
-                { key: 'summary', label: 'Summary', long: true, required: true },
+                {
+                    key: 'summary',
+                    label: 'Summary',
+                    long: true,
+                    required: true,
+                },
             ],
             iconField: true,
         },
@@ -93,7 +106,11 @@ const SECTION_DEFS = {
         fields: [
             { key: 'eyebrow', label: 'Eyebrow', required: true },
             { key: 'title', label: 'Heading', required: true },
-            { key: 'highlight', label: 'Highlighted words', placeholder: 'fit together' },
+            {
+                key: 'highlight',
+                label: 'Highlighted words',
+                placeholder: 'fit together',
+            },
             { key: 'description', label: 'Description', long: true },
         ],
         repeater: {
@@ -101,7 +118,11 @@ const SECTION_DEFS = {
             label: 'Pipeline stages',
             addLabel: 'Add stage',
             fields: [
-                { key: 'icon', label: 'Lucide icon name', placeholder: 'Network' },
+                {
+                    key: 'icon',
+                    label: 'Lucide icon name',
+                    placeholder: 'Network',
+                },
                 { key: 'label', label: 'Label', required: true },
                 { key: 'tagline', label: 'Tagline', required: true },
                 { key: 'detail', label: 'Detail', long: true, required: true },
@@ -115,7 +136,11 @@ const SECTION_DEFS = {
         fields: [
             { key: 'eyebrow', label: 'Eyebrow', required: true },
             { key: 'title', label: 'Heading', required: true },
-            { key: 'highlight', label: 'Highlighted words', placeholder: 'serious delivery' },
+            {
+                key: 'highlight',
+                label: 'Highlighted words',
+                placeholder: 'serious delivery',
+            },
             { key: 'description', label: 'Description', long: true },
         ],
         repeater: {
@@ -123,9 +148,18 @@ const SECTION_DEFS = {
             label: 'Value cards',
             addLabel: 'Add value',
             fields: [
-                { key: 'icon', label: 'Lucide icon name', placeholder: 'Handshake' },
+                {
+                    key: 'icon',
+                    label: 'Lucide icon name',
+                    placeholder: 'Handshake',
+                },
                 { key: 'title', label: 'Title', required: true },
-                { key: 'summary', label: 'Summary', long: true, required: true },
+                {
+                    key: 'summary',
+                    label: 'Summary',
+                    long: true,
+                    required: true,
+                },
             ],
             iconField: true,
         },
@@ -136,7 +170,11 @@ const SECTION_DEFS = {
         fields: [
             { key: 'eyebrow', label: 'Eyebrow', required: true },
             { key: 'title', label: 'Heading', required: true },
-            { key: 'highlight', label: 'Highlighted words', placeholder: 'built' },
+            {
+                key: 'highlight',
+                label: 'Highlighted words',
+                placeholder: 'built',
+            },
             { key: 'description', label: 'Description', long: true },
             { key: 'featured_label', label: 'Featured label' },
             { key: 'case_study_label', label: 'Case study button' },
@@ -153,7 +191,11 @@ const SECTION_DEFS = {
         fields: [
             { key: 'eyebrow', label: 'Eyebrow', required: true },
             { key: 'title', label: 'Heading', required: true },
-            { key: 'highlight', label: 'Highlighted words', placeholder: 'client' },
+            {
+                key: 'highlight',
+                label: 'Highlighted words',
+                placeholder: 'client',
+            },
             { key: 'description', label: 'Description', long: true },
             { key: 'archive_label', label: 'Archive button' },
             { key: 'empty_text', label: 'Empty-state text' },
@@ -165,7 +207,11 @@ const SECTION_DEFS = {
         fields: [
             { key: 'eyebrow', label: 'Eyebrow', required: true },
             { key: 'title', label: 'Heading', required: true },
-            { key: 'highlight', label: 'Highlighted words', placeholder: 'small' },
+            {
+                key: 'highlight',
+                label: 'Highlighted words',
+                placeholder: 'small',
+            },
             { key: 'mission_label', label: 'Mission label' },
             { key: 'more_label', label: 'About link text' },
         ],
@@ -177,11 +223,21 @@ const SECTION_DEFS = {
         fields: [
             { key: 'studio_label', label: 'Studio label', required: true },
             { key: 'studio_heading', label: 'Studio heading' },
-            { key: 'studio_text', label: 'Studio text', long: true, required: true },
+            {
+                key: 'studio_text',
+                label: 'Studio text',
+                long: true,
+                required: true,
+            },
             { key: 'studio_link', label: 'Studio link text', required: true },
             { key: 'founder_label', label: 'Founder label', required: true },
             { key: 'founder_heading', label: 'Founder heading' },
-            { key: 'founder_text', label: 'Founder text', long: true, required: true },
+            {
+                key: 'founder_text',
+                label: 'Founder text',
+                long: true,
+                required: true,
+            },
             { key: 'founder_link', label: 'Founder link text', required: true },
         ],
     },
@@ -191,7 +247,11 @@ const SECTION_DEFS = {
         fields: [
             { key: 'eyebrow', label: 'Eyebrow', required: true },
             { key: 'title', label: 'Heading', required: true },
-            { key: 'highlight', label: 'Highlighted words', placeholder: "Let's build it." },
+            {
+                key: 'highlight',
+                label: 'Highlighted words',
+                placeholder: "Let's build it.",
+            },
             { key: 'description', label: 'Description', long: true },
             { key: 'button_label', label: 'Button label', required: true },
             { key: 'email_label', label: 'Email button label' },
@@ -205,7 +265,11 @@ const SECTION_DEFS = {
         fields: [
             { key: 'eyebrow', label: 'Eyebrow', required: true },
             { key: 'title', label: 'Heading', required: true },
-            { key: 'highlight', label: 'Highlighted words', placeholder: 'for' },
+            {
+                key: 'highlight',
+                label: 'Highlighted words',
+                placeholder: 'for',
+            },
             { key: 'description', label: 'Description', long: true },
         ],
     },
@@ -215,7 +279,11 @@ const SECTION_DEFS = {
         fields: [
             { key: 'eyebrow', label: 'Eyebrow', required: true },
             { key: 'title', label: 'Heading', required: true },
-            { key: 'highlight', label: 'Highlighted words', placeholder: 'building' },
+            {
+                key: 'highlight',
+                label: 'Highlighted words',
+                placeholder: 'building',
+            },
             { key: 'description', label: 'Description', long: true },
             { key: 'email_heading', label: 'Email panel heading' },
             { key: 'email_note', label: 'Email panel note', long: true },
@@ -377,13 +445,13 @@ type ExposedDef = {
 };
 
 const sectionDef = computed<ExposedDef | null>(() =>
-    def.value ? { fields: def.value.fields, repeater: def.value.repeater } : null,
+    def.value
+        ? { fields: def.value.fields, repeater: def.value.repeater }
+        : null,
 );
 
 const previewIcon = computed(() =>
-    resolveIcon(
-        (form.value.icon as string | undefined) ?? null,
-    ),
+    resolveIcon((form.value.icon as string | undefined) ?? null),
 );
 </script>
 
@@ -392,9 +460,7 @@ const previewIcon = computed(() =>
         :open="props.open"
         @update:open="(value) => emit('update:open', value)"
     >
-        <DialogContent
-            class="max-h-[90vh] max-w-2xl overflow-y-auto"
-        >
+        <DialogContent class="max-h-[90vh] max-w-2xl overflow-y-auto">
             <DialogHeader>
                 <DialogTitle>
                     {{ def?.title ?? 'Edit section' }}
@@ -426,14 +492,18 @@ const previewIcon = computed(() =>
                         :model-value="String(form[field.key] ?? '')"
                         rows="3"
                         :placeholder="field.placeholder"
-                        @update:model-value="(value) => (form[field.key] = value)"
+                        @update:model-value="
+                            (value) => (form[field.key] = value)
+                        "
                     />
                     <Input
                         v-else
                         :id="`sc-${field.key}`"
                         :model-value="String(form[field.key] ?? '')"
                         :placeholder="field.placeholder"
-                        @update:model-value="(value) => (form[field.key] = value)"
+                        @update:model-value="
+                            (value) => (form[field.key] = value)
+                        "
                     />
 
                     <InputError :message="errors[field.key]" />
@@ -493,7 +563,9 @@ const previewIcon = computed(() =>
                                         />
                                     </span>
                                     <Input
-                                        :model-value="String(row[field.key] ?? '')"
+                                        :model-value="
+                                            String(row[field.key] ?? '')
+                                        "
                                         :placeholder="field.placeholder"
                                         class="flex-1"
                                         @update:model-value="

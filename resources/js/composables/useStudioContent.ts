@@ -16,8 +16,7 @@ export function useStudioContent<K extends keyof StudioContent>(
 ): ComputedRef<StudioContent[K]> {
     return computed(() => {
         const content = company?.studio_content as
-            | Record<string, unknown>
-            | undefined;
+            Record<string, unknown> | undefined;
 
         return (content?.[section] ?? {}) as StudioContent[K];
     });

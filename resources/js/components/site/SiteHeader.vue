@@ -58,7 +58,7 @@ const cta = computed(() => {
         <div
             :class="
                 cn(
-                    'mx-auto flex h-14 max-w-6xl items-center gap-4 rounded-full border px-3 pl-4 transition-all duration-500 sm:h-16',
+                    'mx-auto flex h-16 max-w-6xl items-center gap-4 rounded-full border px-3 pl-4 transition-all duration-500 sm:h-[4.5rem]',
                     scrolled
                         ? 'ui-glass border-border shadow-[var(--shadow-soft)]'
                         : 'border-transparent bg-transparent',
@@ -75,7 +75,7 @@ const cta = computed(() => {
                     :name="nav.owner.value?.name"
                     :initials="nav.initials.value"
                     initials-class="rounded-xl bg-gradient-to-br from-[var(--grad-from)] to-[var(--grad-to)] text-white"
-                    image-class="h-8"
+                    image-class="h-11 sm:h-14"
                 />
             </Link>
 

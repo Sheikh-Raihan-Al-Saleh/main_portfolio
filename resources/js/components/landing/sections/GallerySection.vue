@@ -3,6 +3,7 @@ import { motion } from 'motion-v';
 import { computed, ref } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { uploadUrl } from '@/lib/media';
 import { inViewOnce, perspectiveCard, stagger } from '@/lib/motion';
 import type { LandingSection } from '@/types';
 
@@ -24,9 +25,6 @@ const open = computed({
 const activeImage = computed(() =>
     openIndex.value === null ? null : (images.value[openIndex.value] ?? null),
 );
-function imageUrl(path: string) {
-    return `/uploads/${path}`;
-}
 </script>
 
 <template>
@@ -53,7 +51,7 @@ function imageUrl(path: string) {
                 @click="openIndex = index"
             >
                 <img
-                    :src="imageUrl(image)"
+                    :src="uploadUrl(image)"
                     :alt="`${section.heading ?? 'Gallery'} image ${index + 1}`"
                     loading="lazy"
                     class="aspect-[4/3] w-full rounded-xl object-cover transition duration-500 group-hover:scale-[1.02]"
@@ -67,7 +65,7 @@ function imageUrl(path: string) {
                 }}</DialogTitle>
                 <img
                     v-if="activeImage"
-                    :src="imageUrl(activeImage)"
+                    :src="uploadUrl(activeImage)"
                     :alt="section.heading ?? 'Gallery image'"
                     class="h-auto w-full rounded-lg"
                 />

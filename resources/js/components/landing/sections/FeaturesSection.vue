@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import * as icons from '@lucide/vue';
 import { Sparkles } from '@lucide/vue';
 import { motion } from 'motion-v';
 import { computed } from 'vue';
-import type { Component } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
+import { resolveIcon } from '@/lib/iconResolver';
 import { inViewOnce, perspectiveCard, stagger } from '@/lib/motion';
 import type { LandingSection } from '@/types';
 
@@ -14,15 +13,6 @@ type Props = {
 };
 const props = defineProps<Props>();
 const items = computed(() => props.section.data.items ?? []);
-function resolveIcon(name: string | null): Component {
-    if (!name) {
-        return Sparkles;
-    }
-
-    const registry = icons as unknown as Record<string, Component | undefined>;
-
-    return registry[name] ?? Sparkles;
-}
 const gradients = [
     'from-signal to-signal',
     'from-foreground to-foreground',
@@ -62,7 +52,7 @@ const gradients = [
                             ]"
                         >
                             <component
-                                :is="resolveIcon(item.icon)"
+                                :is="resolveIcon(item.icon, Sparkles)"
                                 class="size-5"
                             />
                         </div>

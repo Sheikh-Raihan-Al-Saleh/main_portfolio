@@ -39,7 +39,7 @@ export type DemoEmbedData = {
 };
 
 export type WalkthroughStep = {
-    image_path: string;
+    image_path: string | null;
     title: string;
     caption: string | null;
 };

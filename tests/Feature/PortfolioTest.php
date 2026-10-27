@@ -8,6 +8,8 @@ use App\Models\Experience;
 use App\Models\Profile;
 use App\Models\Project;
 use App\Models\Skill;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 test('the company home page renders with the company and its work', function () {
     Company::current()->update(['name' => 'Sheikh Nabil', 'headline' => 'Software studio']);
@@ -100,6 +102,8 @@ test('the founder portfolio renders its real figures in the html, not placeholde
 });
 
 test('the public header and footer render the uploaded company logo', function () {
+    Storage::fake('uploads');
+    Storage::disk('uploads')->put('logos/brand.png', UploadedFile::fake()->image('brand.png')->getContent());
     Company::current()->update(['logo_path' => 'logos/brand.png']);
 
     foreach (['/', '/about', '/founder'] as $path) {
@@ -283,4 +287,17 @@ test('an unpublished project detail page returns 404', function () {
 
 test('the resume route 404s when no resume has been uploaded', function () {
     $this->get('/resume')->assertNotFound();
+});
+
+test('a media path whose file is gone resolves to no url instead of a broken image', function () {
+    Storage::fake('uploads');
+    Storage::disk('uploads')->put('projects/kept.png', 'x');
+
+    $project = Project::factory()->create([
+        'cover_image_path' => 'projects/deleted.png',
+        'gallery' => ['projects/kept.png', 'projects/deleted.png'],
+    ]);
+
+    expect($project->cover_image_url)->toBeNull()
+        ->and($project->gallery_urls)->toBe([url('uploads/projects/kept.png')]);
 });

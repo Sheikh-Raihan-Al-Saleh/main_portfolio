@@ -2,8 +2,6 @@
 import { Form, Head } from '@inertiajs/vue3';
 import {
     ExternalLink,
-    Eye,
-    EyeOff,
     ImageIcon,
     LayoutTemplate,
     MousePointerClick,
@@ -21,7 +19,7 @@ import FormSection from '@/components/admin/form/FormSection.vue';
 import FormTabs from '@/components/admin/form/FormTabs.vue';
 import type { FormTab } from '@/components/admin/form/types';
 import SectionEditorDialog from '@/components/admin/landing/SectionEditorDialog.vue';
-import ReorderButtons from '@/components/admin/ReorderButtons.vue';
+import SectionListRow from '@/components/admin/landing/SectionListRow.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -35,6 +33,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useReorder } from '@/composables/useReorder';
+import { uploadUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import projects from '@/routes/admin/projects';
 import type {
@@ -88,8 +87,6 @@ function editSection(section: LandingSection) {
     editorOpen.value = true;
 }
 
-/** Static /uploads/ URL for an already-stored hero slot, so saved server
- * images preview in the form instead of only freshly picked local files. */
 /**
  * The page's two views. A page that has not been saved yet has no sections
  * to show, so it opens on its details.
@@ -158,10 +155,10 @@ const tabs: FormTab[] = [
     },
 ];
 
+/** Static /uploads/ URL for an already-stored hero slot, so saved server
+ * images preview in the form instead of only freshly picked local files. */
 function heroPreview(index: number): string | null {
-    const path = props.landingPage?.hero_media_paths?.[index];
-
-    return path ? `/uploads/${path}` : null;
+    return uploadUrl(props.landingPage?.hero_media_paths?.[index]) ?? null;
 }
 </script>
 
@@ -566,63 +563,17 @@ function heroPreview(index: number): string | null {
             </div>
 
             <ul v-else class="flex flex-col gap-3">
-                <li
+                <SectionListRow
                     v-for="(section, index) in orderedSections"
                     :key="section.id"
-                    class="ui-card ui-card-hover flex items-center gap-4 p-4"
-                >
-                    <ReorderButtons
-                        :index="index"
-                        :total="orderedSections.length"
-                        :disabled="saving"
-                        @move="move"
-                    />
-
-                    <span
-                        class="grid size-9 shrink-0 place-items-center rounded-xl bg-muted text-xs font-semibold text-muted-foreground"
-                        >{{ index + 1 }}</span
-                    >
-
-                    <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm font-semibold">
-                            {{ section.heading || typeLabels[section.type] }}
-                        </p>
-                        <p class="text-xs text-muted-foreground">
-                            {{ typeLabels[section.type] }}
-                        </p>
-                    </div>
-
-                    <span
-                        :class="
-                            cn(
-                                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
-                                section.is_visible
-                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                                    : 'bg-muted text-muted-foreground',
-                            )
-                        "
-                    >
-                        <Eye v-if="section.is_visible" class="size-3.5" />
-                        <EyeOff v-else class="size-3.5" />
-                        {{ section.is_visible ? 'Visible' : 'Hidden' }}
-                    </span>
-
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        :aria-label="`Edit ${typeLabels[section.type]} section`"
-                        @click="editSection(section)"
-                    >
-                        <Settings2 class="size-4" />
-                        Edit
-                    </Button>
-
-                    <DeleteAction
-                        :url="`/admin/landing-sections/${section.id}`"
-                        label="Delete section"
-                        description="This removes the section and any images it uploaded."
-                    />
-                </li>
+                    :section="section"
+                    :index="index"
+                    :total="orderedSections.length"
+                    :type-label="typeLabels[section.type]"
+                    :disabled="saving"
+                    @move="move"
+                    @edit="editSection(section)"
+                />
             </ul>
         </section>
 

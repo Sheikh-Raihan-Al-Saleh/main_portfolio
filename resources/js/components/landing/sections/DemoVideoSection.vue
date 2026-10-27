@@ -3,6 +3,7 @@ import { Play, Volume2, VolumeX } from '@lucide/vue';
 import { motion } from 'motion-v';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
+import { uploadUrl } from '@/lib/media';
 import { scaleIn } from '@/lib/motion';
 import type { LandingSection } from '@/types';
 
@@ -12,9 +13,8 @@ type Props = {
 };
 const props = defineProps<Props>();
 const data = computed(() => props.section.data);
-const storageUrl = (path?: string | null) => (path ? `/uploads/${path}` : null);
-const posterUrl = computed(() => storageUrl(data.value.poster_path));
-const uploadUrl = computed(() => storageUrl(data.value.video_path));
+const posterUrl = computed(() => uploadUrl(data.value.poster_path));
+const videoUrl = computed(() => uploadUrl(data.value.video_path));
 const activated = ref(false);
 const embedUrl = computed(() => {
     const url = data.value.video_url;
@@ -128,13 +128,13 @@ function toggleMute() {
             >
                 <div class="overflow-hidden rounded-xl bg-black">
                     <div
-                        v-if="data.provider === 'upload' && uploadUrl"
+                        v-if="data.provider === 'upload' && videoUrl"
                         class="relative"
                     >
                         <video
                             ref="videoElement"
-                            :src="uploadUrl"
-                            :poster="posterUrl ?? undefined"
+                            :src="videoUrl"
+                            :poster="posterUrl"
                             class="aspect-video w-full object-cover"
                             preload="metadata"
                             playsinline

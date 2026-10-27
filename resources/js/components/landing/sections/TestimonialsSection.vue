@@ -3,6 +3,7 @@ import { Quote } from '@lucide/vue';
 import { motion } from 'motion-v';
 import { computed } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
+import { uploadUrl } from '@/lib/media';
 import { inViewOnce, perspectiveCard, stagger } from '@/lib/motion';
 import type { LandingSection } from '@/types';
 
@@ -61,7 +62,7 @@ function initials(name: string) {
                     >
                         <img
                             v-if="item.avatar_path"
-                            :src="`/uploads/${item.avatar_path}`"
+                            :src="uploadUrl(item.avatar_path)"
                             :alt="item.name"
                             loading="lazy"
                             class="size-9 rounded-full object-cover"

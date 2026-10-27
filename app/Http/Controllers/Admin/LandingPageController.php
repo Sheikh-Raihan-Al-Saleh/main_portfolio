@@ -81,6 +81,14 @@ class LandingPageController extends Controller
 
             // Only save if we have any paths
             $landingPage->hero_media_paths = ! empty($paths) ? array_values($paths) : null;
+
+            // The slots supersede the legacy single hero, whose path was copied
+            // into slot 0 by migration. Replacing that slot deletes the shared
+            // file, so drop the legacy pointer rather than leave it dangling.
+            if ($landingPage->hero_media_path !== null && ! in_array($landingPage->hero_media_path, $paths, true)) {
+                $this->deleteMedia($landingPage->hero_media_path);
+                $landingPage->hero_media_path = null;
+            }
         }
 
         $landingPage->og_image_path = $this->storeMedia(

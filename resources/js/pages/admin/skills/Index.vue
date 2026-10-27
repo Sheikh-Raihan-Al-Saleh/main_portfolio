@@ -97,8 +97,12 @@ function openEdit(skill: Skill) {
                     <TableRow>
                         <TableHead class="w-20">Order</TableHead>
                         <TableHead>Skill</TableHead>
-                        <TableHead class="w-40">Category</TableHead>
-                        <TableHead class="w-40">Proficiency</TableHead>
+                        <TableHead class="hidden w-40 sm:table-cell"
+                            >Category</TableHead
+                        >
+                        <TableHead class="hidden w-40 md:table-cell"
+                            >Proficiency</TableHead
+                        >
                         <TableHead class="w-24 text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -118,27 +122,40 @@ function openEdit(skill: Skill) {
                             />
                         </TableCell>
 
-                        <TableCell>
-                            <div class="flex items-center gap-2">
-                                <span class="rounded-lg bg-violet-500/10 p-1.5">
+                        <TableCell class="w-full max-w-0">
+                            <div class="flex min-w-0 items-center gap-2">
+                                <span
+                                    class="shrink-0 rounded-lg bg-violet-500/10 p-1.5"
+                                >
                                     <Sparkles
                                         class="size-3.5 text-violet-600 dark:text-violet-400"
                                     />
                                 </span>
-                                <span class="font-medium">{{
-                                    skill.name
-                                }}</span>
+                                <span class="min-w-0">
+                                    <span class="block truncate font-medium">{{
+                                        skill.name
+                                    }}</span>
+                                    <!-- Category column is hidden on phones. -->
+                                    <span
+                                        class="block truncate text-xs text-muted-foreground sm:hidden"
+                                        >{{
+                                            categories[skill.category] ??
+                                            skill.category
+                                        }}
+                                        · {{ skill.proficiency }}%</span
+                                    >
+                                </span>
                                 <Badge
                                     v-if="skill.is_featured"
                                     variant="secondary"
-                                    class="border-0 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                                    class="hidden border-0 bg-amber-500/10 text-amber-600 sm:inline-flex dark:text-amber-400"
                                 >
                                     Featured
                                 </Badge>
                             </div>
                         </TableCell>
 
-                        <TableCell>
+                        <TableCell class="hidden sm:table-cell">
                             <Badge
                                 variant="secondary"
                                 :class="[
@@ -153,7 +170,7 @@ function openEdit(skill: Skill) {
                             </Badge>
                         </TableCell>
 
-                        <TableCell>
+                        <TableCell class="hidden md:table-cell">
                             <div class="flex items-center gap-2">
                                 <div
                                     class="h-2 w-full max-w-24 overflow-hidden rounded-full bg-muted"

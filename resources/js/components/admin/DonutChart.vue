@@ -35,8 +35,7 @@ const segments = computed(() => {
     let offset = 0;
 
     return props.slices.map((slice) => {
-        const fraction =
-            total.value > 0 ? slice.value / total.value : 0;
+        const fraction = total.value > 0 ? slice.value / total.value : 0;
         const length = fraction * circumference.value;
         const segment = {
             slice,
@@ -52,9 +51,7 @@ const segments = computed(() => {
     });
 });
 
-const centerText = computed(
-    () => props.centerLabel ?? `${total.value} total`,
-);
+const centerText = computed(() => props.centerLabel ?? `${total.value} total`);
 </script>
 
 <template>
@@ -64,7 +61,11 @@ const centerText = computed(
             :height="props.size"
             :viewBox="`0 0 ${props.size} ${props.size}`"
             role="img"
-            :aria-label="props.slices.map((slice) => `${slice.label}: ${slice.value}`).join(', ')"
+            :aria-label="
+                props.slices
+                    .map((slice) => `${slice.label}: ${slice.value}`)
+                    .join(', ')
+            "
             class="shrink-0 -rotate-90"
         >
             <circle
@@ -91,7 +92,9 @@ const centerText = computed(
                 :stroke-dashoffset="segment.offset"
                 class="transition-[stroke-dasharray] duration-700"
             >
-                <title>{{ `${segment.slice.label}: ${segment.slice.value}` }}</title>
+                <title>
+                    {{ `${segment.slice.label}: ${segment.slice.value}` }}
+                </title>
             </circle>
         </svg>
 
@@ -99,7 +102,10 @@ const centerText = computed(
             <!-- Center label, absolutely placed over the hole -->
             <div
                 class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 text-center"
-                :style="{ left: `${props.size / 2}px`, top: `${props.size / 2}px` }"
+                :style="{
+                    left: `${props.size / 2}px`,
+                    top: `${props.size / 2}px`,
+                }"
             >
                 <p class="text-xl font-bold tabular-nums">
                     {{ total }}

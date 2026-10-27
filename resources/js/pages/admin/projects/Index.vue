@@ -113,8 +113,12 @@ watch(search, (value) => {
                         <TableHead class="hidden md:table-cell"
                             >Stack</TableHead
                         >
-                        <TableHead class="w-32">Context</TableHead>
-                        <TableHead class="w-32">Status</TableHead>
+                        <TableHead class="hidden w-32 sm:table-cell"
+                            >Context</TableHead
+                        >
+                        <TableHead class="hidden w-32 sm:table-cell"
+                            >Status</TableHead
+                        >
                         <TableHead class="w-32 text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -134,11 +138,11 @@ watch(search, (value) => {
                             />
                         </TableCell>
 
-                        <TableCell>
-                            <div class="flex items-center gap-3">
+                        <TableCell class="w-full max-w-0 whitespace-normal">
+                            <div class="flex items-center gap-2 sm:gap-3">
                                 <div
                                     v-if="project.cover_image_url"
-                                    class="relative size-10 shrink-0 overflow-hidden rounded-lg bg-muted"
+                                    class="relative size-8 shrink-0 overflow-hidden rounded-lg bg-muted sm:size-10"
                                 >
                                     <img
                                         :src="project.cover_image_url"
@@ -148,20 +152,37 @@ watch(search, (value) => {
                                 </div>
                                 <div
                                     v-else
-                                    class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/10"
+                                    class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/10 sm:size-10"
                                 >
                                     <FolderKanban
                                         class="size-4 text-blue-500"
                                     />
                                 </div>
                                 <div class="min-w-0">
-                                    <p class="truncate font-medium">
+                                    <p
+                                        class="line-clamp-2 font-medium break-words sm:truncate"
+                                    >
                                         {{ project.title }}
                                     </p>
                                     <p
-                                        class="truncate font-mono text-xs text-muted-foreground"
+                                        class="hidden truncate font-mono text-xs text-muted-foreground sm:block"
                                     >
                                         /{{ project.slug }}
+                                    </p>
+                                    <!-- Status column is hidden on phones; show it inline. -->
+                                    <p
+                                        class="mt-0.5 text-xs font-medium sm:hidden"
+                                        :class="
+                                            project.is_published
+                                                ? 'text-emerald-600 dark:text-emerald-400'
+                                                : 'text-amber-600 dark:text-amber-400'
+                                        "
+                                    >
+                                        {{
+                                            project.is_published
+                                                ? 'Published'
+                                                : 'Draft'
+                                        }}
                                     </p>
                                 </div>
                             </div>
@@ -182,7 +203,7 @@ watch(search, (value) => {
                             </div>
                         </TableCell>
 
-                        <TableCell>
+                        <TableCell class="hidden sm:table-cell">
                             <Badge
                                 variant="outline"
                                 :class="
@@ -199,7 +220,7 @@ watch(search, (value) => {
                             </Badge>
                         </TableCell>
 
-                        <TableCell>
+                        <TableCell class="hidden sm:table-cell">
                             <div class="flex flex-wrap gap-1">
                                 <Badge
                                     :variant="
@@ -231,7 +252,7 @@ watch(search, (value) => {
 
                         <TableCell>
                             <div
-                                class="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100"
+                                class="grid grid-cols-2 justify-items-center gap-0.5 transition-opacity sm:flex sm:items-center sm:justify-end sm:gap-1 pointer-fine:opacity-0 pointer-fine:group-focus-within:opacity-100 pointer-fine:group-hover:opacity-100"
                             >
                                 <Button
                                     v-if="project.is_published"

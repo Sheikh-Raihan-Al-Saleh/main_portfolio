@@ -4,6 +4,7 @@ use App\Enums\LandingSectionType;
 use App\Models\LandingSection;
 use App\Models\Project;
 use App\Models\ProjectLandingPage;
+use Illuminate\Support\Facades\Storage;
 
 test('a published landing page renders its visible sections in order', function () {
     $project = Project::factory()->create();
@@ -110,4 +111,32 @@ test('saving a landing page flags the project as having one', function () {
     $landingPage->delete();
 
     expect($project->fresh()->has_landing_page)->toBeFalse();
+});
+
+test('section media whose file is gone is stripped from the public payload', function () {
+    Storage::fake('uploads');
+    Storage::disk('uploads')->put('landing/kept.png', 'x');
+
+    $project = Project::factory()->create();
+    $landingPage = ProjectLandingPage::factory()->for($project)->create();
+
+    LandingSection::factory()->for($landingPage, 'landingPage')->ofType(LandingSectionType::Gallery)->create([
+        'sort_order' => 1,
+        'data' => ['images' => ['landing/kept.png', 'landing/deleted.png']],
+    ]);
+    LandingSection::factory()->for($landingPage, 'landingPage')->ofType(LandingSectionType::DemoWalkthrough)->create([
+        'sort_order' => 2,
+        'data' => ['frame' => 'browser', 'steps' => [
+            ['title' => 'One', 'image_path' => 'landing/kept.png'],
+            ['title' => 'Two', 'image_path' => 'landing/deleted.png'],
+        ]],
+    ]);
+
+    $this->get("/p/{$project->slug}")
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('sections.0.data.images', ['landing/kept.png'])
+            ->where('sections.1.data.steps.0.image_path', 'landing/kept.png')
+            ->where('sections.1.data.steps.1.image_path', null),
+        );
 });

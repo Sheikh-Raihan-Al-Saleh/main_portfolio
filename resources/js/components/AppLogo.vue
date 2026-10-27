@@ -8,16 +8,10 @@ const name = usePage().props.name;
 /** Website logo from Admin → Founder; the studio logo is the fallback. */
 const logoUrl = computed(
     () =>
-        (
-            usePage().props.profile as
-                | { logo_url?: string | null }
-                | undefined
-        )?.logo_url ??
-        (
-            usePage().props.company as
-                | { logo_url?: string | null }
-                | undefined
-        )?.logo_url ??
+        (usePage().props.profile as { logo_url?: string | null } | undefined)
+            ?.logo_url ??
+        (usePage().props.company as { logo_url?: string | null } | undefined)
+            ?.logo_url ??
         null,
 );
 </script>
@@ -29,12 +23,12 @@ const logoUrl = computed(
     -->
     <div
         v-if="logoUrl"
-        class="flex h-10 items-center overflow-hidden rounded-md bg-white px-2 ring-1 ring-sidebar-border group-data-[collapsible=icon]:hidden"
+        class="flex h-12 items-center overflow-hidden rounded-md bg-white px-2 ring-1 ring-sidebar-border group-data-[collapsible=icon]:hidden"
     >
         <img
             :src="logoUrl"
             alt=""
-            class="h-8 w-auto max-w-36 object-contain"
+            class="h-10 w-auto max-w-48 object-contain"
         />
     </div>
     <!--

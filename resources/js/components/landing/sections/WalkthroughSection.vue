@@ -6,6 +6,7 @@ import DeviceFrame from '@/components/landing/frames/DeviceFrame.vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
 import { usePrefersReducedMotion } from '@/composables/usePrefersReducedMotion';
 import { useScrollProgress } from '@/composables/useScrollProgress';
+import { uploadUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import type { LandingSection } from '@/types';
 
@@ -40,9 +41,6 @@ const frameProps = computed(() =>
         ? {}
         : { variant: data.value.frame === 'phone' ? 'phone' : 'laptop' },
 );
-function imageUrl(path: string) {
-    return `/uploads/${path}`;
-}
 function select(index: number) {
     activeIndex.value = index;
 }
@@ -65,9 +63,12 @@ function select(index: number) {
                 <p v-if="step.caption" class="text-sm text-muted-foreground">
                     {{ step.caption }}
                 </p>
-                <component :is="frameComponent" v-bind="frameProps"
+                <component
+                    :is="frameComponent"
+                    v-if="step.image_path"
+                    v-bind="frameProps"
                     ><img
-                        :src="imageUrl(step.image_path)"
+                        :src="uploadUrl(step.image_path)"
                         :alt="step.title"
                         loading="lazy"
                         class="w-full"
@@ -88,9 +89,9 @@ function select(index: number) {
                         >
                             <AnimatePresence mode="popLayout">
                                 <motion.img
-                                    v-if="activeStep"
+                                    v-if="activeStep?.image_path"
                                     :key="activeIndex"
-                                    :src="imageUrl(activeStep.image_path)"
+                                    :src="uploadUrl(activeStep.image_path)"
                                     :alt="activeStep.title"
                                     class="absolute inset-0 size-full object-cover object-top"
                                     :initial="{ opacity: 0, scale: 1.03 }"

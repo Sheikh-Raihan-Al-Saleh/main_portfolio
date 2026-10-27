@@ -4,8 +4,6 @@ import {
     BookOpen,
     Building2,
     ExternalLink,
-    Eye,
-    EyeOff,
     ImageIcon,
     LayoutTemplate,
     Link2,
@@ -13,13 +11,11 @@ import {
     PanelBottom,
     Plus,
     Search,
-    Settings2,
     Sparkles,
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import CompanyController from '@/actions/App/Http/Controllers/Admin/CompanyController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
-import DeleteAction from '@/components/admin/DeleteAction.vue';
 import FileField from '@/components/admin/FileField.vue';
 import FooterEditor from '@/components/admin/FooterEditor.vue';
 import ErrorList from '@/components/admin/form/ErrorList.vue';
@@ -27,7 +23,7 @@ import FormSection from '@/components/admin/form/FormSection.vue';
 import FormTabs from '@/components/admin/form/FormTabs.vue';
 import type { FormTab } from '@/components/admin/form/types';
 import SectionEditorDialog from '@/components/admin/landing/SectionEditorDialog.vue';
-import ReorderButtons from '@/components/admin/ReorderButtons.vue';
+import SectionListRow from '@/components/admin/landing/SectionListRow.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -782,63 +778,18 @@ function editSection(section: LandingSection) {
             </div>
 
             <ul v-else class="flex flex-col gap-3">
-                <li
+                <SectionListRow
                     v-for="(section, index) in orderedSections"
                     :key="section.id"
-                    class="ui-card ui-card-hover flex items-center gap-4 p-4"
-                >
-                    <ReorderButtons
-                        :index="index"
-                        :total="orderedSections.length"
-                        :disabled="saving"
-                        @move="move"
-                    />
-
-                    <span
-                        class="grid size-9 shrink-0 place-items-center rounded-xl bg-muted text-xs font-semibold text-muted-foreground"
-                        >{{ index + 1 }}</span
-                    >
-
-                    <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm font-semibold">
-                            {{ section.heading || typeLabels[section.type] }}
-                        </p>
-                        <p class="text-xs text-muted-foreground">
-                            {{ typeLabels[section.type] }}
-                        </p>
-                    </div>
-
-                    <span
-                        :class="
-                            cn(
-                                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
-                                section.is_visible
-                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                                    : 'bg-muted text-muted-foreground',
-                            )
-                        "
-                    >
-                        <Eye v-if="section.is_visible" class="size-3.5" />
-                        <EyeOff v-else class="size-3.5" />
-                        {{ section.is_visible ? 'Visible' : 'Hidden' }}
-                    </span>
-
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        :aria-label="`Edit ${typeLabels[section.type]} block`"
-                        @click="editSection(section)"
-                    >
-                        <Settings2 class="size-4" />
-                        Edit
-                    </Button>
-
-                    <DeleteAction
-                        :url="`/admin/landing-sections/${section.id}`"
-                        label="Delete block"
-                        description="This removes the block and any images it uploaded."
-                    />
-                </li>
+                    :section="section"
+                    :index="index"
+                    :total="orderedSections.length"
+                    :type-label="typeLabels[section.type]"
+                    :disabled="saving"
+                    noun="block"
+                    @move="move"
+                    @edit="editSection(section)"
+                />
             </ul>
         </section>
 

@@ -52,6 +52,7 @@ function scrollToTop(): void {
                         :name="nav.owner.value?.name"
                         :initials="nav.initials.value"
                         initials-class="footer-logo-icon rounded-xl bg-gradient-to-br from-[var(--grad-from)] to-[var(--grad-to)] text-white"
+                        image-class="h-14 sm:h-16"
                     />
                 </Link>
                 <p

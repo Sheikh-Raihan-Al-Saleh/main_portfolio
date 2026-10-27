@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<Props>(), {
     name: null,
     initials: '',
     initialsClass: undefined,
-    imageClass: 'h-9',
+    imageClass: 'h-12',
     showName: true,
 });
 </script>
@@ -32,14 +32,16 @@ const props = withDefaults(defineProps<Props>(), {
 <template>
     <span
         v-if="props.logoUrl"
-        class="inline-flex items-center rounded-md bg-white px-2 py-1"
+        class="inline-flex items-center rounded-lg bg-white px-2.5 py-1 shadow-sm ring-1 ring-black/5"
     >
+        <!-- Width caps are generous so a wide logo scales by height, not shrinks. -->
         <img
             :src="props.logoUrl"
             :alt="props.name ?? 'Home'"
+            decoding="async"
             :class="
                 cn(
-                    'w-auto max-w-44 object-contain sm:max-w-56',
+                    'w-auto max-w-56 object-contain sm:max-w-72',
                     props.imageClass,
                 )
             "

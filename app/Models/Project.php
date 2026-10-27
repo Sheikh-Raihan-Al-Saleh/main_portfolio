@@ -131,10 +131,11 @@ class Project extends Model
      */
     protected function getGalleryUrlsAttribute(): array
     {
-        return array_map(
-            fn (string $path): string => $this->mediaUrl($path) ?? '',
+        // Missing files are dropped rather than rendered as empty <img> tags.
+        return array_values(array_filter(array_map(
+            fn (string $path): ?string => $this->mediaUrl($path),
             $this->gallery ?? [],
-        );
+        )));
     }
 
     /** @param  Builder<Project>  $query */
