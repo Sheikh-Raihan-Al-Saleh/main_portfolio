@@ -4,13 +4,9 @@ import { computed } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
 import AnimatedCounter from '@/components/site/AnimatedCounter.vue';
 import { inViewOnce, perspectiveCard, stagger } from '@/lib/motion';
-import type { LandingSection } from '@/types';
+import type { StatsSectionProps } from '@/types';
 
-type Props = {
-    section: Extract<LandingSection, { type: 'stats' }>;
-    anchor?: string;
-};
-const props = defineProps<Props>();
+const props = defineProps<StatsSectionProps>();
 const items = computed(() => props.section.data.items ?? []);
 </script>
 

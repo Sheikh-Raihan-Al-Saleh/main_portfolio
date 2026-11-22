@@ -2,12 +2,12 @@
 import { Form, Head } from '@inertiajs/vue3';
 import { Cpu, Pencil, Plus } from '@lucide/vue';
 import { ref } from 'vue';
-import TechnologyController from '@/actions/App/Http/Controllers/Admin/TechnologyController';
+import TechnologyController from '@/actions/App/Http/Controllers/Technology/TechnologyController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
 import FormDialog from '@/components/admin/form/FormDialog.vue';
 import FormFooter from '@/components/admin/form/FormFooter.vue';
-import InputError from '@/components/InputError.vue';
+import InputError from '@/components/common/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,13 +21,14 @@ import {
 } from '@/components/ui/table';
 import technologyRoutes from '@/routes/admin/technologies';
 import type { Technology } from '@/types';
+import type { AdminTechnologiesIndexProps } from '@/types';
 
 /**
  * The shared technology vocabulary: the tags on projects (and the public
  * archive filter). New names typed into a project's stack are added here
  * automatically; this page renames, merges by hand, or removes them.
  */
-defineProps<{ technologies: Technology[] }>();
+defineProps<AdminTechnologiesIndexProps>();
 
 defineOptions({
     layout: {

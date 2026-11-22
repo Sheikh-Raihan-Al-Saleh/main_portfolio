@@ -9,17 +9,14 @@ import Marquee from '@/components/site/Marquee.vue';
 import { useSite } from '@/composables/useSite';
 import { EASE_OUT } from '@/lib/motion';
 import { fillTokens } from '@/lib/text';
-import type { StudioStats } from '@/types';
+import type { StudioHeroProps } from '@/types';
 
 /**
  * The studio home hero: a huge editorial headline, the brand masthead with
  * the logo shown large, the headline numbers, and a ticker underneath.
  * The liquid shape behind it is drawn by three.js (lib/liquid/engine.ts).
  */
-const props = defineProps<{
-    stats: StudioStats;
-    ticker: string[];
-}>();
+const props = defineProps<StudioHeroProps>();
 
 const { studio } = useSite();
 

@@ -2,23 +2,14 @@
 import { computed } from 'vue';
 import Reveal from '@/components/site/Reveal.vue';
 import { cn } from '@/lib/utils';
+import type { SectionShellProps } from '@/types';
 
 /**
  * The frame every content block renders in (studio home blocks and project
  * landing pages): editorial heading, then the block body.
  */
-type Props = {
-    eyebrow?: string | null;
-    heading?: string | null;
-    subheading?: string | null;
-    anchor?: string;
-    /** A tinted band, to separate consecutive blocks. */
-    muted?: boolean;
-    wide?: boolean;
-    class?: string;
-};
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<SectionShellProps>(), {
     eyebrow: null,
     heading: null,
     subheading: null,

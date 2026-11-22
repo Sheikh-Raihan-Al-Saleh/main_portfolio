@@ -11,7 +11,7 @@ import {
     Search,
     User,
 } from '@lucide/vue';
-import FounderController from '@/actions/App/Http/Controllers/Admin/FounderController';
+import FounderController from '@/actions/App/Http/Controllers/Founder/FounderController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import ContentEditor from '@/components/admin/ContentEditor.vue';
 import FileField from '@/components/admin/FileField.vue';
@@ -19,9 +19,8 @@ import FooterEditor from '@/components/admin/FooterEditor.vue';
 import ErrorList from '@/components/admin/form/ErrorList.vue';
 import FormSection from '@/components/admin/form/FormSection.vue';
 import FormTabs from '@/components/admin/form/FormTabs.vue';
-import type { FormTab } from '@/components/admin/form/types';
 import TagInput from '@/components/admin/TagInput.vue';
-import InputError from '@/components/InputError.vue';
+import InputError from '@/components/common/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,14 +28,11 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import founderRoutes from '@/routes/admin/founder';
 import settingsProfileRoutes from '@/routes/profile';
-import type { Founder, SocialMap, SocialPlatform } from '@/types';
+import type { FormTab } from '@/types';
+import type { SocialPlatform } from '@/types';
+import type { AdminFounderEditProps } from '@/types';
 
-type Props = {
-    founder: Founder;
-    socials: SocialMap;
-};
-
-defineProps<Props>();
+defineProps<AdminFounderEditProps>();
 
 const nameToken = '{{name}}';
 

@@ -1,3 +1,5 @@
+import type { UploadLimits } from '@/types';
+
 /**
  * Public URL for a path stored on the `uploads` disk (e.g. a section block's
  * image). Mirrors App\Services\MediaService::url(): uploads are static files
@@ -18,12 +20,6 @@ function formatBytes(bytes: number): string {
         ? `${Number(mb.toFixed(1))} MB`
         : `${Math.ceil(bytes / 1024)} KB`;
 }
-
-/** PHP's upload limits in bytes, shared as `uploadLimits`; null = unlimited. */
-export type UploadLimits = {
-    file: number | null;
-    request: number | null;
-};
 
 /**
  * Message when the picked files exceed the server's upload limits, or null

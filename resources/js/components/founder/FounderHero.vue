@@ -9,16 +9,13 @@ import { usePrefersReducedMotion } from '@/composables/usePrefersReducedMotion';
 import { useSite } from '@/composables/useSite';
 import { EASE_OUT } from '@/lib/motion';
 import { fillTokens } from '@/lib/text';
-import type { FounderContent, FounderStats } from '@/types';
+import type { FounderHeroProps } from '@/types';
 
 /**
  * The founder hero: a portrait, the name set large, rotating role titles,
  * the headline numbers and the resume.
  */
-const props = defineProps<{
-    content: FounderContent;
-    stats: FounderStats;
-}>();
+const props = defineProps<FounderHeroProps>();
 
 const { founder, studio } = useSite();
 const reducedMotion = usePrefersReducedMotion();

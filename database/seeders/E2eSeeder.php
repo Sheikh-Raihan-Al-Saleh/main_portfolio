@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Project;
 use App\Models\User;
-use App\Services\FounderService;
-use App\Services\StudioService;
+use App\Services\Founder\FounderService;
+use App\Services\Studio\StudioService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;

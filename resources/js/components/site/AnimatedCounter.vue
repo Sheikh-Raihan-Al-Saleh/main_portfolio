@@ -1,14 +1,9 @@
 <script setup lang="ts">
 import { useInView } from 'motion-v';
 import { onMounted, ref, watch } from 'vue';
+import type { AnimatedCounterProps } from '@/types';
 
-type Props = {
-    value: number;
-    suffix?: string;
-    duration?: number;
-};
-
-const { value, duration = 1400 } = defineProps<Props>();
+const { value, duration = 1400 } = defineProps<AnimatedCounterProps>();
 
 const element = ref<HTMLElement | null>(null);
 const inView = useInView(element);

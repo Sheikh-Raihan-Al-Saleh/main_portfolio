@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { motion } from 'motion-v';
 import { computed } from 'vue';
+import type { HeroDevicesCarouselProps } from '@/types';
 
-type Props = {
-    images: string[];
-};
-
-const props = defineProps<Props>();
+const props = defineProps<HeroDevicesCarouselProps>();
 
 const laptopSrc = computed(() => props.images[0] ?? null);
 const tabletSrc = computed(() => props.images[1] ?? props.images[0] ?? null);

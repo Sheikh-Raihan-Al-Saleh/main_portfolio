@@ -1,5 +1,5 @@
-import type { UploadLimits } from '@/lib/media';
 import type { Auth } from '@/types/auth';
+import type { UploadLimits } from '@/types/ui';
 
 // Extend ImportMeta interface for Vite...
 declare module 'vite/client' {

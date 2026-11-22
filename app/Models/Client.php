@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Services\MediaService;
+use App\Services\Media\MediaService;
 use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;

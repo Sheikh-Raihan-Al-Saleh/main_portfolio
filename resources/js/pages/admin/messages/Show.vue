@@ -5,13 +5,9 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
 import { Button } from '@/components/ui/button';
 import messageRoutes from '@/routes/admin/messages';
-import type { ContactMessage } from '@/types';
+import type { AdminMessagesShowProps } from '@/types';
 
-type Props = {
-    message: ContactMessage;
-};
-
-const props = defineProps<Props>();
+const props = defineProps<AdminMessagesShowProps>();
 
 defineOptions({
     layout: {

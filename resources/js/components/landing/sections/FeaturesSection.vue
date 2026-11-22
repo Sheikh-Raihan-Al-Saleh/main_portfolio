@@ -5,13 +5,9 @@ import { computed } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
 import { resolveIcon } from '@/lib/iconResolver';
 import { inViewOnce, perspectiveCard, stagger } from '@/lib/motion';
-import type { LandingSection } from '@/types';
+import type { FeaturesSectionProps } from '@/types';
 
-type Props = {
-    section: Extract<LandingSection, { type: 'features' }>;
-    anchor?: string;
-};
-const props = defineProps<Props>();
+const props = defineProps<FeaturesSectionProps>();
 const items = computed(() => props.section.data.items ?? []);
 const gradients = [
     'from-brand to-brand',

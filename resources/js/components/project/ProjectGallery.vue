@@ -3,12 +3,12 @@ import { ChevronLeft, ChevronRight, X } from '@lucide/vue';
 import { AnimatePresence, motion } from 'motion-v';
 import { onBeforeUnmount, ref, watch } from 'vue';
 import SmartImage from '@/components/media/SmartImage.vue';
-import type { ProjectDetail } from '@/types';
+import type { ProjectGalleryProps } from '@/types';
 
 /**
  * A project's screenshot gallery with a keyboard-friendly lightbox.
  */
-const props = defineProps<{ images: ProjectDetail['images'] }>();
+const props = defineProps<ProjectGalleryProps>();
 
 const active = ref<number | null>(null);
 

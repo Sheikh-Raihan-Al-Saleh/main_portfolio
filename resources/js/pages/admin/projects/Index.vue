@@ -28,13 +28,9 @@ import { useReorder } from '@/composables/useReorder';
 import { fadeUp } from '@/lib/motion';
 import projectRoutes from '@/routes/admin/projects';
 import type { Project } from '@/types';
+import type { AdminProjectsIndexProps } from '@/types';
 
-type Props = {
-    projects: Project[];
-    filters: { search: string | null };
-};
-
-const props = defineProps<Props>();
+const props = defineProps<AdminProjectsIndexProps>();
 
 defineOptions({
     layout: {
@@ -44,7 +40,7 @@ defineOptions({
 
 const { items, move, saving } = useReorder<Project>(
     () => props.projects,
-    'projects',
+    projectRoutes.reorder().url,
 );
 
 const search = ref(props.filters.search ?? '');

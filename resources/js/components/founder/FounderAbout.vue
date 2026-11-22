@@ -4,12 +4,12 @@ import Reveal from '@/components/site/Reveal.vue';
 import SectionHeading from '@/components/site/SectionHeading.vue';
 import { useSite } from '@/composables/useSite';
 import { paragraphs } from '@/lib/text';
-import type { SectionCopy } from '@/types';
+import type { FounderAboutProps } from '@/types';
 
 /**
  * About the founder: the bio, the founder's note and the quick facts.
  */
-defineProps<{ copy: SectionCopy }>();
+defineProps<FounderAboutProps>();
 
 const { founder } = useSite();
 

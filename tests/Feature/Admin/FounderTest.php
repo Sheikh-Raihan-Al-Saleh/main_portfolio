@@ -1,6 +1,6 @@
 <?php
 
-use App\Services\FounderService;
+use App\Services\Founder\FounderService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 

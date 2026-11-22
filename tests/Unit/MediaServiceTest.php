@@ -1,6 +1,6 @@
 <?php
 
-use App\Services\MediaService;
+use App\Services\Media\MediaService;
 use Tests\TestCase;
 
 uses(TestCase::class);

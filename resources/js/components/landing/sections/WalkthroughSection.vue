@@ -8,13 +8,9 @@ import { usePrefersReducedMotion } from '@/composables/usePrefersReducedMotion';
 import { useScrollProgress } from '@/composables/useScrollProgress';
 import { mediaUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
-import type { LandingSection } from '@/types';
+import type { WalkthroughSectionProps } from '@/types';
 
-type Props = {
-    section: Extract<LandingSection, { type: 'demo_walkthrough' }>;
-    anchor?: string;
-};
-const props = defineProps<Props>();
+const props = defineProps<WalkthroughSectionProps>();
 const data = computed(() => props.section.data);
 const steps = computed(() => data.value.steps ?? []);
 const reduced = usePrefersReducedMotion();

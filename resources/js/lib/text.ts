@@ -1,3 +1,5 @@
+import type { TextPart } from '@/types';
+
 /**
  * Small text helpers for admin-editable copy.
  */
@@ -14,8 +16,6 @@ export function fillTokens(
         String(tokens[key] ?? ''),
     );
 }
-
-export type TextPart = { text: string; highlight: boolean };
 
 /**
  * Split a headline around its highlighted phrase, so the phrase can be set in

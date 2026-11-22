@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
-import InputError from '@/components/InputError.vue';
+import InputError from '@/components/common/InputError.vue';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -15,10 +15,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { resolveIcon } from '@/lib/iconResolver';
-import type { StudioContent } from '@/types';
+import type {
+    StudioContentSectionDialogEmits,
+    StudioContentSectionDialogExposedDef,
+    StudioContentSectionDialogProps,
+    StudioContentSectionDialogRecordOf,
+    StudioContentSectionDialogSectionDef,
+    StudioContentSectionDialogSectionKey,
+} from '@/types';
 
 /** A loose JSON object, as stored in the studio's `content` column. */
-type RecordOf = Record<string, unknown>;
 
 /**
  * The smart modal for one studio story section.
@@ -30,33 +36,6 @@ type RecordOf = Record<string, unknown>;
  * required fields are flagged before submit, and icon names preview as they
  * are typed.
  */
-
-export type SectionKey = keyof Omit<StudioContent, 'ticker'>;
-
-type FieldDef = {
-    key: string;
-    label: string;
-    long?: boolean;
-    required?: boolean;
-    placeholder?: string;
-};
-
-type RepeaterDef = {
-    key: 'items' | 'stages' | 'stack' | 'guarantees';
-    label: string;
-    addLabel: string;
-    /** Field definitions for object rows; omitted for string rows. */
-    fields?: FieldDef[];
-    /** Marks the icon-name field so it can render a live preview. */
-    iconField?: boolean;
-};
-
-type SectionDef = {
-    title: string;
-    description: string;
-    fields: FieldDef[];
-    repeater?: RepeaterDef;
-};
 
 const SECTION_DEFS = {
     capabilities: {
@@ -292,30 +271,27 @@ const SECTION_DEFS = {
             { key: 'form_reply_note', label: 'Reply note' },
         ],
     },
-} satisfies Record<SectionKey, SectionDef>;
+} satisfies Record<
+    StudioContentSectionDialogSectionKey,
+    StudioContentSectionDialogSectionDef
+>;
 
-type Props = {
-    open: boolean;
-    sectionKey: SectionKey | null;
-    /** The merged section content to seed the form with. */
-    content: RecordOf | null;
-};
+const props = defineProps<StudioContentSectionDialogProps>();
 
-const props = defineProps<Props>();
-
-const emit = defineEmits<{
-    'update:open': [boolean];
-    /** Emitted with the edited clone; the parent decides when to persist. */
-    save: [SectionKey, RecordOf];
-}>();
+const emit = defineEmits<StudioContentSectionDialogEmits>();
 
 const def = computed(() =>
     props.sectionKey
-        ? (SECTION_DEFS as Record<SectionKey, SectionDef>)[props.sectionKey]
+        ? (
+              SECTION_DEFS as Record<
+                  StudioContentSectionDialogSectionKey,
+                  StudioContentSectionDialogSectionDef
+              >
+          )[props.sectionKey]
         : null,
 );
 
-const form = ref<RecordOf>({});
+const form = ref<StudioContentSectionDialogRecordOf>({});
 const errors = ref<Record<string, string>>({});
 
 watch(
@@ -328,7 +304,7 @@ watch(
         errors.value = {};
         form.value = JSON.parse(
             JSON.stringify(props.content ?? {}),
-        ) as RecordOf;
+        ) as StudioContentSectionDialogRecordOf;
     },
     { immediate: true },
 );
@@ -337,7 +313,7 @@ watch(
  * Object rows for the repeater. The guarantees section stores a bare string
  * list, so its rows are wrapped as `{ text }` and unwrapped on save.
  */
-const repeaterRows = computed<RecordOf[]>(() => {
+const repeaterRows = computed<StudioContentSectionDialogRecordOf[]>(() => {
     const repeater = def.value?.repeater;
 
     if (!repeater) {
@@ -354,10 +330,10 @@ const repeaterRows = computed<RecordOf[]>(() => {
         return (value as string[]).map((text) => ({ text }));
     }
 
-    return value as RecordOf[];
+    return value as StudioContentSectionDialogRecordOf[];
 });
 
-function writeRows(rows: RecordOf[]) {
+function writeRows(rows: StudioContentSectionDialogRecordOf[]) {
     const repeater = def.value?.repeater;
 
     if (!repeater) {
@@ -380,7 +356,7 @@ function addRow() {
         return;
     }
 
-    const blank: RecordOf =
+    const blank: StudioContentSectionDialogRecordOf =
         repeater.key === 'guarantees'
             ? { text: '' }
             : Object.fromEntries(
@@ -433,18 +409,16 @@ function save() {
     emit(
         'save',
         props.sectionKey,
-        JSON.parse(JSON.stringify(form.value)) as RecordOf,
+        JSON.parse(
+            JSON.stringify(form.value),
+        ) as StudioContentSectionDialogRecordOf,
     );
     close();
 }
 
 /** Expose only what the template needs from the def, fully typed. */
-type ExposedDef = {
-    fields: FieldDef[];
-    repeater?: RepeaterDef;
-};
 
-const sectionDef = computed<ExposedDef | null>(() =>
+const sectionDef = computed<StudioContentSectionDialogExposedDef | null>(() =>
     def.value
         ? { fields: def.value.fields, repeater: def.value.repeater }
         : null,

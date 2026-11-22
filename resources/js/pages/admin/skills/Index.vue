@@ -3,7 +3,7 @@ import { Head } from '@inertiajs/vue3';
 import { Pencil, Plus, Sparkles } from '@lucide/vue';
 import { motion } from 'motion-v';
 import { computed, ref } from 'vue';
-import SkillController from '@/actions/App/Http/Controllers/Admin/SkillController';
+import SkillController from '@/actions/App/Http/Controllers/Skill/SkillController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
 import FormDialog from '@/components/admin/form/FormDialog.vue';
@@ -21,16 +21,12 @@ import {
 import { useReorder } from '@/composables/useReorder';
 import { fadeUp } from '@/lib/motion';
 import skillRoutes from '@/routes/admin/skills';
-import type { Skill, SkillCategory } from '@/types';
+import type { Skill } from '@/types';
+import type { AdminSkillsIndexProps } from '@/types';
 import SkillCategoryManager from './SkillCategoryManager.vue';
 import SkillForm from './SkillForm.vue';
 
-type Props = {
-    /** The founder's categories, in order, each with its skills. */
-    categories: SkillCategory[];
-};
-
-const props = defineProps<Props>();
+const props = defineProps<AdminSkillsIndexProps>();
 
 const skills = computed(() =>
     props.categories.flatMap((category) => category.skills),
@@ -55,7 +51,10 @@ defineOptions({
     },
 });
 
-const { items, move, saving } = useReorder<Skill>(() => skills.value, 'skills');
+const { items, move, saving } = useReorder<Skill>(
+    () => skills.value,
+    skillRoutes.reorder().url,
+);
 
 /** Create and edit happen in a modal, so the list stays in view. */
 const dialogOpen = ref(false);

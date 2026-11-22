@@ -4,7 +4,8 @@ import { AlertCircle, ArrowLeft, ArrowRight, Check, Save } from '@lucide/vue';
 import { computed, nextTick, ref, watch } from 'vue';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { FormTab } from './types';
+import type { FormTabsProps } from '@/types';
+import type { FormTab } from '@/types';
 
 /**
  * Splits a long admin form into tabs, so each screen shows one topic instead
@@ -19,15 +20,8 @@ import type { FormTab } from './types';
  * Use inside an Inertia <Form v-slot="{ errors, processing }"> and pass both.
  * Panel content goes in `#tab-<id>` slots.
  */
-type Props = {
-    tabs: FormTab[];
-    errors?: Record<string, string>;
-    processing?: boolean;
-    submitLabel?: string;
-    cancelHref?: string | null;
-};
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<FormTabsProps>(), {
     errors: () => ({}),
     processing: false,
     submitLabel: 'Save changes',

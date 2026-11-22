@@ -3,6 +3,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { loadLiquid } from '@/composables/useLiquid';
 import type { LiquidHandle } from '@/lib/liquid/engine';
 import { cn } from '@/lib/utils';
+import type { LiquidImageProps } from '@/types';
 
 /**
  * An image that turns liquid: it ripples from the pointer on hover and bends
@@ -13,15 +14,8 @@ import { cn } from '@/lib/utils';
  * with reduced motion get. Once the WebGL copy has drawn its first frame the
  * <img> fades out underneath it and stays in place for accessibility.
  */
-type Props = {
-    src: string;
-    alt?: string;
-    class?: string;
-    imgClass?: string;
-    eager?: boolean;
-};
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<LiquidImageProps>(), {
     alt: '',
     class: undefined,
     imgClass: undefined,

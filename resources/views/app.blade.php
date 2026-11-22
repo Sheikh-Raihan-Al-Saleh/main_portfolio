@@ -31,7 +31,7 @@
         </style>
 
         {{-- Favicon: the studio's logo mark when one is uploaded, else the bundled icon. --}}
-        @php($brand = app(\App\Services\StudioService::class)->brand())
+        @php($brand = app(\App\Services\Studio\StudioService::class)->brand())
         @if ($brand['logo_mark_url'])
             <link rel="icon" href="{{ $brand['logo_mark_url'] }}">
             <link rel="apple-touch-icon" href="{{ $brand['logo_mark_url'] }}">

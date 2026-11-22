@@ -10,6 +10,10 @@ import { useBrand } from '@/composables/useSite';
 import { useSiteScope } from '@/composables/useSiteScope';
 import { EASE_OUT } from '@/lib/motion';
 import { home } from '@/routes';
+import type {
+    AuthEditorialLayoutProps,
+    AuthEditorialLayoutShowcase,
+} from '@/types';
 
 /**
  * The frame for every sign-in page (log in, forgot / reset password,
@@ -22,19 +26,15 @@ import { home } from '@/routes';
  * The brand comes from the shared `brand` prop; the covers from the
  * `showcase` prop the Fortify views pass (FortifyServiceProvider).
  */
-defineProps<{
-    title?: string;
-    description?: string;
-}>();
+defineProps<AuthEditorialLayoutProps>();
 
 useSiteScope('studio');
-
-type Showcase = { title: string; cover: string }[];
 
 const page = usePage();
 const brand = useBrand();
 const showcase = computed(
-    () => (page.props.showcase as Showcase | undefined) ?? [],
+    () =>
+        (page.props.showcase as AuthEditorialLayoutShowcase | undefined) ?? [],
 );
 const hovered = ref<string | null>(null);
 

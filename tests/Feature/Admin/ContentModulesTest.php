@@ -10,7 +10,7 @@ use App\Models\ProjectLandingPage;
 use App\Models\Skill;
 use App\Models\SkillCategory;
 use App\Models\Technology;
-use App\Services\FounderService;
+use App\Services\Founder\FounderService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -122,24 +122,24 @@ test('technologies are unique by slug', function () {
 
 // --- Reorder -----------------------------------------------------------------
 
-test('any sortable list can be reordered', function () {
+test('a module list can be reordered through its own route', function () {
     [$a, $b, $c] = Project::factory()->count(3)->create()->all();
 
-    $this->actingAs($this->admin)->post('/admin/reorder/projects', ['ids' => [$c->id, $a->id, $b->id]])->assertRedirect();
+    $this->actingAs($this->admin)->post('/admin/projects/reorder', ['ids' => [$c->id, $a->id, $b->id]])->assertRedirect();
 
     expect(Project::query()->orderBy('sort_order')->pluck('id')->all())->toBe([$c->id, $a->id, $b->id]);
 });
 
-test('reordering rejects unknown lists and mixed parents', function () {
-    $this->actingAs($this->admin)->post('/admin/reorder/users', ['ids' => [1]])->assertNotFound();
-
+test('reordering blocks only moves blocks of the same page', function () {
     $first = ProjectLandingPage::factory()->create();
     $second = ProjectLandingPage::factory()->create();
-    $x = LandingSection::factory()->create(['sectionable_id' => $first->id]);
-    $y = LandingSection::factory()->create(['sectionable_id' => $second->id]);
+    $x = LandingSection::factory()->create(['sectionable_id' => $first->id, 'sort_order' => 5]);
+    $y = LandingSection::factory()->create(['sectionable_id' => $second->id, 'sort_order' => 5]);
 
-    $this->actingAs($this->admin)->post('/admin/reorder/landing-sections', ['ids' => [$x->id, $y->id]])
-        ->assertSessionHasErrors('ids');
+    $this->actingAs($this->admin)->post('/admin/landing-sections/reorder', ['ids' => [$x->id, $y->id]])->assertRedirect();
+
+    expect($x->fresh()->sort_order)->toBe(0)
+        ->and($y->fresh()->sort_order)->toBe(5);
 });
 
 // --- Messages ----------------------------------------------------------------
@@ -168,7 +168,7 @@ test('the dashboard reports stats, activity and completeness', function () {
     $this->actingAs($this->admin)->get('/admin')
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('admin/Dashboard')
+            ->component('admin/dashboard/Index')
             ->where('stats.projects', 3)
             ->where('stats.publishedProjects', 2)
             ->where('stats.unreadMessages', 2)

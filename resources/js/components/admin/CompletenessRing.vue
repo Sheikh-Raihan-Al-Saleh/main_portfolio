@@ -1,21 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { CompletenessRingProps } from '@/types';
 
 /**
  * A single completeness score: a progress ring with the percentage in the
  * middle and the missing fields listed underneath, each linking to the page
  * that fixes it. Pure SVG, no dependencies.
  */
-type Props = {
-    label: string;
-    percent: number;
-    missing: string[];
-    /** Route the "fix" links point at; missing items append to it. */
-    href: string;
-    size?: number;
-};
 
-const props = withDefaults(defineProps<Props>(), { size: 120 });
+const props = withDefaults(defineProps<CompletenessRingProps>(), { size: 120 });
 
 const radius = computed(() => (props.size - 16) / 2);
 const circumference = computed(() => 2 * Math.PI * radius.value);

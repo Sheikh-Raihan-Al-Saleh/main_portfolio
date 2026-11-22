@@ -4,16 +4,12 @@ import SmartImage from '@/components/media/SmartImage.vue';
 import Reveal from '@/components/site/Reveal.vue';
 import SectionHeading from '@/components/site/SectionHeading.vue';
 import { monthYear, yearRange } from '@/lib/text';
-import type { Education, Experience, SectionCopy } from '@/types';
+import type { ExperienceSectionProps } from '@/types';
 
 /**
  * Work history as an editorial timeline, followed by education.
  */
-defineProps<{
-    copy: SectionCopy;
-    experiences: Experience[];
-    educations: Education[];
-}>();
+defineProps<ExperienceSectionProps>();
 </script>
 
 <template>

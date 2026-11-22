@@ -7,13 +7,9 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import type { LandingSection } from '@/types';
+import type { FaqSectionProps } from '@/types';
 
-type Props = {
-    section: Extract<LandingSection, { type: 'faq' }>;
-    anchor?: string;
-};
-const props = defineProps<Props>();
+const props = defineProps<FaqSectionProps>();
 const items = computed(() => props.section.data.items ?? []);
 </script>
 

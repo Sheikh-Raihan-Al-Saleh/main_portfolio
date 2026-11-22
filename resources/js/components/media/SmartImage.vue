@@ -2,25 +2,15 @@
 import { ImageOff } from '@lucide/vue';
 import { ref, watch } from 'vue';
 import { cn } from '@/lib/utils';
+import type { SmartImageProps } from '@/types';
 
 /**
  * An image that always shows something sensible: a soft placeholder while it
  * loads, and a neutral fallback if the file is missing or broken, instead of
  * the browser's broken-image icon.
  */
-type Props = {
-    src: string | null | undefined;
-    alt: string;
-    /** CSS aspect-ratio for the frame, e.g. "16/10". Omit to size by content. */
-    ratio?: string;
-    /** object-fit for the image. */
-    fit?: 'cover' | 'contain';
-    eager?: boolean;
-    class?: string;
-    imgClass?: string;
-};
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<SmartImageProps>(), {
     ratio: undefined,
     fit: 'cover',
     eager: false,

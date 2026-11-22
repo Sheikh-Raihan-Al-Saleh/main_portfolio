@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { FounderContent } from '@/types';
+import type { ContentEditorProps } from '@/types';
 
 /**
  * Editor for the founder page's fixed copy (section headings and labels).
@@ -11,7 +12,7 @@ import type { FounderContent } from '@/types';
  * (FounderDefaults::content()), so every field is present and pre-filled.
  * Fields post as content[...] alongside the rest of the founder form.
  */
-defineProps<{ content: FounderContent }>();
+defineProps<ContentEditorProps>();
 
 const sections: { key: keyof FounderContent['sections']; label: string }[] = [
     { key: 'about', label: 'About' },

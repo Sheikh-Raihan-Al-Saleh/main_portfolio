@@ -2,18 +2,14 @@
 import { Motion } from 'motion-v';
 import { computed } from 'vue';
 import { EASE_OUT, inViewOnce } from '@/lib/motion';
+import type { RevealProps } from '@/types';
 
 /**
  * Fades its content up into place the first time it scrolls into view.
  * `as` sets the element, so a revealed item can be a real <li> inside a list.
  */
-type Props = {
-    delay?: number;
-    y?: number;
-    as?: 'div' | 'li' | 'section' | 'article' | 'span';
-};
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<RevealProps>(), {
     delay: 0,
     y: 24,
     as: 'div',

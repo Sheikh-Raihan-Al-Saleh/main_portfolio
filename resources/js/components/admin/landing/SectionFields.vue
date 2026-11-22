@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from '@lucide/vue';
 import MediaUploadField from '@/components/admin/landing/MediaUploadField.vue';
-import type { Field } from '@/components/admin/landing/sectionSchema';
 import TagInput from '@/components/admin/TagInput.vue';
-import InputError from '@/components/InputError.vue';
+import InputError from '@/components/common/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,16 +15,12 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import type { Field } from '@/types';
+import type { SectionFieldsProps } from '@/types';
 
-type Props = {
-    fields: Field[];
-    /** Laravel validation errors, keyed as `data.items.0.title`. */
-    errors: Record<string, string>;
-    /** Error-key prefix for the current nesting level. */
-    prefix?: string;
-};
-
-const props = withDefaults(defineProps<Props>(), { prefix: 'data' });
+const props = withDefaults(defineProps<SectionFieldsProps>(), {
+    prefix: 'data',
+});
 
 /** The `data` payload being edited, owned by the parent via v-model. */
 const model = defineModel<Record<string, unknown>>({ required: true });

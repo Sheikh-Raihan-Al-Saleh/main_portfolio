@@ -3,7 +3,7 @@ import { Head } from '@inertiajs/vue3';
 import { Briefcase, Pencil, Plus } from '@lucide/vue';
 import { motion } from 'motion-v';
 import { ref } from 'vue';
-import ExperienceController from '@/actions/App/Http/Controllers/Admin/ExperienceController';
+import ExperienceController from '@/actions/App/Http/Controllers/Experience/ExperienceController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
 import FormDialog from '@/components/admin/form/FormDialog.vue';
@@ -22,13 +22,10 @@ import { useReorder } from '@/composables/useReorder';
 import { fadeUp } from '@/lib/motion';
 import experienceRoutes from '@/routes/admin/experiences';
 import type { Experience } from '@/types';
+import type { AdminExperiencesIndexProps } from '@/types';
 import ExperienceForm from './ExperienceForm.vue';
 
-type Props = {
-    experiences: Experience[];
-};
-
-const props = defineProps<Props>();
+const props = defineProps<AdminExperiencesIndexProps>();
 
 defineOptions({
     layout: {
@@ -38,7 +35,7 @@ defineOptions({
 
 const { items, move, saving } = useReorder<Experience>(
     () => props.experiences,
-    'experiences',
+    experienceRoutes.reorder().url,
 );
 
 function period(experience: Experience): string {

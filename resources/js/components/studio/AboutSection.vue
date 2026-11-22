@@ -7,12 +7,12 @@ import SectionHeading from '@/components/site/SectionHeading.vue';
 import { useSite } from '@/composables/useSite';
 import { paragraphs } from '@/lib/text';
 import { about } from '@/routes';
-import type { AboutContent } from '@/types';
+import type { AboutSectionProps } from '@/types';
 
 /**
  * 05 — The studio in its own words: bio, mission and founding facts.
  */
-defineProps<{ content: AboutContent }>();
+defineProps<AboutSectionProps>();
 
 const { studio } = useSite();
 

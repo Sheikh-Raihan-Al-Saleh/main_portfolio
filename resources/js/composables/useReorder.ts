@@ -1,29 +1,16 @@
 import { router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import type { Ref } from 'vue';
-import { reorder } from '@/routes/admin';
-
 type Identifiable = { id: number };
 
-/** The sortable lists (App\Services\ReorderService::TYPES). */
-export type ReorderList =
-    | 'projects'
-    | 'project-images'
-    | 'landing-sections'
-    | 'clients'
-    | 'skill-categories'
-    | 'skills'
-    | 'experiences'
-    | 'educations';
-
 /**
- * Keeps a locally reorderable copy of a list and saves the new order through
- * the shared reorder endpoint. The list updates optimistically so the move
- * feels instant.
+ * Keeps a locally reorderable copy of a list and saves the new order to the
+ * module's reorder route (e.g. `projects.reorder().url`). The list updates
+ * immediately, so moving an item feels instant.
  */
 export function useReorder<T extends Identifiable>(
     source: () => T[],
-    list: ReorderList,
+    reorderUrl: string,
 ): {
     items: Ref<T[]>;
     move: (index: number, direction: -1 | 1) => void;
@@ -52,7 +39,7 @@ export function useReorder<T extends Identifiable>(
         saving.value = true;
 
         router.post(
-            reorder(list).url,
+            reorderUrl,
             { ids: next.map((item) => item.id) },
             {
                 preserveScroll: true,

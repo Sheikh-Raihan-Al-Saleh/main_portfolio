@@ -1,17 +1,12 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import ProjectController from '@/actions/App/Http/Controllers/Admin/ProjectController';
+import ProjectController from '@/actions/App/Http/Controllers/Project/ProjectController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import projects from '@/routes/admin/projects';
-import type { SelectOption } from '@/types';
+import type { AdminProjectsCreateProps } from '@/types';
 import ProjectForm from './ProjectForm.vue';
 
-type Props = {
-    owners: SelectOption[];
-    technologyOptions: string[];
-};
-
-defineProps<Props>();
+defineProps<AdminProjectsCreateProps>();
 
 defineOptions({
     layout: {

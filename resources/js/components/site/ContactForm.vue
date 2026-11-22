@@ -2,21 +2,16 @@
 import { Form } from '@inertiajs/vue3';
 import { ArrowUpRight } from '@lucide/vue';
 import { ref } from 'vue';
-import ContactController from '@/actions/App/Http/Controllers/Public/ContactController';
-import InputError from '@/components/InputError.vue';
+import ContactController from '@/actions/App/Http/Controllers/Contact/ContactController';
+import InputError from '@/components/common/InputError.vue';
+import type { ContactFormProps } from '@/types';
 
 /**
  * The public contact form, used by both faces of the site. `site` records
  * which one the enquiry came from, so it reaches the right inbox.
  */
-type Props = {
-    site: 'studio' | 'founder';
-    messagePlaceholder?: string;
-    submitLabel?: string;
-    replyNote?: string | null;
-};
 
-withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<ContactFormProps>(), {
     messagePlaceholder: 'A few lines about what you have in mind…',
     submitLabel: 'Send message',
     replyNote: null,

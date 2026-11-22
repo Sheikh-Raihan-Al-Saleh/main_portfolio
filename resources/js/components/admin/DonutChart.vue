@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { DonutChartProps } from '@/types';
 
 /**
  * A small donut chart drawn as plain SVG strokes.
@@ -7,18 +8,8 @@ import { computed } from 'vue';
  * Same rationale as LineChart: one visual, no library. Each slice is a
  * stroke-dasharray circle segment; the legend doubles as the data table.
  */
-type Props = {
-    slices: {
-        label: string;
-        value: number;
-        color: string;
-    }[];
-    /** Label in the hole; defaults to the total. */
-    centerLabel?: string;
-    size?: number;
-};
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<DonutChartProps>(), {
     centerLabel: undefined,
     size: 148,
 });

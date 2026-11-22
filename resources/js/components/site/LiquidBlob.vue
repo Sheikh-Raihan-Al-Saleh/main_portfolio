@@ -3,17 +3,17 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { loadLiquid } from '@/composables/useLiquid';
 import type { LiquidHandle } from '@/lib/liquid/engine';
 import { cn } from '@/lib/utils';
+import type { LiquidBlobProps } from '@/types';
 
 /**
  * A flowing liquid shape in the face's accent colour, for heroes. Drawn by
  * the shared WebGL engine; until then, and for visitors without WebGL or with
  * reduced motion, a soft CSS gradient in the same colour holds its place.
  */
-type Props = {
-    class?: string;
-};
 
-const props = withDefaults(defineProps<Props>(), { class: undefined });
+const props = withDefaults(defineProps<LiquidBlobProps>(), {
+    class: undefined,
+});
 
 const host = ref<HTMLElement | null>(null);
 const surface = ref<HTMLCanvasElement | null>(null);

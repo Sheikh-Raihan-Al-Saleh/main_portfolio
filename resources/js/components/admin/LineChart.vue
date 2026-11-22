@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useId } from 'vue';
+import type { LineChartProps } from '@/types';
 
 /**
  * A small area/line chart drawn as plain SVG.
@@ -10,17 +11,8 @@ import { useId } from 'vue';
  * mapped to a path here — no dependencies, no runtime beyond the path math,
  * and the hover dots are plain circles with native tooltips via <title>.
  */
-type Props = {
-    labels: string[];
-    series: {
-        name: string;
-        values: number[];
-        color: string;
-    }[];
-    height?: number;
-};
 
-const props = withDefaults(defineProps<Props>(), { height: 180 });
+const props = withDefaults(defineProps<LineChartProps>(), { height: 180 });
 
 const width = 600;
 const pad = { top: 12, right: 8, bottom: 22, left: 28 };

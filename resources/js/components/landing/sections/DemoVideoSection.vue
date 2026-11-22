@@ -5,13 +5,9 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
 import { mediaUrl } from '@/lib/media';
 import { scaleIn } from '@/lib/motion';
-import type { LandingSection } from '@/types';
+import type { DemoVideoSectionProps } from '@/types';
 
-type Props = {
-    section: Extract<LandingSection, { type: 'demo_video' }>;
-    anchor?: string;
-};
-const props = defineProps<Props>();
+const props = defineProps<DemoVideoSectionProps>();
 const data = computed(() => props.section.data);
 const posterUrl = computed(() => mediaUrl(data.value.poster_path));
 const videoUrl = computed(() => mediaUrl(data.value.video_path));

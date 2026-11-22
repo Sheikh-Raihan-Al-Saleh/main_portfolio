@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Studio;
-use App\Support\StudioDefaults;
+use App\Support\Defaults\StudioDefaults;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 

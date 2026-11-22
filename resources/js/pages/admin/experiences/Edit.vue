@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import ExperienceController from '@/actions/App/Http/Controllers/Admin/ExperienceController';
+import ExperienceController from '@/actions/App/Http/Controllers/Experience/ExperienceController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import experiences from '@/routes/admin/experiences';
-import type { Experience } from '@/types';
+import type { AdminExperiencesEditProps } from '@/types';
 import ExperienceForm from './ExperienceForm.vue';
 
-type Props = {
-    experience: Experience;
-};
-
-defineProps<Props>();
+defineProps<AdminExperiencesEditProps>();
 
 defineOptions({
     layout: {

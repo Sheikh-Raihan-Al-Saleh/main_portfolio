@@ -43,3 +43,32 @@ for (const [name, path] of pages) {
         });
     });
 }
+
+const adminPages = [
+    ['admin-dashboard', '/admin'],
+    ['admin-studio', '/admin/studio'],
+    ['admin-founder', '/admin/founder'],
+    ['admin-projects', '/admin/projects'],
+    ['admin-project-edit', '/admin/projects/create'],
+    ['admin-skills', '/admin/skills'],
+    ['admin-technologies', '/admin/technologies'],
+] as const;
+
+test('screenshot admin pages', async ({ page }, info) => {
+    test.skip(
+        !dir || info.project.name !== 'desktop',
+        'Desktop only, with SCREENSHOT_DIR.',
+    );
+
+    await page.goto('/login');
+    await page.getByLabel('Email address').fill('e2e-admin@example.test');
+    await page.getByLabel('Password', { exact: true }).fill('e2e-password-123');
+    await page.getByRole('button', { name: 'Log in' }).click();
+    await page.waitForURL(/\/admin$/);
+
+    for (const [name, path] of adminPages) {
+        await page.goto(path);
+        await settle(page);
+        await page.screenshot({ path: `${dir}/${name}.png`, fullPage: true });
+    }
+});

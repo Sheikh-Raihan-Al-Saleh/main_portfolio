@@ -2,23 +2,12 @@
 import { X } from '@lucide/vue';
 import { ref, useId } from 'vue';
 import { Input } from '@/components/ui/input';
+import type { TagInputEmits, TagInputProps } from '@/types';
 
-type Props = {
-    /**
-     * Form field name; values are submitted as `name[]`. Optional, because
-     * callers that read the list through `v-model` submit it themselves.
-     */
-    name?: string;
-    modelValue?: string[] | null;
-    placeholder?: string;
-    /** Known values offered while typing (a native datalist). */
-    suggestions?: string[];
-};
-
-const props = defineProps<Props>();
+const props = defineProps<TagInputProps>();
 
 /** Emitted alongside the hidden inputs, so the component works either way. */
-const emit = defineEmits<{ 'update:modelValue': [string[]] }>();
+const emit = defineEmits<TagInputEmits>();
 
 const tags = ref<string[]>([...(props.modelValue ?? [])]);
 const listId = `tag-suggestions-${useId()}`;

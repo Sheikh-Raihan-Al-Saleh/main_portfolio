@@ -4,29 +4,29 @@ import FileField from '@/components/admin/FileField.vue';
 import FieldGroup from '@/components/admin/form/FieldGroup.vue';
 import FormFooter from '@/components/admin/form/FormFooter.vue';
 import TagInput from '@/components/admin/TagInput.vue';
-import InputError from '@/components/InputError.vue';
+import InputError from '@/components/common/InputError.vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import experiences from '@/routes/admin/experiences';
-import type { Experience } from '@/types';
+import type {
+    AdminExperiencesExperienceFormEmits,
+    AdminExperiencesExperienceFormProps,
+} from '@/types';
 
 /**
  * The experience form, grouped into role, dates, details and logo. Renders
  * as a card on its own page, or as the body of a modal on the list page
  * (`mode="dialog"`), where it emits `saved` / `cancel` instead of linking.
  */
-type Props = {
-    experience?: Experience;
-    action: Record<string, unknown>;
-    submitLabel: string;
-    mode?: 'page' | 'dialog';
-};
 
-withDefaults(defineProps<Props>(), { experience: undefined, mode: 'page' });
+withDefaults(defineProps<AdminExperiencesExperienceFormProps>(), {
+    experience: undefined,
+    mode: 'page',
+});
 
-const emit = defineEmits<{ saved: []; cancel: [] }>();
+const emit = defineEmits<AdminExperiencesExperienceFormEmits>();
 
 function dateValue(value: string | null | undefined): string {
     return value ? value.slice(0, 10) : '';

@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
+import type { DeviceFrameProps } from '@/types';
 
-type Props = {
-    variant?: 'phone' | 'tablet' | 'laptop';
-    class?: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<DeviceFrameProps>(), {
     variant: 'phone',
     class: undefined,
 });

@@ -6,20 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { oversizedFileMessage } from '@/lib/media';
+import type { FileFieldProps } from '@/types';
 
-type Props = {
-    name: string;
-    label: string;
-    /** Name of the companion boolean field that clears the stored file. */
-    removeName?: string;
-    currentUrl?: string | null;
-    accept?: string;
-    hint?: string;
-    /** Render the existing file as an image preview rather than a filename. */
-    preview?: boolean;
-};
-
-const props = defineProps<Props>();
+const props = defineProps<FileFieldProps>();
 
 const page = usePage();
 const previewUrl = ref<string | null>(props.currentUrl ?? null);

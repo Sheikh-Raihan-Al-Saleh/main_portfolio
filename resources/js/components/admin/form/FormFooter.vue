@@ -3,25 +3,20 @@ import { Link } from '@inertiajs/vue3';
 import { Save } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import type { FormFooterEmits, FormFooterProps } from '@/types';
 
 /**
  * The action row at the bottom of a short form. On a page it links back to
  * the list; in a modal it asks the modal to close instead.
  */
-type Props = {
-    processing?: boolean;
-    submitLabel: string;
-    mode?: 'page' | 'dialog';
-    cancelHref?: string;
-};
 
-withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<FormFooterProps>(), {
     processing: false,
     mode: 'page',
     cancelHref: undefined,
 });
 
-const emit = defineEmits<{ cancel: [] }>();
+const emit = defineEmits<FormFooterEmits>();
 </script>
 
 <template>

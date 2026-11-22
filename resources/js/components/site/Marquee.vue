@@ -1,22 +1,16 @@
 <script setup lang="ts">
+import type { MarqueeProps } from '@/types';
+
 /**
  * An endless horizontal ticker. The slot is rendered twice so the loop is
  * seamless; the copy is hidden from assistive technology and inert. Pauses on hover
  * and stops for visitors who prefer reduced motion (site.css).
  */
-withDefaults(
-    defineProps<{
-        /** Seconds for one full loop. */
-        duration?: number;
-        gap?: string;
-        reverse?: boolean;
-    }>(),
-    {
-        duration: 40,
-        gap: '3rem',
-        reverse: false,
-    },
-);
+withDefaults(defineProps<MarqueeProps>(), {
+    duration: 40,
+    gap: '3rem',
+    reverse: false,
+});
 </script>
 
 <template>

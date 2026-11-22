@@ -3,8 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\Founder;
-use App\Services\StudioService;
-use App\Support\FounderDefaults;
+use App\Services\Studio\StudioService;
+use App\Support\Defaults\FounderDefaults;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 

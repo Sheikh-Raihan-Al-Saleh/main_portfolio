@@ -4,42 +4,24 @@ import { ArrowUpRight } from '@lucide/vue';
 import ProjectGrid from '@/components/project/ProjectGrid.vue';
 import Reveal from '@/components/site/Reveal.vue';
 import SectionHeading from '@/components/site/SectionHeading.vue';
-import type { ProjectCard } from '@/types';
+import type { WorkSectionProps } from '@/types';
 
 /**
  * A titled block of project cards with a link to the full archive. Used for
  * the studio's selected work and the founder's own work.
  */
-withDefaults(
-    defineProps<{
-        id?: string;
-        index?: string | null;
-        eyebrow: string;
-        title: string;
-        highlight?: string | null;
-        description?: string | null;
-        projects: ProjectCard[];
-        total?: number;
-        archiveHref?: string;
-        archiveLabel?: string;
-        emptyText?: string;
-        feature?: boolean;
-        /** Show the archive link even when every project is already listed. */
-        alwaysShowArchive?: boolean;
-    }>(),
-    {
-        id: undefined,
-        index: null,
-        highlight: null,
-        description: null,
-        total: 0,
-        archiveHref: undefined,
-        archiveLabel: 'View all work',
-        emptyText: 'No published work yet.',
-        feature: true,
-        alwaysShowArchive: false,
-    },
-);
+withDefaults(defineProps<WorkSectionProps>(), {
+    id: undefined,
+    index: null,
+    highlight: null,
+    description: null,
+    total: 0,
+    archiveHref: undefined,
+    archiveLabel: 'View all work',
+    emptyText: 'No published work yet.',
+    feature: true,
+    alwaysShowArchive: false,
+});
 </script>
 
 <template>

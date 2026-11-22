@@ -4,7 +4,7 @@ import { router } from '@inertiajs/vue3';
 import { computed, reactive, ref, watch } from 'vue';
 import SectionFields from '@/components/admin/landing/SectionFields.vue';
 import { sectionSchemas } from '@/components/admin/landing/sectionSchema';
-import InputError from '@/components/InputError.vue';
+import InputError from '@/components/common/InputError.vue';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -18,25 +18,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import type { LandingSection, LandingSectionType } from '@/types';
+import type { LandingSectionType, SectionEditorDialogEmits } from '@/types';
+import type { SectionEditorDialogProps } from '@/types';
 
-type Props = {
-    open: boolean;
-    /**
-     * The page a new section is added to: the studio home page, or the
-     * landing page of the project given by `projectId`.
-     */
-    owner: 'studio' | 'project';
-    projectId?: number | null;
-    /** Editing an existing section, or null when adding a new one. */
-    section: LandingSection | null;
-    /** Type for a new section. Ignored when `section` is provided. */
-    type: LandingSectionType | null;
-};
+const props = defineProps<SectionEditorDialogProps>();
 
-const props = defineProps<Props>();
-
-const emit = defineEmits<{ 'update:open': [boolean]; saved: [] }>();
+const emit = defineEmits<SectionEditorDialogEmits>();
 
 const activeType = computed<LandingSectionType | null>(
     () => props.section?.type ?? props.type,

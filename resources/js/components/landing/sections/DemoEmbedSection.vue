@@ -8,13 +8,9 @@ import SectionShell from '@/components/landing/SectionShell.vue';
 import { Button } from '@/components/ui/button';
 import { scaleIn } from '@/lib/motion';
 import { cn } from '@/lib/utils';
-import type { LandingSection } from '@/types';
+import type { DemoEmbedSectionProps } from '@/types';
 
-type Props = {
-    section: Extract<LandingSection, { type: 'demo_embed' }>;
-    anchor?: string;
-};
-const props = defineProps<Props>();
+const props = defineProps<DemoEmbedSectionProps>();
 const data = computed(() => props.section.data);
 const activated = ref(false);
 const wrapper = ref<HTMLElement | null>(null);

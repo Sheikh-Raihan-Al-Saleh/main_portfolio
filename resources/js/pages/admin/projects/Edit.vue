@@ -1,20 +1,14 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import { ExternalLink } from '@lucide/vue';
-import ProjectController from '@/actions/App/Http/Controllers/Admin/ProjectController';
+import ProjectController from '@/actions/App/Http/Controllers/Project/ProjectController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import { Button } from '@/components/ui/button';
 import projects from '@/routes/admin/projects';
-import type { Project, SelectOption } from '@/types';
+import type { AdminProjectsEditProps } from '@/types';
 import ProjectForm from './ProjectForm.vue';
 
-type Props = {
-    project: Project;
-    owners: SelectOption[];
-    technologyOptions: string[];
-};
-
-defineProps<Props>();
+defineProps<AdminProjectsEditProps>();
 
 defineOptions({
     layout: {

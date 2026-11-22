@@ -3,24 +3,14 @@ import { computed } from 'vue';
 import Reveal from '@/components/site/Reveal.vue';
 import { highlightParts } from '@/lib/text';
 import { cn } from '@/lib/utils';
+import type { SectionHeadingProps } from '@/types';
 
 /**
  * The editorial section opener: a numbered eyebrow, a serif headline with
  * one highlighted phrase, and an optional lead paragraph.
  */
-type Props = {
-    eyebrow?: string | null;
-    title: string;
-    highlight?: string | null;
-    description?: string | null;
-    /** Chapter number shown before the eyebrow, e.g. "01". */
-    index?: string | null;
-    align?: 'left' | 'split';
-    size?: 'md' | 'lg';
-    class?: string;
-};
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<SectionHeadingProps>(), {
     eyebrow: null,
     highlight: null,
     description: null,

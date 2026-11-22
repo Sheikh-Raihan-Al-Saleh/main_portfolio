@@ -7,8 +7,8 @@ use App\Models\LandingSection;
 use App\Models\Project;
 use App\Models\ProjectLandingPage;
 use App\Models\Skill;
-use App\Services\FounderService;
-use App\Services\StudioService;
+use App\Services\Founder\FounderService;
+use App\Services\Studio\StudioService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -24,7 +24,7 @@ test('the studio home page shows studio work, founder work, clients and blocks',
     $this->get('/')
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('public/Home')
+            ->component('public/home/Index')
             ->has('projects', 2)
             ->where('totalProjects', 2)
             ->has('founderProjects', 1)
@@ -46,7 +46,7 @@ test('the about page renders the studio story and clients', function () {
     $this->get('/about')
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('public/About')
+            ->component('public/about/Index')
             ->has('clients', 2)
             ->where('stats.clients', 2),
         );
@@ -64,7 +64,7 @@ test('the founder page shows only personal work and the full history', function 
     $this->get('/founder')
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('public/Founder')
+            ->component('public/founder/Index')
             ->has('projects', 2)
             ->has('skillGroups', 1)
             ->has('skillGroups.0.skills', 3)
@@ -83,7 +83,7 @@ test('the archive lists every published project and seeds the filters', function
     $this->get('/projects?tech=laravel&owner=founder')
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('public/Projects')
+            ->component('public/projects/Index')
             ->has('projects', 2)
             ->where('filters.tech', 'laravel')
             ->where('filters.owner', 'founder'),
@@ -101,7 +101,7 @@ test('a project page shows the gallery and related work', function () {
     $this->get("/projects/{$project->slug}")
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('public/ProjectShow')
+            ->component('public/projects/Show')
             ->where('project.slug', $project->slug)
             ->where('project.images.0.url', '/uploads/projects/gallery/a.jpg')
             ->has('related', 1),

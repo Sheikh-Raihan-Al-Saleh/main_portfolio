@@ -3,7 +3,7 @@ import { Head } from '@inertiajs/vue3';
 import { GraduationCap, Pencil, Plus } from '@lucide/vue';
 import { motion } from 'motion-v';
 import { ref } from 'vue';
-import EducationController from '@/actions/App/Http/Controllers/Admin/EducationController';
+import EducationController from '@/actions/App/Http/Controllers/Education/EducationController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
 import FormDialog from '@/components/admin/form/FormDialog.vue';
@@ -21,13 +21,10 @@ import { useReorder } from '@/composables/useReorder';
 import { fadeUp } from '@/lib/motion';
 import educationRoutes from '@/routes/admin/educations';
 import type { Education } from '@/types';
+import type { AdminEducationsIndexProps } from '@/types';
 import EducationForm from './EducationForm.vue';
 
-type Props = {
-    educations: Education[];
-};
-
-const props = defineProps<Props>();
+const props = defineProps<AdminEducationsIndexProps>();
 
 defineOptions({
     layout: {
@@ -37,7 +34,7 @@ defineOptions({
 
 const { items, move, saving } = useReorder<Education>(
     () => props.educations,
-    'educations',
+    educationRoutes.reorder().url,
 );
 
 function period(education: Education): string {

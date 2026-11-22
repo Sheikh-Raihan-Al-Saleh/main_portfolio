@@ -2,6 +2,7 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { defineAsyncComponent } from 'vue';
 import { initializeTheme } from '@/composables/useAppearance';
 import PublicLayout from '@/layouts/PublicLayout.vue';
+import { pageTitle, trackBrandName } from '@/lib/brandTitle';
 import { initializeFlashToast } from '@/lib/flashToast';
 
 // Only the public shell ships in the entry bundle. The admin, auth and
@@ -15,10 +16,8 @@ const SettingsLayout = defineAsyncComponent(
     () => import('@/layouts/settings/Layout.vue'),
 );
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
-
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: pageTitle,
     layout: (name) => {
         switch (true) {
             case name.startsWith('public/'):
@@ -35,6 +34,9 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
+
+// Page titles end with the company name, kept current on every visit.
+trackBrandName();
 
 // This will set light / dark mode on page load...
 initializeTheme();

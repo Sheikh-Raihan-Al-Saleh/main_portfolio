@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { useBrand } from '@/composables/useSite';
 import { cn } from '@/lib/utils';
+import type { BrandLogoProps } from '@/types';
 
 /**
  * The company logo, used everywhere the brand appears (header, footer,
@@ -11,18 +12,8 @@ import { cn } from '@/lib/utils';
  * When no logo is uploaded, or the file fails to load, a typographic wordmark
  * built from the name is shown instead, so the brand is never blank.
  */
-type Props = {
-    /** Full logo, or the square mark (also the favicon). */
-    variant?: 'full' | 'mark';
-    size?: 'sm' | 'md' | 'lg' | 'xl' | 'hero';
-    /** "dark" picks the logo made for dark backgrounds, if one was uploaded. */
-    tone?: 'light' | 'dark';
-    /** Show the name next to a mark-only logo. */
-    withName?: boolean;
-    class?: string;
-};
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<BrandLogoProps>(), {
     variant: 'full',
     size: 'md',
     tone: 'light',

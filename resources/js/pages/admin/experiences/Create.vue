@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import ExperienceController from '@/actions/App/Http/Controllers/Admin/ExperienceController';
+import ExperienceController from '@/actions/App/Http/Controllers/Experience/ExperienceController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import experiences from '@/routes/admin/experiences';
 import ExperienceForm from './ExperienceForm.vue';

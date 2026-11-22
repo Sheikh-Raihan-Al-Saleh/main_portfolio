@@ -5,18 +5,22 @@
 | Web routes
 |--------------------------------------------------------------------------
 |
-| The single entry point for every browser route. Each module keeps its
-| routes in its own file under routes/modules; this file only wires them in.
+| Every module keeps its routes (public pages and admin panel) in its own
+| file under routes/modules. This file only loads them.
 |
-|   public.php   the studio site, the founder portfolio, contact form
-|   admin.php    the admin panel (requires routes/modules/admin/*.php)
-|   settings.php the signed-in admin's own account
-|
-| Authentication routes (login, password reset, two-factor) are registered
-| by Laravel Fortify.
+| Login, password reset and two-factor routes are registered by Fortify.
 |
 */
 
-require __DIR__.'/modules/public.php';
-require __DIR__.'/modules/admin.php';
-require __DIR__.'/modules/settings.php';
+require __DIR__.'/modules/studio.php';
+require __DIR__.'/modules/founder.php';
+require __DIR__.'/modules/project.php';
+require __DIR__.'/modules/landing-page.php';
+require __DIR__.'/modules/technology.php';
+require __DIR__.'/modules/client.php';
+require __DIR__.'/modules/skill.php';
+require __DIR__.'/modules/experience.php';
+require __DIR__.'/modules/education.php';
+require __DIR__.'/modules/contact.php';
+require __DIR__.'/modules/dashboard.php';
+require __DIR__.'/modules/account.php';

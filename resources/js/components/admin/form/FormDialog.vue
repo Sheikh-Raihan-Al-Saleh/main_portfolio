@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { Component } from 'vue';
 import {
     Dialog,
     DialogContent,
@@ -7,19 +6,15 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import type { FormDialogProps } from '@/types';
 
 /**
  * A modal for a short create / edit form, so the list it belongs to stays in
  * view. The form inside owns its footer; its body scrolls within the modal
  * while the header and the footer stay put.
  */
-type Props = {
-    title: string;
-    description?: string;
-    icon?: Component;
-};
 
-defineProps<Props>();
+defineProps<FormDialogProps>();
 
 const open = defineModel<boolean>('open', { default: false });
 </script>

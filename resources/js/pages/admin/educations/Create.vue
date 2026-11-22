@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import EducationController from '@/actions/App/Http/Controllers/Admin/EducationController';
+import EducationController from '@/actions/App/Http/Controllers/Education/EducationController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import educations from '@/routes/admin/educations';
 import EducationForm from './EducationForm.vue';

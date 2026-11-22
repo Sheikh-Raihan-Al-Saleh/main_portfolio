@@ -4,7 +4,7 @@ use App\Enums\LandingSectionType;
 use App\Models\LandingSection;
 use App\Models\Project;
 use App\Models\ProjectLandingPage;
-use App\Services\StudioService;
+use App\Services\Studio\StudioService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 

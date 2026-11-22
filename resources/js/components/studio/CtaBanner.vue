@@ -4,12 +4,12 @@ import { computed } from 'vue';
 import Reveal from '@/components/site/Reveal.vue';
 import { useSite } from '@/composables/useSite';
 import { highlightParts } from '@/lib/text';
-import type { CtaContent } from '@/types';
+import type { CtaBannerProps } from '@/types';
 
 /**
  * The closing call to action: one big line and one button.
  */
-const props = defineProps<{ content: CtaContent }>();
+const props = defineProps<CtaBannerProps>();
 
 const { studio } = useSite();
 

@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import { AlertCircle } from '@lucide/vue';
 import { computed } from 'vue';
+import type { ErrorListProps } from '@/types';
 
 /**
  * Lists validation errors under a key prefix (e.g. `footer.`), for nested
  * editors whose fields have no InputError of their own.
  */
-type Props = {
-    errors: Record<string, string>;
-    prefix: string;
-};
 
-const props = defineProps<Props>();
+const props = defineProps<ErrorListProps>();
 
 const messages = computed(() =>
     Object.entries(props.errors).filter(([key]) =>

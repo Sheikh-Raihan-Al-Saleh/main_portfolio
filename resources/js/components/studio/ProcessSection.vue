@@ -4,13 +4,13 @@ import { AnimatePresence, motion } from 'motion-v';
 import { ref } from 'vue';
 import SectionHeading from '@/components/site/SectionHeading.vue';
 import { resolveIcon } from '@/lib/iconResolver';
-import type { EngineeringContent } from '@/types';
+import type { ProcessSectionProps } from '@/types';
 
 /**
  * 03 — How the system is built: the engineering stages as an editorial
  * accordion. One stage is open at a time; the first starts open.
  */
-defineProps<{ content: EngineeringContent }>();
+defineProps<ProcessSectionProps>();
 
 const open = ref(0);
 </script>

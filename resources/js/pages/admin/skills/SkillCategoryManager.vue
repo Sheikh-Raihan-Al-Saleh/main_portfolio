@@ -1,24 +1,24 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
 import { Check, FolderTree, Plus } from '@lucide/vue';
-import SkillCategoryController from '@/actions/App/Http/Controllers/Admin/SkillCategoryController';
+import SkillCategoryController from '@/actions/App/Http/Controllers/Skill/SkillCategoryController';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
 import ReorderButtons from '@/components/admin/ReorderButtons.vue';
-import InputError from '@/components/InputError.vue';
+import InputError from '@/components/common/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useReorder } from '@/composables/useReorder';
-import type { SkillCategory } from '@/types';
+import type { AdminSkillsSkillCategoryManagerProps } from '@/types';
 
 /**
  * Inline management of the founder's skill categories: add, rename,
  * reorder, and delete (only when empty).
  */
-const props = defineProps<{ categories: SkillCategory[] }>();
+const props = defineProps<AdminSkillsSkillCategoryManagerProps>();
 
 const { items, move, saving } = useReorder(
     () => props.categories,
-    'skill-categories',
+    SkillCategoryController.reorder().url,
 );
 </script>
 

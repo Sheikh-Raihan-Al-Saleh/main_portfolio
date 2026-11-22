@@ -10,3 +10,12 @@ export type FlashToast = {
     type: 'success' | 'info' | 'warning' | 'error';
     message: string;
 };
+
+/** PHP's upload limits in bytes, shared as `uploadLimits`; null = unlimited. */
+export type UploadLimits = {
+    file: number | null;
+    request: number | null;
+};
+
+/** A piece of a headline; `highlight` parts are set in the accent italic. */
+export type TextPart = { text: string; highlight: boolean };

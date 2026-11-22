@@ -1,18 +1,11 @@
 <script setup lang="ts">
 import { ChevronDown, ChevronUp } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
+import type { ReorderButtonsEmits, ReorderButtonsProps } from '@/types';
 
-type Props = {
-    index: number;
-    total: number;
-    disabled?: boolean;
-};
+defineProps<ReorderButtonsProps>();
 
-defineProps<Props>();
-
-const emit = defineEmits<{
-    move: [index: number, direction: -1 | 1];
-}>();
+const emit = defineEmits<ReorderButtonsEmits>();
 </script>
 
 <template>

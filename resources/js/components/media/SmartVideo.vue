@@ -3,6 +3,7 @@ import { Play, VideoOff } from '@lucide/vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { usePrefersReducedMotion } from '@/composables/usePrefersReducedMotion';
 import { cn } from '@/lib/utils';
+import type { SmartVideoProps } from '@/types';
 
 /**
  * A self-hosted video (mp4/webm upload).
@@ -13,17 +14,8 @@ import { cn } from '@/lib/utils';
  * - `playsinline` stops iOS from forcing fullscreen.
  * - A missing or broken file shows a fallback instead of a black box.
  */
-type Props = {
-    src: string | null | undefined;
-    poster?: string | null;
-    autoplay?: boolean;
-    loop?: boolean;
-    ratio?: string;
-    label?: string;
-    class?: string;
-};
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<SmartVideoProps>(), {
     poster: null,
     autoplay: false,
     loop: true,

@@ -3,7 +3,7 @@ import { Form } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import FieldGroup from '@/components/admin/form/FieldGroup.vue';
 import FormFooter from '@/components/admin/form/FormFooter.vue';
-import InputError from '@/components/InputError.vue';
+import InputError from '@/components/common/InputError.vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -16,27 +16,22 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import skills from '@/routes/admin/skills';
-import type { SelectOption, Skill } from '@/types';
+import type {
+    AdminSkillsSkillFormEmits,
+    AdminSkillsSkillFormProps,
+} from '@/types';
 
 /**
  * The skill form. Renders as a card on its own page, or as the body of a
  * modal on the list page (`mode="dialog"`), where it emits `saved` / `cancel`.
  */
-type Props = {
-    skill?: Skill;
-    /** The founder's skill categories. */
-    categoryOptions: SelectOption<number>[];
-    action: Record<string, unknown>;
-    submitLabel: string;
-    mode?: 'page' | 'dialog';
-};
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<AdminSkillsSkillFormProps>(), {
     skill: undefined,
     mode: 'page',
 });
 
-const emit = defineEmits<{ saved: []; cancel: [] }>();
+const emit = defineEmits<AdminSkillsSkillFormEmits>();
 
 /** Mirrors the number input, so the live meter previews the value. */
 const level = ref(props.skill?.proficiency ?? 75);

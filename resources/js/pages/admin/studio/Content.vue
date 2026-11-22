@@ -12,23 +12,20 @@ import {
     Users,
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
-import StudioController from '@/actions/App/Http/Controllers/Admin/StudioController';
+import StudioController from '@/actions/App/Http/Controllers/Studio/StudioController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import StudioContentSectionDialog from '@/components/admin/StudioContentSectionDialog.vue';
-import type { SectionKey } from '@/components/admin/StudioContentSectionDialog.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import studioRoutes from '@/routes/admin/studio';
-import type { Studio, StudioContent } from '@/types';
+import type { StudioContent } from '@/types';
+import type {
+    AdminStudioContentProps,
+    StudioContentSectionDialogSectionKey as SectionKey,
+} from '@/types';
 
-type Props = {
-    studio: Pick<Studio, 'id' | 'name'>;
-    /** The merged studio content: defaults plus any stored edits. */
-    content: StudioContent;
-};
-
-const props = defineProps<Props>();
+const props = defineProps<AdminStudioContentProps>();
 
 defineOptions({
     layout: {

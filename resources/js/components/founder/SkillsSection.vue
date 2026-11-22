@@ -3,16 +3,13 @@ import { motion } from 'motion-v';
 import Reveal from '@/components/site/Reveal.vue';
 import SectionHeading from '@/components/site/SectionHeading.vue';
 import { EASE_OUT, inViewOnce } from '@/lib/motion';
-import type { SectionCopy, SkillCategory } from '@/types';
+import type { SkillsSectionProps } from '@/types';
 
 /**
  * The founder's toolkit, by category, with proficiency bars that fill as
  * they scroll into view.
  */
-defineProps<{
-    copy: SectionCopy;
-    groups: SkillCategory[];
-}>();
+defineProps<SkillsSectionProps>();
 </script>
 
 <template>

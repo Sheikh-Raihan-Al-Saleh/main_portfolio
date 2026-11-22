@@ -4,29 +4,18 @@ import DeleteAction from '@/components/admin/DeleteAction.vue';
 import ReorderButtons from '@/components/admin/ReorderButtons.vue';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { LandingSection } from '@/types';
+import type { SectionListRowEmits, SectionListRowProps } from '@/types';
 
 /**
  * One row of a sortable section list, shared by the company home page and a
  * project's landing page. On phones the status and actions drop to a second
  * line so the title keeps the full width.
  */
-type Props = {
-    section: LandingSection;
-    index: number;
-    total: number;
-    typeLabel: string;
-    disabled?: boolean;
-    /** What the admin calls a section on this page ("section" or "block"). */
-    noun?: string;
-};
 
-const { noun = 'section', disabled = false } = defineProps<Props>();
+const { noun = 'section', disabled = false } =
+    defineProps<SectionListRowProps>();
 
-const emit = defineEmits<{
-    move: [index: number, direction: -1 | 1];
-    edit: [];
-}>();
+const emit = defineEmits<SectionListRowEmits>();
 </script>
 
 <template>

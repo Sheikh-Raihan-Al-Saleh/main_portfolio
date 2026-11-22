@@ -1,14 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { cn } from '@/lib/utils';
+import type { BrowserFrameProps } from '@/types';
 
-type Props = {
-    /** Shown in the fake address bar. Host only — the full URL is noise. */
-    url?: string | null;
-    class?: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<BrowserFrameProps>(), {
     url: null,
     class: undefined,
 });

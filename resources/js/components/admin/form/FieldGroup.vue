@@ -1,17 +1,13 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
+import type { FieldGroupProps } from '@/types';
 
 /**
  * A titled group of fields without a card — for forms inside a modal, where
  * a card per group would be too heavy. Groups are separated by a rule.
  */
-type Props = {
-    title: string;
-    description?: string;
-    columns?: 1 | 2;
-};
 
-withDefaults(defineProps<Props>(), { description: '', columns: 1 });
+withDefaults(defineProps<FieldGroupProps>(), { description: '', columns: 1 });
 </script>
 
 <template>

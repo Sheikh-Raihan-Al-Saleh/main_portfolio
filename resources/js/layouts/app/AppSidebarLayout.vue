@@ -1,19 +1,15 @@
 <script setup lang="ts">
 import { usePage } from '@inertiajs/vue3';
 import { motion } from 'motion-v';
-import AppContent from '@/components/AppContent.vue';
-import AppShell from '@/components/AppShell.vue';
-import AppSidebar from '@/components/AppSidebar.vue';
-import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
+import AppContent from '@/components/app/AppContent.vue';
+import AppShell from '@/components/app/AppShell.vue';
+import AppSidebar from '@/components/app/AppSidebar.vue';
+import AppSidebarHeader from '@/components/app/AppSidebarHeader.vue';
 import { Toaster } from '@/components/ui/sonner';
 import { useSiteScope } from '@/composables/useSiteScope';
-import type { BreadcrumbItem } from '@/types';
+import type { AppSidebarLayoutProps } from '@/types';
 
-type Props = {
-    breadcrumbs?: BreadcrumbItem[];
-};
-
-withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<AppSidebarLayoutProps>(), {
     breadcrumbs: () => [],
 });
 

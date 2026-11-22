@@ -7,6 +7,7 @@ import BrandLogo from '@/components/brand/BrandLogo.vue';
 import { useSite } from '@/composables/useSite';
 import { about, founder as founderRoute, home } from '@/routes';
 import projects from '@/routes/projects';
+import type { SiteHeaderNavLink } from '@/types';
 
 /**
  * The public header: the company logo (large, always visible), the page
@@ -15,14 +16,12 @@ import projects from '@/routes/projects';
 const page = usePage();
 const { studio, founder, face } = useSite();
 
-type NavLink = { label: string; href: string };
-
 /** Founder sections are in-page anchors on /founder, full links elsewhere. */
 const founderBase = computed(() =>
-    page.component === 'public/Founder' ? '' : founderRoute().url,
+    page.component === 'public/founder/Index' ? '' : founderRoute().url,
 );
 
-const links = computed<NavLink[]>(() =>
+const links = computed<SiteHeaderNavLink[]>(() =>
     face.value === 'founder'
         ? [
               { label: 'About', href: `${founderBase.value}#about` },

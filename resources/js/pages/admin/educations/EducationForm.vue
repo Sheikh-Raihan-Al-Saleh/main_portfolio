@@ -2,28 +2,28 @@
 import { Form } from '@inertiajs/vue3';
 import FieldGroup from '@/components/admin/form/FieldGroup.vue';
 import FormFooter from '@/components/admin/form/FormFooter.vue';
-import InputError from '@/components/InputError.vue';
+import InputError from '@/components/common/InputError.vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import educations from '@/routes/admin/educations';
-import type { Education } from '@/types';
+import type {
+    AdminEducationsEducationFormEmits,
+    AdminEducationsEducationFormProps,
+} from '@/types';
 
 /**
  * The education form. Renders as a card on its own page, or as the body of a
  * modal on the list page (`mode="dialog"`), where it emits `saved` / `cancel`.
  */
-type Props = {
-    education?: Education;
-    action: Record<string, unknown>;
-    submitLabel: string;
-    mode?: 'page' | 'dialog';
-};
 
-withDefaults(defineProps<Props>(), { education: undefined, mode: 'page' });
+withDefaults(defineProps<AdminEducationsEducationFormProps>(), {
+    education: undefined,
+    mode: 'page',
+});
 
-const emit = defineEmits<{ saved: []; cancel: [] }>();
+const emit = defineEmits<AdminEducationsEducationFormEmits>();
 
 function dateValue(value: string | null | undefined): string {
     return value ? value.slice(0, 10) : '';

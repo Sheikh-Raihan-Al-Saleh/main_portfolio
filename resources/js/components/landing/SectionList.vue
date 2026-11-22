@@ -1,17 +1,8 @@
 <script setup lang="ts">
 import { resolveSection } from '@/components/landing/sectionRegistry';
-import type { LandingSection } from '@/types';
+import type { SectionListProps } from '@/types';
 
-type Props = {
-    sections: LandingSection[];
-    /**
-     * How a section's DOM id is derived, so the anchor can be jumped to and
-     * picked up by the scroll spy. The id is passed down to the block.
-     */
-    anchorFor: (section: LandingSection) => string;
-};
-
-defineProps<Props>();
+defineProps<SectionListProps>();
 </script>
 
 <template>

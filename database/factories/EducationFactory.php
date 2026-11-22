@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Education;
-use App\Services\FounderService;
+use App\Services\Founder\FounderService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

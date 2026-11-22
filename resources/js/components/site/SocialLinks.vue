@@ -2,14 +2,12 @@
 import SocialIcon from '@/components/site/SocialIcon.vue';
 import { cn } from '@/lib/utils';
 import type { SocialLink } from '@/types';
+import type { SocialLinksProps } from '@/types';
 
 /**
  * A row of round social-profile buttons.
  */
-const props = defineProps<{
-    links: SocialLink[];
-    class?: string;
-}>();
+const props = defineProps<SocialLinksProps>();
 
 const labels: Record<SocialLink['platform'], string> = {
     github: 'GitHub',

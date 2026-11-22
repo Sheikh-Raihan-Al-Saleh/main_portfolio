@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Services\MediaService;
+use App\Services\Media\MediaService;
 use Carbon\CarbonInterface;
 use Database\Factories\ProjectFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;

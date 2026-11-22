@@ -7,13 +7,13 @@ import Reveal from '@/components/site/Reveal.vue';
 import { useSite } from '@/composables/useSite';
 import { fillTokens } from '@/lib/text';
 import { about, founder as founderRoute } from '@/routes';
-import type { FounderBridgeContent } from '@/types';
+import type { FounderBridgeProps } from '@/types';
 
 /**
  * Two doors side by side: the studio (who you contract with) and the
  * founder (who writes the code), each linking to its own page.
  */
-defineProps<{ content: FounderBridgeContent }>();
+defineProps<FounderBridgeProps>();
 
 const { studio, founder } = useSite();
 </script>

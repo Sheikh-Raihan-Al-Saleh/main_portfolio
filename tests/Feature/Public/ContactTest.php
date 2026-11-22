@@ -2,8 +2,8 @@
 
 use App\Mail\NewContactMessage;
 use App\Models\ContactMessage;
-use App\Services\FounderService;
-use App\Services\StudioService;
+use App\Services\Founder\FounderService;
+use App\Services\Studio\StudioService;
 use Illuminate\Support\Facades\Mail;
 
 test('a visitor can send an enquiry to the studio', function () {

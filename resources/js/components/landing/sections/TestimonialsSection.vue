@@ -5,13 +5,9 @@ import { computed } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
 import { mediaUrl } from '@/lib/media';
 import { inViewOnce, perspectiveCard, stagger } from '@/lib/motion';
-import type { LandingSection } from '@/types';
+import type { TestimonialsSectionProps } from '@/types';
 
-type Props = {
-    section: Extract<LandingSection, { type: 'testimonials' }>;
-    anchor?: string;
-};
-const props = defineProps<Props>();
+const props = defineProps<TestimonialsSectionProps>();
 const items = computed(() => props.section.data.items ?? []);
 function initials(name: string) {
     return name

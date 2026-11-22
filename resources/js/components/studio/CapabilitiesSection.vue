@@ -2,13 +2,13 @@
 import Reveal from '@/components/site/Reveal.vue';
 import SectionHeading from '@/components/site/SectionHeading.vue';
 import { resolveIcon } from '@/lib/iconResolver';
-import type { CapabilitiesContent } from '@/types';
+import type { CapabilitiesSectionProps } from '@/types';
 
 /**
  * 01 — What the studio builds: a grid of capabilities and the four layers
  * every product is built from.
  */
-defineProps<{ content: CapabilitiesContent }>();
+defineProps<CapabilitiesSectionProps>();
 </script>
 
 <template>

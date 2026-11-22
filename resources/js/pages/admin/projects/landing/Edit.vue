@@ -11,16 +11,15 @@ import {
     Type,
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
-import LandingPageController from '@/actions/App/Http/Controllers/Admin/LandingPageController';
+import LandingPageBuilderController from '@/actions/App/Http/Controllers/LandingPage/LandingPageBuilderController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
 import FileField from '@/components/admin/FileField.vue';
 import FormSection from '@/components/admin/form/FormSection.vue';
 import FormTabs from '@/components/admin/form/FormTabs.vue';
-import type { FormTab } from '@/components/admin/form/types';
 import SectionEditorDialog from '@/components/admin/landing/SectionEditorDialog.vue';
 import SectionListRow from '@/components/admin/landing/SectionListRow.vue';
-import InputError from '@/components/InputError.vue';
+import InputError from '@/components/common/InputError.vue';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -34,23 +33,13 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useReorder } from '@/composables/useReorder';
 import { cn } from '@/lib/utils';
+import landingSectionRoutes from '@/routes/admin/landing-sections';
 import projects from '@/routes/admin/projects';
-import type {
-    LandingSection,
-    LandingSectionType,
-    LandingSectionTypeOption,
-    ProjectLandingPage,
-} from '@/types';
+import type { FormTab } from '@/types';
+import type { LandingSection, LandingSectionType } from '@/types';
+import type { AdminProjectsLandingEditProps } from '@/types';
 
-type Props = {
-    project: { id: number; title: string; slug: string };
-    landingPage: ProjectLandingPage | null;
-    sections: LandingSection[];
-    sectionTypes: LandingSectionTypeOption[];
-    previewUrl: string;
-};
-
-const props = defineProps<Props>();
+const props = defineProps<AdminProjectsLandingEditProps>();
 
 defineOptions({
     layout: {
@@ -62,7 +51,7 @@ const {
     items: orderedSections,
     move,
     saving,
-} = useReorder(() => props.sections, 'landing-sections');
+} = useReorder(() => props.sections, landingSectionRoutes.reorder().url);
 
 const editorOpen = ref(false);
 const editingSection = ref<LandingSection | null>(null);
@@ -232,7 +221,7 @@ function heroPreview(index: number): string | null {
         <!-- ── Page details ── -->
         <div v-show="view === 'details'">
             <Form
-                v-bind="LandingPageController.update.form(project.slug)"
+                v-bind="LandingPageBuilderController.update.form(project.slug)"
                 v-slot="{ errors, processing }"
             >
                 <FormTabs

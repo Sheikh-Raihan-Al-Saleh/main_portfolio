@@ -5,9 +5,8 @@ import { computed, ref } from 'vue';
 import FileField from '@/components/admin/FileField.vue';
 import FormSection from '@/components/admin/form/FormSection.vue';
 import FormTabs from '@/components/admin/form/FormTabs.vue';
-import type { FormTab } from '@/components/admin/form/types';
 import TagInput from '@/components/admin/TagInput.vue';
-import InputError from '@/components/InputError.vue';
+import InputError from '@/components/common/InputError.vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -21,20 +20,10 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { oversizedFileMessage } from '@/lib/media';
 import projects from '@/routes/admin/projects';
-import type { Project, SelectOption } from '@/types';
+import type { FormTab } from '@/types';
+import type { AdminProjectsProjectFormProps } from '@/types';
 
-type Props = {
-    project?: Project;
-    /** Wayfinder form props: `ProjectController.store.form()` or `.update.form(id)`. */
-    action: Record<string, unknown>;
-    submitLabel: string;
-    /** Who the project belongs to: the studio or the founder. */
-    owners: SelectOption[];
-    /** Known technology names, suggested while typing the stack. */
-    technologyOptions: string[];
-};
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<AdminProjectsProjectFormProps>(), {
     project: undefined,
 });
 

@@ -3,7 +3,7 @@ import { Form, Head, router } from '@inertiajs/vue3';
 import { Eye, EyeOff, Pencil, Plus, Search, Users } from '@lucide/vue';
 import { motion } from 'motion-v';
 import { computed, ref, watch } from 'vue';
-import ClientController from '@/actions/App/Http/Controllers/Admin/ClientController';
+import ClientController from '@/actions/App/Http/Controllers/Client/ClientController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
 import FileField from '@/components/admin/FileField.vue';
@@ -32,13 +32,9 @@ import { useReorder } from '@/composables/useReorder';
 import { fadeUp } from '@/lib/motion';
 import clientRoutes from '@/routes/admin/clients';
 import type { Client } from '@/types';
+import type { AdminClientsIndexProps } from '@/types';
 
-type Props = {
-    clients: Client[];
-    filters: { search: string | null };
-};
-
-const props = defineProps<Props>();
+const props = defineProps<AdminClientsIndexProps>();
 
 defineOptions({
     layout: {
@@ -48,7 +44,7 @@ defineOptions({
 
 const { items, move, saving } = useReorder<Client>(
     () => props.clients,
-    'clients',
+    clientRoutes.reorder().url,
 );
 
 const open = ref(false);

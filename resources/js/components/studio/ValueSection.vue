@@ -3,12 +3,12 @@ import { Check } from '@lucide/vue';
 import Reveal from '@/components/site/Reveal.vue';
 import SectionHeading from '@/components/site/SectionHeading.vue';
 import { resolveIcon } from '@/lib/iconResolver';
-import type { ValueContent } from '@/types';
+import type { ValueSectionProps } from '@/types';
 
 /**
  * 04 — Why work with the studio: the promises, then the reasons.
  */
-defineProps<{ content: ValueContent }>();
+defineProps<ValueSectionProps>();
 </script>
 
 <template>

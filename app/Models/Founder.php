@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Services\MediaService;
-use App\Support\FounderDefaults;
+use App\Services\Media\MediaService;
+use App\Support\Defaults\FounderDefaults;
 use Database\Factories\FounderFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;

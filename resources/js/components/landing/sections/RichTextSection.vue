@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import SectionShell from '@/components/landing/SectionShell.vue';
-import type { LandingSection } from '@/types';
-type Props = {
-    section: Extract<LandingSection, { type: 'richtext' }>;
-    anchor?: string;
-};
-defineProps<Props>();
+import type { RichTextSectionProps } from '@/types';
+
+defineProps<RichTextSectionProps>();
 </script>
 
 <template>

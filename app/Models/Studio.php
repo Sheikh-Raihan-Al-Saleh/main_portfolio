@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Services\MediaService;
-use App\Support\StudioContent;
+use App\Services\Media\MediaService;
+use App\Support\Defaults\StudioContent;
 use Database\Factories\StudioFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;

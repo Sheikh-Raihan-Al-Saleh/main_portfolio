@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import SmartImage from '@/components/media/SmartImage.vue';
 import Marquee from '@/components/site/Marquee.vue';
-import type { Client } from '@/types';
+import type { ClientStripProps } from '@/types';
 
 /**
  * "Trusted by": the client logos, scrolling. Logos without a file show the
  * client's name in the display face instead.
  */
-defineProps<{
-    clients: Client[];
-    label?: string;
-}>();
+defineProps<ClientStripProps>();
 </script>
 
 <template>

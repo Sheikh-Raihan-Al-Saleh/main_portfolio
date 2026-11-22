@@ -4,35 +4,25 @@ import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { FooterConfig } from '@/types';
+import type {
+    FooterEditorColumnRow,
+    FooterEditorLinkRow,
+    FooterEditorProps,
+} from '@/types';
 
-type Props = {
-    footer: FooterConfig | null;
-};
-
-const props = defineProps<Props>();
-
-type LinkRow = {
-    label: string;
-    url: string;
-};
-
-type ColumnRow = {
-    title: string;
-    links: LinkRow[];
-};
+const props = defineProps<FooterEditorProps>();
 
 function toLink(link?: {
     label?: string | null;
     url?: string | null;
-}): LinkRow {
+}): FooterEditorLinkRow {
     return { label: link?.label ?? '', url: link?.url ?? '' };
 }
 
 function toColumn(col?: {
     title?: string | null;
     links?: { label?: string | null; url?: string | null }[] | null;
-}): ColumnRow {
+}): FooterEditorColumnRow {
     return {
         title: col?.title ?? '',
         links: (col?.links ?? []).map(toLink),
@@ -43,8 +33,12 @@ const statusText = ref(props.footer?.status_text ?? '');
 const statusTextUnavailable = ref(props.footer?.status_text_unavailable ?? '');
 const copyright = ref(props.footer?.copyright ?? '');
 const backToTop = ref(props.footer?.back_to_top ?? '');
-const columns = ref<ColumnRow[]>(props.footer?.columns?.map(toColumn) ?? []);
-const legalLinks = ref<LinkRow[]>(props.footer?.legal_links?.map(toLink) ?? []);
+const columns = ref<FooterEditorColumnRow[]>(
+    props.footer?.columns?.map(toColumn) ?? [],
+);
+const legalLinks = ref<FooterEditorLinkRow[]>(
+    props.footer?.legal_links?.map(toLink) ?? [],
+);
 
 function addColumn() {
     columns.value.push({ title: '', links: [{ label: '', url: '' }] });
@@ -54,11 +48,11 @@ function removeColumn(index: number) {
     columns.value.splice(index, 1);
 }
 
-function addLink(column: ColumnRow) {
+function addLink(column: FooterEditorColumnRow) {
     column.links.push({ label: '', url: '' });
 }
 
-function removeLink(column: ColumnRow, index: number) {
+function removeLink(column: FooterEditorColumnRow, index: number) {
     column.links.splice(index, 1);
 }
 

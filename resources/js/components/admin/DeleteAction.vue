@@ -13,15 +13,9 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import type { DeleteActionProps } from '@/types';
 
-type Props = {
-    /** Wayfinder route definition for the destroy action. */
-    url: string;
-    label: string;
-    description?: string;
-};
-
-const props = defineProps<Props>();
+const props = defineProps<DeleteActionProps>();
 
 const open = ref(false);
 const processing = ref(false);

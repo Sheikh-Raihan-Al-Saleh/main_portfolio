@@ -3,18 +3,14 @@ import { Link } from '@inertiajs/vue3';
 import { ArrowUpRight } from '@lucide/vue';
 import { computed } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
-import type { LandingSection } from '@/types';
+import type { CtaSectionProps } from '@/types';
 
 /**
  * A call-to-action block: a big headline on the accent colour and one button.
  * Internal URLs ("/...") are Inertia visits; anything else opens normally.
  */
-type Props = {
-    section: Extract<LandingSection, { type: 'cta' }>;
-    anchor?: string;
-};
 
-const props = defineProps<Props>();
+const props = defineProps<CtaSectionProps>();
 
 const data = computed(() => props.section.data);
 const isInternal = computed(

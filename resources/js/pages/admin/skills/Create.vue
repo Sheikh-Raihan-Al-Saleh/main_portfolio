@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import SkillController from '@/actions/App/Http/Controllers/Admin/SkillController';
+import SkillController from '@/actions/App/Http/Controllers/Skill/SkillController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import skills from '@/routes/admin/skills';
-import type { SelectOption } from '@/types';
+import type { AdminSkillsCreateProps } from '@/types';
 import SkillForm from './SkillForm.vue';
 
-type Props = {
-    categoryOptions: SelectOption<number>[];
-};
-
-defineProps<Props>();
+defineProps<AdminSkillsCreateProps>();
 
 defineOptions({
     layout: {

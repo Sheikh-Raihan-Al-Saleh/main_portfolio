@@ -5,13 +5,9 @@ import SectionShell from '@/components/landing/SectionShell.vue';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { mediaUrl } from '@/lib/media';
 import { inViewOnce, perspectiveCard, stagger } from '@/lib/motion';
-import type { LandingSection } from '@/types';
+import type { GallerySectionProps } from '@/types';
 
-type Props = {
-    section: Extract<LandingSection, { type: 'gallery' }>;
-    anchor?: string;
-};
-const props = defineProps<Props>();
+const props = defineProps<GallerySectionProps>();
 const images = computed(() => props.section.data.images ?? []);
 const openIndex = ref<number | null>(null);
 const open = computed({

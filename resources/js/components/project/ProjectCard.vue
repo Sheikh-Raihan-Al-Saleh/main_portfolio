@@ -3,22 +3,15 @@ import { Link } from '@inertiajs/vue3';
 import { ArrowUpRight } from '@lucide/vue';
 import LiquidImage from '@/components/site/LiquidImage.vue';
 import { cn } from '@/lib/utils';
-import type { ProjectCard } from '@/types';
+import type { ProjectCardProps } from '@/types';
 
 /**
  * One project in a grid: the cover (with the liquid hover effect), title,
  * summary and stack. The whole card links to the project page; the case
  * study link is offered on top when the project has a published one.
  */
-type Props = {
-    project: ProjectCard;
-    /** "feature" is the large, wide card that leads a grid. */
-    variant?: 'default' | 'feature';
-    index?: number;
-    eager?: boolean;
-};
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<ProjectCardProps>(), {
     variant: 'default',
     index: undefined,
     eager: false,

@@ -1,15 +1,12 @@
 <script setup lang="ts">
+import type { AdminPageHeaderProps } from '@/types';
+
 /**
  * The banner every admin page opens with: title and description, with the
  * page's actions on the right.
  */
-type Props = {
-    title: string;
-    description?: string;
-    eyebrow?: string;
-};
 
-defineProps<Props>();
+defineProps<AdminPageHeaderProps>();
 </script>
 
 <template>

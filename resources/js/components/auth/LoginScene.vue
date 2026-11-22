@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import SmartImage from '@/components/media/SmartImage.vue';
+import type { LoginSceneCard, LoginSceneEmits, LoginSceneProps } from '@/types';
 
 /**
  * The 3D scene beside the sign-in form, drawn with three.js.
@@ -13,15 +14,10 @@ import SmartImage from '@/components/media/SmartImage.vue';
  * Without WebGL, or for visitors who prefer reduced motion, a still collage
  * of the same images is shown instead.
  */
-type Showcase = { title: string; cover: string }[];
 
-const props = defineProps<{
-    covers: Showcase;
-    logoUrl: string | null;
-    brandName: string;
-}>();
+const props = defineProps<LoginSceneProps>();
 
-const emit = defineEmits<{ hover: [title: string | null] }>();
+const emit = defineEmits<LoginSceneEmits>();
 
 const host = ref<HTMLDivElement | null>(null);
 const live = ref(false);
@@ -139,15 +135,7 @@ onMounted(async () => {
     const styles = getComputedStyle(container);
     const accent = styles.getPropertyValue('--brand').trim() || '#ff4d00';
 
-    type Card = {
-        mesh: InstanceType<typeof THREE.Mesh>;
-        title: string | null;
-        base: InstanceType<typeof THREE.Vector3>;
-        phase: number;
-        hover: number;
-    };
-
-    const cards: Card[] = [];
+    const cards: LoginSceneCard[] = [];
     const disposables: { dispose: () => void }[] = [];
     const geometry = new THREE.PlaneGeometry(1, 1, 1, 1);
     disposables.push(geometry);
@@ -258,7 +246,7 @@ onMounted(async () => {
     const pointer = new THREE.Vector2(0, 0);
     const target = new THREE.Vector2(0, 0);
     const raycaster = new THREE.Raycaster();
-    let hovered: Card | null = null;
+    let hovered: LoginSceneCard | null = null;
 
     const onMove = (event: PointerEvent) => {
         const rect = container.getBoundingClientRect();

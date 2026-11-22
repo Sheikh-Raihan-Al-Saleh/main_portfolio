@@ -1,20 +1,15 @@
 <script setup lang="ts">
 import ProjectCard from '@/components/project/ProjectCard.vue';
 import Reveal from '@/components/site/Reveal.vue';
-import type { ProjectCard as ProjectCardType } from '@/types';
+import type { ProjectGridProps } from '@/types';
 
 /**
  * A two-column project grid, optionally led by one wide feature card.
  */
-withDefaults(
-    defineProps<{
-        projects: ProjectCardType[];
-        /** Show the first project as a wide feature card. */
-        feature?: boolean;
-        numbered?: boolean;
-    }>(),
-    { feature: false, numbered: true },
-);
+withDefaults(defineProps<ProjectGridProps>(), {
+    feature: false,
+    numbered: true,
+});
 </script>
 
 <template>

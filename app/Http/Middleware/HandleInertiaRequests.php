@@ -2,11 +2,11 @@
 
 namespace App\Http\Middleware;
 
-use App\Http\Resources\FounderResource;
-use App\Http\Resources\StudioResource;
-use App\Services\ContactMessageService;
-use App\Services\FounderService;
-use App\Services\StudioService;
+use App\Http\Resources\Founder\FounderResource;
+use App\Http\Resources\Studio\StudioResource;
+use App\Services\Contact\ContactMessageService;
+use App\Services\Founder\FounderService;
+use App\Services\Studio\StudioService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 

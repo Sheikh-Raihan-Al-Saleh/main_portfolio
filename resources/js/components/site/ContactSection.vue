@@ -4,43 +4,25 @@ import ContactForm from '@/components/site/ContactForm.vue';
 import Reveal from '@/components/site/Reveal.vue';
 import SectionHeading from '@/components/site/SectionHeading.vue';
 import SocialLinks from '@/components/site/SocialLinks.vue';
-import type { SocialLink } from '@/types';
+import type { ContactSectionProps } from '@/types';
 
 /**
  * The contact block shared by both faces: heading and direct details on the
  * left, the form on the right.
  */
-withDefaults(
-    defineProps<{
-        site: 'studio' | 'founder';
-        eyebrow: string;
-        title: string;
-        highlight?: string | null;
-        description?: string | null;
-        email?: string | null;
-        phone?: string | null;
-        location?: string | null;
-        socials?: SocialLink[];
-        emailHeading?: string;
-        emailNote?: string | null;
-        placeholder?: string;
-        submitLabel?: string;
-        replyNote?: string | null;
-    }>(),
-    {
-        highlight: null,
-        description: null,
-        email: null,
-        phone: null,
-        location: null,
-        socials: () => [],
-        emailHeading: 'Prefer email?',
-        emailNote: null,
-        placeholder: undefined,
-        submitLabel: undefined,
-        replyNote: null,
-    },
-);
+withDefaults(defineProps<ContactSectionProps>(), {
+    highlight: null,
+    description: null,
+    email: null,
+    phone: null,
+    location: null,
+    socials: () => [],
+    emailHeading: 'Prefer email?',
+    emailNote: null,
+    placeholder: undefined,
+    submitLabel: undefined,
+    replyNote: null,
+});
 </script>
 
 <template>

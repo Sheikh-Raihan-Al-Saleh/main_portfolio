@@ -15,18 +15,17 @@ import {
     Sparkles,
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
-import StudioController from '@/actions/App/Http/Controllers/Admin/StudioController';
+import StudioController from '@/actions/App/Http/Controllers/Studio/StudioController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import FileField from '@/components/admin/FileField.vue';
 import FooterEditor from '@/components/admin/FooterEditor.vue';
 import ErrorList from '@/components/admin/form/ErrorList.vue';
 import FormSection from '@/components/admin/form/FormSection.vue';
 import FormTabs from '@/components/admin/form/FormTabs.vue';
-import type { FormTab } from '@/components/admin/form/types';
 import SectionEditorDialog from '@/components/admin/landing/SectionEditorDialog.vue';
 import SectionListRow from '@/components/admin/landing/SectionListRow.vue';
 import BrandLogo from '@/components/brand/BrandLogo.vue';
-import InputError from '@/components/InputError.vue';
+import InputError from '@/components/common/InputError.vue';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -40,24 +39,17 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useReorder } from '@/composables/useReorder';
 import { cn } from '@/lib/utils';
+import landingSectionRoutes from '@/routes/admin/landing-sections';
 import studioRoutes from '@/routes/admin/studio';
+import type { FormTab } from '@/types';
 import type {
     LandingSection,
     LandingSectionType,
-    LandingSectionTypeOption,
-    SocialMap,
     SocialPlatform,
-    Studio,
 } from '@/types';
+import type { AdminStudioEditProps } from '@/types';
 
-type Props = {
-    studio: Studio;
-    socials: SocialMap;
-    sections: LandingSection[];
-    sectionTypes: LandingSectionTypeOption[];
-};
-
-const props = defineProps<Props>();
+const props = defineProps<AdminStudioEditProps>();
 
 const nameToken = '{{name}}';
 const footerHint =
@@ -212,7 +204,7 @@ const {
     items: orderedSections,
     move,
     saving,
-} = useReorder(() => props.sections, 'landing-sections');
+} = useReorder(() => props.sections, landingSectionRoutes.reorder().url);
 
 const editorOpen = ref(false);
 const editingSection = ref<LandingSection | null>(null);

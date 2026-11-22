@@ -2,18 +2,14 @@
 import { computed } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
 import Marquee from '@/components/site/Marquee.vue';
-import type { LandingSection } from '@/types';
+import type { TechSectionProps } from '@/types';
 
 /**
  * The tech stack block: a wrapped list of tags, or a scrolling ticker once
  * the list is long enough to need one.
  */
-type Props = {
-    section: Extract<LandingSection, { type: 'tech' }>;
-    anchor?: string;
-};
 
-const props = defineProps<Props>();
+const props = defineProps<TechSectionProps>();
 
 const items = computed(() => props.section.data.items ?? []);
 const useMarquee = computed(() => items.value.length >= 8);

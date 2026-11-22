@@ -1,19 +1,13 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
+import type { FormSectionProps } from '@/types';
 
 /**
  * A group of related fields in a card: a short title and hint on top, the
  * fields below. Keeps long forms scannable — each card answers one question.
  */
-type Props = {
-    title?: string;
-    description?: string;
-    /** Two columns from `sm` up; three adds a third column from `lg` up. */
-    columns?: 1 | 2 | 3;
-    class?: string;
-};
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<FormSectionProps>(), {
     title: '',
     description: '',
     columns: 1,

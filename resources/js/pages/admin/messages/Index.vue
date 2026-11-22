@@ -6,14 +6,9 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import { Button } from '@/components/ui/button';
 import { fadeUp } from '@/lib/motion';
 import messageRoutes from '@/routes/admin/messages';
-import type { ContactMessage, Paginated } from '@/types';
+import type { AdminMessagesIndexProps } from '@/types';
 
-type Props = {
-    messages: Paginated<ContactMessage>;
-    filters: { filter: string | null };
-};
-
-defineProps<Props>();
+defineProps<AdminMessagesIndexProps>();
 
 defineOptions({
     layout: {

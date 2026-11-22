@@ -14,30 +14,13 @@ import { yearRange } from '@/lib/text';
 import { cn } from '@/lib/utils';
 import { founder as founderRoute } from '@/routes';
 import projectRoutes from '@/routes/projects';
-import type { LandingSection, ProjectLandingPage } from '@/types';
+import type { PublicLandingShowProps } from '@/types';
 
 /**
  * A project's marketing case-study page (/p/{slug}).
  */
-type LandingProject = {
-    id: number;
-    title: string;
-    slug: string;
-    summary: string | null;
-    role: string | null;
-    owner_type: 'studio' | 'founder';
-    live_url: string | null;
-    repo_url: string | null;
-    cover_image_url: string | null;
-    started_at: string | null;
-    completed_at: string | null;
-};
 
-const props = defineProps<{
-    project: LandingProject;
-    landingPage: ProjectLandingPage;
-    sections: LandingSection[];
-}>();
+const props = defineProps<PublicLandingShowProps>();
 
 const { brand } = useSite();
 

@@ -1,4 +1,4 @@
-import type { LandingSectionType } from '@/types';
+import type { LandingSectionType, SectionSchema } from '@/types';
 
 /**
  * Declarative description of each section type's `data` payload.
@@ -7,43 +7,6 @@ import type { LandingSectionType } from '@/types';
  * forms. It mirrors App\Enums\LandingSectionType::rules() — that enum is what
  * actually validates the payload; this is only the UI for producing it.
  */
-
-export type FieldKind =
-    | 'text'
-    | 'textarea'
-    | 'number'
-    | 'select'
-    | 'switch'
-    | 'media'
-    | 'repeater'
-    | 'stringList';
-
-export type Field = {
-    key: string;
-    label: string;
-    kind: FieldKind;
-    placeholder?: string;
-    hint?: string;
-    required?: boolean;
-    /** select only */
-    options?: { value: string; label: string }[];
-    /** media only: the upload directory the backend accepts. */
-    directory?: 'steps' | 'gallery' | 'video' | 'poster' | 'avatar';
-    /** media only: accept video files as well as images. */
-    video?: boolean;
-    /** repeater only */
-    fields?: Field[];
-    /** repeater only: label for the add button. */
-    addLabel?: string;
-};
-
-export type SectionSchema = {
-    /** Short explanation shown at the top of the editor. */
-    description: string;
-    fields: Field[];
-    /** Payload used when adding a fresh section of this type. */
-    defaults: Record<string, unknown>;
-};
 
 export const sectionSchemas: Record<LandingSectionType, SectionSchema> = {
     features: {

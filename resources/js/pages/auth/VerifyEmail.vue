@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
-import TextLink from '@/components/TextLink.vue';
+import TextLink from '@/components/common/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { logout } from '@/routes';
 import { send } from '@/routes/verification';
+import type { AuthVerifyEmailProps } from '@/types';
 
 defineOptions({
     layout: {
@@ -14,9 +15,7 @@ defineOptions({
     },
 });
 
-defineProps<{
-    status?: string;
-}>();
+defineProps<AuthVerifyEmailProps>();
 </script>
 
 <template>

@@ -7,23 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { oversizedFileMessage, mediaUrl } from '@/lib/media';
 import landingSections from '@/routes/admin/landing-sections';
+import type { MediaUploadFieldEmits, MediaUploadFieldProps } from '@/types';
 
-type Props = {
-    modelValue: string | null;
-    label: string;
-    /** Upload directory; must be one the backend allowlists. */
-    directory: 'steps' | 'gallery' | 'video' | 'poster' | 'avatar';
-    /** Accept video files as well as images. */
-    video?: boolean;
-    hint?: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<MediaUploadFieldProps>(), {
     video: false,
     hint: undefined,
 });
 
-const emit = defineEmits<{ 'update:modelValue': [string | null] }>();
+const emit = defineEmits<MediaUploadFieldEmits>();
 
 const page = usePage();
 const uploading = ref(false);
