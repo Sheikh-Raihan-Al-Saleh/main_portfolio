@@ -8,40 +8,35 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
+ * @property int $skill_category_id
+ * @property int|null $technology_id
  * @property string $name
- * @property string $category
  * @property int $proficiency
  * @property string|null $icon
  * @property bool $is_featured
  * @property int $sort_order
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property-read SkillCategory $category
  */
-#[Fillable(['name', 'category', 'proficiency', 'icon', 'is_featured', 'sort_order'])]
+#[Fillable(['skill_category_id', 'technology_id', 'name', 'proficiency', 'icon', 'is_featured', 'sort_order'])]
 class Skill extends Model
 {
     /** @use HasFactory<SkillFactory> */
     use HasFactory;
 
-    /**
-     * The categories a skill can be filed under, keyed by stored value.
-     *
-     * @return array<string, string>
-     */
-    public static function categories(): array
+    /** @return BelongsTo<SkillCategory, $this> */
+    public function category(): BelongsTo
     {
-        return [
-            'language' => 'Language',
-            'framework' => 'Framework',
-            'frontend' => 'Frontend',
-            'database' => 'Database',
-            'devops' => 'DevOps & Cloud',
-            'tool' => 'Tooling',
-        ];
+        return $this->belongsTo(SkillCategory::class, 'skill_category_id');
+    }
+
+    /** @return BelongsTo<Technology, $this> */
+    public function technology(): BelongsTo
+    {
+        return $this->belongsTo(Technology::class);
     }
 
     /** @param  Builder<Skill>  $query */
@@ -66,6 +61,7 @@ class Skill extends Model
         return [
             'proficiency' => 'integer',
             'is_featured' => 'boolean',
+            'sort_order' => 'integer',
         ];
     }
 }

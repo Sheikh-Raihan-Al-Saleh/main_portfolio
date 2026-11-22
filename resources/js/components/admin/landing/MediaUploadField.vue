@@ -5,7 +5,8 @@ import { computed, ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { oversizedFileMessage, uploadUrl } from '@/lib/media';
+import { oversizedFileMessage, mediaUrl } from '@/lib/media';
+import landingSections from '@/routes/admin/landing-sections';
 
 type Props = {
     modelValue: string | null;
@@ -29,7 +30,7 @@ const uploading = ref(false);
 const error = ref<string | null>(null);
 const inputRef = ref<HTMLInputElement | null>(null);
 
-const previewUrl = computed(() => uploadUrl(props.modelValue));
+const previewUrl = computed(() => mediaUrl(props.modelValue));
 
 const isVideo = computed(() =>
     Boolean(props.modelValue && /\.(mp4|webm)$/i.test(props.modelValue)),
@@ -71,7 +72,7 @@ async function handleChange(event: Event) {
     body.append('directory', props.directory);
 
     try {
-        const response = await fetch('/admin/landing-media', {
+        const response = await fetch(landingSections.media.store().url, {
             method: 'POST',
             body,
             headers: {

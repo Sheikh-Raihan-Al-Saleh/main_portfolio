@@ -1,298 +1,195 @@
 <script setup lang="ts">
-import { ArrowUpRight, Download } from '@lucide/vue';
-import { motion } from 'motion-v';
-import { computed } from 'vue';
-import AnimatedCounter from '@/components/portfolio/AnimatedCounter.vue';
-import EditorialMarquee from '@/components/site/EditorialMarquee.vue';
+import { ArrowDownRight, Download } from '@lucide/vue';
+import { AnimatePresence, motion } from 'motion-v';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import SmartImage from '@/components/media/SmartImage.vue';
+import AnimatedCounter from '@/components/site/AnimatedCounter.vue';
 import LiquidBlob from '@/components/site/LiquidBlob.vue';
-import LiquidImage from '@/components/site/LiquidImage.vue';
-import { contentConfig } from '@/lib/content';
+import { usePrefersReducedMotion } from '@/composables/usePrefersReducedMotion';
+import { useSite } from '@/composables/useSite';
 import { EASE_OUT } from '@/lib/motion';
-import type { PortfolioStats, Profile } from '@/types';
+import { fillTokens } from '@/lib/text';
+import type { FounderContent, FounderStats } from '@/types';
 
 /**
- * The founder's hero, as a magazine cover: a mono masthead (name, role,
- * location, availability), his introduction in giant condensed type with his
- * name on the lime marker, his portrait as a liquid image, then the
- * statement, buttons, figures and main tools, and a running band of roles.
- *
- * Everything comes from the profile. The figures are server-rendered with
- * their real values (the SSR feature test reads that markup).
+ * The founder hero: a portrait, the name set large, rotating role titles,
+ * the headline numbers and the resume.
  */
-type Props = {
-    profile: Profile;
-    stats: PortfolioStats;
-    highlights?: string[];
-};
+const props = defineProps<{
+    content: FounderContent;
+    stats: FounderStats;
+}>();
 
-const props = withDefaults(defineProps<Props>(), { highlights: () => [] });
+const { founder, studio } = useSite();
+const reducedMotion = usePrefersReducedMotion();
 
-const content = computed(() => contentConfig(props.profile));
+const title = computed(() =>
+    fillTokens(founder.value.hero.title || "Hi, I'm {{name}}.", {
+        name: founder.value.name,
+    }),
+);
 
 const roles = computed(() =>
-    props.profile.roles?.length
-        ? props.profile.roles
-        : [props.profile.headline ?? 'Software Engineer'],
+    founder.value.roles.length
+        ? founder.value.roles
+        : [founder.value.headline ?? ''],
 );
+const roleIndex = ref(0);
+let timer: number | undefined;
 
-const firstName = computed(() => props.profile.name?.split(' ')[0] ?? '');
-
-const heroTitle = computed(() =>
-    (props.profile.hero_title ?? "Hi, I'm {{name}}.")
-        .replaceAll('{{name}}', props.profile.name ?? 'Developer')
-        .trim(),
-);
-
-/** The title with the founder's name picked out on the marker. */
-const titleParts = computed(() => {
-    const title = heroTitle.value;
-    const name = props.profile.name ?? '';
-    const target = name && title.includes(name) ? name : firstName.value;
-    const index = target ? title.indexOf(target) : -1;
-
-    if (index < 0) {
-        return [{ text: title, accent: false }];
+onMounted(() => {
+    if (roles.value.length > 1 && !reducedMotion.value) {
+        timer = window.setInterval(() => {
+            roleIndex.value = (roleIndex.value + 1) % roles.value.length;
+        }, 2600);
     }
-
-    return [
-        { text: title.slice(0, index), accent: false },
-        { text: target, accent: true },
-        { text: title.slice(index + target.length), accent: false },
-    ];
 });
 
-/**
- * The title as words, each flagged when it belongs to the highlighted name.
- * Spacing is kept exactly as typed, so "Nabil." never becomes "Nabil ."
- */
-const titleWords = computed(() => {
-    const words: { word: string; accent: boolean; space: boolean }[] = [];
+onBeforeUnmount(() => window.clearInterval(timer));
 
-    for (const part of titleParts.value) {
-        for (const token of part.text.split(/(\s+)/)) {
-            if (token === '') {
-                continue;
-            }
-
-            if (/^\s+$/.test(token)) {
-                const last = words.at(-1);
-
-                if (last) {
-                    last.space = true;
-                }
-
-                continue;
-            }
-
-            words.push({ word: token, accent: part.accent, space: false });
-        }
-    }
-
-    return words;
-});
-
-const statement = computed(() =>
-    (props.profile.hero_statement ?? props.profile.tagline ?? '').trim(),
-);
-
-const tools = computed(() => props.highlights.slice(0, 6));
-
-/** The running band: his roles, topped up with his tools if there is one. */
-const band = computed(() =>
-    roles.value.length > 1 ? roles.value : [...roles.value, ...tools.value],
-);
-
-/** The button draws its own arrow, so drop one typed into the label. */
-const primaryLabel = computed(() =>
-    content.value.hero.primary_cta_label.replace(/\s*→\s*$/, ''),
-);
-
-const masthead = computed(() =>
-    [props.profile.name, props.profile.headline, props.profile.location].filter(
-        (item): item is string => Boolean(item),
-    ),
-);
-
-function rise(delay: number) {
-    return {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.9, ease: EASE_OUT, delay },
+const figures = computed(() =>
+    [
+        {
+            value: props.stats.yearsExperience,
+            label: props.content.hero.years_label,
         },
-    };
-}
+        {
+            value: props.stats.projects,
+            label: props.content.hero.projects_label,
+        },
+        { value: props.stats.skills, label: props.content.hero.skills_label },
+    ].filter((figure) => figure.value > 0),
+);
+
+const reveal = (delay: number) => ({
+    initial: { opacity: 0, y: 32 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.9, ease: EASE_OUT, delay },
+});
 </script>
 
 <template>
-    <section class="relative flex min-h-[100svh] flex-col overflow-hidden">
+    <section class="relative overflow-hidden" aria-labelledby="founder-title">
+        <LiquidBlob
+            class="pointer-events-none absolute -bottom-40 -left-40 size-[34rem] opacity-80"
+        />
+
         <div
-            class="site-container relative flex flex-1 flex-col pt-28 pb-10 sm:pt-32 lg:pb-14"
+            class="container-site relative grid gap-14 pt-10 pb-20 sm:pt-16 lg:grid-cols-12 lg:items-center"
         >
-            <!-- Masthead -->
-            <motion.div
-                :variants="rise(0)"
-                initial="hidden"
-                animate="visible"
-                class="ui-label flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-b border-border pb-4"
-            >
-                <span class="flex flex-wrap gap-x-6 gap-y-1">
-                    <span v-for="item in masthead" :key="item">{{ item }}</span>
-                </span>
-                <span class="inline-flex items-center gap-2">
-                    <span
-                        :class="
-                            profile.available_for_work
-                                ? 'ui-pulse-dot'
-                                : 'size-2 rounded-full bg-muted-foreground'
-                        "
-                    />
-                    {{
-                        profile.available_for_work
-                            ? content.about.available_open
-                            : content.about.available_closed
-                    }}
-                </span>
-            </motion.div>
+            <div class="lg:col-span-7">
+                <motion.p v-bind="reveal(0.1)" class="eyebrow">
+                    Founder of {{ studio.name }}
+                </motion.p>
 
-            <!-- Name and portrait -->
-            <div
-                class="grid flex-1 items-center gap-10 py-10 lg:grid-cols-12 lg:gap-8"
-            >
-                <h1
-                    class="ui-display text-[clamp(3.75rem,10.5vw,11rem)] lg:col-span-8"
-                    :aria-label="heroTitle"
+                <motion.h1
+                    id="founder-title"
+                    v-bind="reveal(0.2)"
+                    class="display display-lg mt-8"
                 >
-                    <template v-for="(item, i) in titleWords" :key="i">
-                        <span class="ui-word" aria-hidden="true"
-                            ><span
-                                :class="item.accent ? 'ui-accent' : undefined"
-                                :style="{ '--i': i, '--base': '120ms' }"
-                                >{{ item.word }}</span
-                            ></span
-                        >{{ item.space ? ' ' : '' }}
-                    </template>
-                </h1>
+                    {{ title }}
+                </motion.h1>
 
                 <motion.div
-                    :initial="{ opacity: 0, y: 40 }"
-                    :animate="{ opacity: 1, y: 0 }"
-                    :transition="{ duration: 1.1, ease: EASE_OUT, delay: 0.3 }"
-                    class="relative mx-auto w-full max-w-sm lg:col-span-4 lg:max-w-none"
+                    v-bind="reveal(0.3)"
+                    class="mt-6 h-12 overflow-hidden sm:h-14"
+                    aria-live="polite"
                 >
-                    <LiquidImage
-                        v-if="profile.avatar_url"
-                        :src="profile.avatar_url"
-                        :alt="profile.name"
-                        eager
-                        class="aspect-[4/5] w-full rounded-sm bg-muted"
-                    />
-                    <LiquidBlob v-else class="aspect-[4/5] w-full" />
-                    <span
-                        class="ui-label absolute -bottom-3 left-4 bg-[var(--accent-fill)] px-2 py-1 text-[var(--accent-ink)]"
-                        >{{ roles[0] }}</span
-                    >
-                </motion.div>
-            </div>
-
-            <!-- Statement, buttons, figures -->
-            <motion.div
-                initial="hidden"
-                animate="visible"
-                class="grid gap-8 border-t border-border pt-6 lg:grid-cols-12 lg:items-end"
-            >
-                <motion.div
-                    :variants="rise(0.5)"
-                    class="flex flex-col gap-5 lg:col-span-5"
-                >
-                    <p
-                        v-if="statement"
-                        class="max-w-md text-lg leading-relaxed text-pretty"
-                    >
-                        {{ statement }}
-                    </p>
-                    <ul
-                        v-if="tools.length"
-                        class="flex flex-wrap gap-1.5"
-                        aria-label="Main tools"
-                    >
-                        <li v-for="tool in tools" :key="tool" class="ui-pill">
-                            {{ tool }}
-                        </li>
-                    </ul>
+                    <AnimatePresence mode="wait">
+                        <motion.p
+                            :key="roleIndex"
+                            class="display text-4xl text-brand italic sm:text-5xl"
+                            :initial="{ y: '100%', opacity: 0 }"
+                            :animate="{ y: 0, opacity: 1 }"
+                            :exit="{ y: '-100%', opacity: 0 }"
+                            :transition="{ duration: 0.5, ease: EASE_OUT }"
+                        >
+                            {{ roles[roleIndex] }}
+                        </motion.p>
+                    </AnimatePresence>
                 </motion.div>
 
+                <motion.p v-bind="reveal(0.4)" class="lead mt-8 max-w-xl">
+                    {{ founder.hero.statement || founder.tagline }}
+                </motion.p>
+
                 <motion.div
-                    :variants="rise(0.6)"
-                    class="flex flex-wrap gap-3 lg:col-span-3"
+                    v-bind="reveal(0.5)"
+                    class="mt-10 flex flex-wrap gap-3"
                 >
                     <a
-                        :href="content.hero.primary_cta_url || '#projects'"
-                        class="ui-btn ui-btn-primary"
+                        v-if="founder.hero.primary_cta.label"
+                        :href="founder.hero.primary_cta.url || '#projects'"
+                        class="btn btn-ink"
                     >
-                        {{ primaryLabel }}
-                        <ArrowUpRight class="size-4" />
+                        {{ founder.hero.primary_cta.label }}
+                        <ArrowDownRight
+                            class="btn-arrow size-4"
+                            aria-hidden="true"
+                        />
                     </a>
                     <a
-                        :href="content.hero.secondary_cta_url || '#contact'"
-                        class="ui-btn ui-btn-secondary"
-                    >
-                        {{ content.hero.secondary_cta_label }}
-                    </a>
-                    <a
-                        v-if="profile.resume_url"
-                        href="/resume"
+                        v-if="founder.resume_url"
+                        :href="founder.resume_url"
                         target="_blank"
                         rel="noopener"
-                        class="ui-btn ui-btn-secondary"
+                        class="btn btn-outline"
                     >
-                        <Download class="size-4" />
+                        <Download class="size-4" aria-hidden="true" />
                         {{ content.hero.resume_label }}
                     </a>
                 </motion.div>
 
-                <!--
-                    Figures: the span structure (tabular-nums value, then its
-                    label) is asserted by the SSR feature test; keep it.
-                -->
-                <motion.div
-                    :variants="rise(0.7)"
-                    class="grid grid-cols-3 gap-6 lg:col-span-4"
+                <motion.dl
+                    v-if="figures.length"
+                    v-bind="reveal(0.6)"
+                    class="mt-14 flex flex-wrap gap-x-12 gap-y-6"
                 >
-                    <div class="flex flex-col">
-                        <span
-                            class="ui-display text-5xl tabular-nums sm:text-6xl"
-                            ><AnimatedCounter
-                                :value="stats.yearsExperience"
-                                suffix="+"
-                        /></span>
-                        <span class="ui-label text-muted-foreground">{{
-                            content.hero.years_label
-                        }}</span>
+                    <div v-for="figure in figures" :key="figure.label">
+                        <dd class="display text-6xl">
+                            <AnimatedCounter :value="figure.value" />
+                        </dd>
+                        <dt class="meta mt-1">{{ figure.label }}</dt>
                     </div>
-                    <div class="flex flex-col">
-                        <span
-                            class="ui-display text-5xl tabular-nums sm:text-6xl"
-                            ><AnimatedCounter :value="stats.projects"
-                        /></span>
-                        <span class="ui-label text-muted-foreground">{{
-                            content.hero.projects_label
+                </motion.dl>
+            </div>
+
+            <motion.div
+                class="relative lg:col-span-5"
+                :initial="{ opacity: 0, scale: 0.94, rotate: -2 }"
+                :animate="{ opacity: 1, scale: 1, rotate: 0 }"
+                :transition="{ duration: 1.1, ease: EASE_OUT, delay: 0.3 }"
+            >
+                <SmartImage
+                    :src="founder.avatar_url"
+                    :alt="founder.name"
+                    ratio="4/5"
+                    eager
+                    class="rounded-[2rem]"
+                >
+                    <template #fallback>
+                        <span class="display text-[10rem] text-stone/30">{{
+                            founder.name.charAt(0)
                         }}</span>
-                    </div>
-                    <div class="flex flex-col">
-                        <span
-                            class="ui-display text-5xl tabular-nums sm:text-6xl"
-                            ><AnimatedCounter :value="stats.skills"
-                        /></span>
-                        <span class="ui-label text-muted-foreground">{{
-                            content.hero.skills_label
-                        }}</span>
-                    </div>
-                </motion.div>
+                    </template>
+                </SmartImage>
+
+                <p
+                    class="absolute -bottom-5 left-6 inline-flex items-center gap-3 rounded-full border border-line bg-paper px-5 py-3 text-sm shadow-sm"
+                >
+                    <span
+                        class="status-dot"
+                        :class="
+                            !founder.is_available_for_work && 'status-dot-off'
+                        "
+                    />
+                    {{
+                        founder.is_available_for_work
+                            ? content.about.available_open
+                            : content.about.available_closed
+                    }}
+                </p>
             </motion.div>
         </div>
-
-        <EditorialMarquee :items="band" />
     </section>
 </template>

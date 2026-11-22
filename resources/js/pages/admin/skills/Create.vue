@@ -3,10 +3,11 @@ import { Head } from '@inertiajs/vue3';
 import SkillController from '@/actions/App/Http/Controllers/Admin/SkillController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import skills from '@/routes/admin/skills';
+import type { SelectOption } from '@/types';
 import SkillForm from './SkillForm.vue';
 
 type Props = {
-    categories: Record<string, string>;
+    categoryOptions: SelectOption<number>[];
 };
 
 defineProps<Props>();
@@ -31,7 +32,7 @@ defineOptions({
         />
 
         <SkillForm
-            :categories="categories"
+            :category-options="categoryOptions"
             :action="SkillController.store.form()"
             submit-label="Create skill"
         />

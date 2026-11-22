@@ -1,5 +1,9 @@
 <x-mail::message>
-# New message from your portfolio
+@if ($brandLogo)
+<img src="{{ $brandLogo }}" alt="{{ $brandName }} logo" style="height: 56px; width: auto; margin-bottom: 16px;">
+@endif
+
+# New enquiry for {{ $brandName }}
 
 **From:** {{ $contactMessage->name }} &lt;{{ $contactMessage->email }}&gt;
 
@@ -19,5 +23,7 @@
 Open in admin panel
 </x-mail::button>
 
-You can reply to this email directly to reach {{ $contactMessage->name }}.
+Reply to this email to reach {{ $contactMessage->name }} directly.
+
+{{ $brandName }}
 </x-mail::message>

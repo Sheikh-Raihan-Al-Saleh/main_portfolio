@@ -19,25 +19,24 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import CompletenessRing from '@/components/admin/CompletenessRing.vue';
 import DonutChart from '@/components/admin/DonutChart.vue';
 import LineChart from '@/components/admin/LineChart.vue';
-import AnimatedCounter from '@/components/portfolio/AnimatedCounter.vue';
+import AnimatedCounter from '@/components/site/AnimatedCounter.vue';
 import { Button } from '@/components/ui/button';
+import { useSite } from '@/composables/useSite';
 import { fadeUp, stagger } from '@/lib/motion';
 import { dashboard } from '@/routes/admin';
 import clients from '@/routes/admin/clients';
 import educations from '@/routes/admin/educations';
 import experiences from '@/routes/admin/experiences';
+import founderRoutes from '@/routes/admin/founder';
 import messages from '@/routes/admin/messages';
 import projects from '@/routes/admin/projects';
 import skills from '@/routes/admin/skills';
-import { edit as studioSectionsEdit } from '@/routes/admin/studio-sections';
+import studioRoutes from '@/routes/admin/studio';
 import type {
-    Company,
     CompletenessScore,
     ContactMessage,
     DashboardActivity,
     MessageSource,
-    Profile,
-    Project,
 } from '@/types';
 
 type Props = {
@@ -58,16 +57,20 @@ type Props = {
         founder: CompletenessScore;
     };
     recentMessages: ContactMessage[];
-    recentProjects: Pick<
-        Project,
-        'id' | 'title' | 'slug' | 'is_published' | 'is_featured' | 'updated_at'
-    >[];
+    recentProjects: {
+        id: number;
+        title: string;
+        slug: string;
+        is_published: boolean;
+        is_featured: boolean;
+        updated_at: string;
+    }[];
     messageSources: MessageSource[];
-    profile: Profile;
-    company: Company;
 };
 
 const props = defineProps<Props>();
+
+const { studio, founder } = useSite();
 
 defineOptions({
     layout: {
@@ -115,7 +118,7 @@ const cards = [
         suffix: '',
         caption: 'builder blocks',
         icon: Sparkles,
-        href: studioSectionsEdit(),
+        href: studioRoutes.content.edit(),
         color: 'from-violet-500 to-purple-500',
         bg: 'bg-violet-500/10',
         text: 'text-violet-600 dark:text-violet-400',
@@ -191,7 +194,7 @@ function formatDate(value: string): string {
     <div class="p-4 sm:p-6">
         <AdminPageHeader
             title="Dashboard"
-            :description="`Analytics and content health for ${company.name} and ${profile.name}.`"
+            :description="`Analytics and content health for ${studio.name} and ${founder.name}.`"
         >
             <template #actions>
                 <Button as-child variant="outline" size="sm">
@@ -212,7 +215,7 @@ function formatDate(value: string): string {
                     </Link>
                 </Button>
                 <Button as-child variant="outline" size="sm">
-                    <Link :href="studioSectionsEdit()">
+                    <Link :href="studioRoutes.content.edit()">
                         <Sparkles class="size-4" />
                         Home sections
                     </Link>
@@ -386,13 +389,13 @@ function formatDate(value: string): string {
                         label="Studio"
                         :percent="completeness.studio.percent"
                         :missing="completeness.studio.missing"
-                        href="/admin/company"
+                        :href="studioRoutes.edit().url"
                     />
                     <CompletenessRing
                         label="Founder"
                         :percent="completeness.founder.percent"
                         :missing="completeness.founder.missing"
-                        href="/admin/profile"
+                        :href="founderRoutes.edit().url"
                     />
                 </div>
             </motion.section>

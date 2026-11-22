@@ -176,7 +176,7 @@ watch(
                                     cn(
                                         'grid size-8 shrink-0 place-items-center rounded-lg transition-colors',
                                         active === tab.id
-                                            ? 'bg-gradient-to-br from-[var(--signal)] to-[var(--grad-to)] text-white'
+                                            ? 'bg-primary text-primary-foreground'
                                             : 'bg-muted text-muted-foreground group-hover:text-foreground',
                                     )
                                 "
@@ -196,7 +196,7 @@ watch(
                                         cn(
                                             'flex items-center gap-2 text-sm font-semibold',
                                             active === tab.id
-                                                ? 'text-brand'
+                                                ? 'text-brand-text'
                                                 : 'text-foreground',
                                         )
                                     "

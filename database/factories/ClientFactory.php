@@ -3,10 +3,13 @@
 namespace Database\Factories;
 
 use App\Models\Client;
-use App\Models\Company;
+use App\Services\StudioService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
+ * Clients belong to the current studio, so factory-made clients appear in the
+ * real logo strip.
+ *
  * @extends Factory<Client>
  */
 class ClientFactory extends Factory
@@ -19,21 +22,11 @@ class ClientFactory extends Factory
     public function definition(): array
     {
         return [
-            // Clients hang off the company singleton, the same row the seeder
-            // and the public pages read, so a factory-made client shows up in the
-            // real logo strip rather than in a throwaway company.
-            'company_id' => Company::current()->id,
+            'studio_id' => fn (): int => app(StudioService::class)->current()->id,
             'name' => fake()->unique()->company(),
             'logo_path' => null,
             'website_url' => 'https://'.fake()->domainName(),
-            'industry' => fake()->randomElement([
-                'Fintech',
-                'Logistics',
-                'Retail',
-                'Healthcare',
-                'Education',
-                'Real estate',
-            ]),
+            'industry' => fake()->randomElement(['Fintech', 'Logistics', 'Retail', 'Healthcare', 'Education', 'Real estate']),
             'summary' => fake()->sentence(10),
             'sort_order' => 0,
             'is_visible' => true,

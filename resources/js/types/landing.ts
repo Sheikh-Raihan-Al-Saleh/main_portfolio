@@ -110,14 +110,12 @@ export type LandingSection = {
     };
 }[LandingSectionType];
 
+/** LandingPageResource: a project's case-study page settings. */
 export type ProjectLandingPage = {
     id: number;
-    project_id: number;
     eyebrow: string | null;
     headline: string | null;
     subheadline: string | null;
-    hero_media_path: string | null;
-    hero_media_paths: (string | null)[] | null;
     hero_video_url: string | null;
     primary_cta_label: string | null;
     primary_cta_url: string | null;
@@ -127,11 +125,10 @@ export type ProjectLandingPage = {
     accent_to: string | null;
     seo_title: string | null;
     seo_description: string | null;
-    og_image_path: string | null;
-    is_published: boolean;
-    hero_media_url: string | null;
-    hero_media_urls: string[];
     og_image_url: string | null;
+    is_published: boolean;
+    /** Hero screenshots by slot: 0 desktop, 1 tablet, 2 phone. Empty = null. */
+    hero_media: (string | null)[];
 };
 
 export type LandingSectionTypeOption = {

@@ -78,10 +78,10 @@ test('users are rate limited', function () {
     $response->assertTooManyRequests();
 });
 
-test('the login screen showcases up to three published project covers', function () {
+test('the login screen showcases up to six published project covers', function () {
     Storage::fake('uploads');
 
-    foreach (range(1, 4) as $i) {
+    foreach (range(1, 7) as $i) {
         Storage::disk('uploads')->put("projects/cover-{$i}.png", 'x');
         Project::factory()->create(['cover_image_path' => "projects/cover-{$i}.png"]);
     }
@@ -94,10 +94,10 @@ test('the login screen showcases up to three published project covers', function
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('auth/Login')
-            ->has('showcase', 3)
+            ->has('showcase', 6)
             ->has('showcase.0', fn ($item) => $item
                 ->whereType('title', 'string')
-                ->where('cover', fn (string $url) => str_contains($url, 'uploads/projects/cover-')),
+                ->where('cover', fn (string $url) => str_starts_with($url, '/uploads/projects/cover-')),
             ),
         );
 });

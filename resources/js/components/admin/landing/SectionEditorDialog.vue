@@ -23,11 +23,11 @@ import type { LandingSection, LandingSectionType } from '@/types';
 type Props = {
     open: boolean;
     /**
-     * The section's owner: a project's landing page, or the company home page.
-     * Exactly one of the two is set, matching the database constraint.
+     * The page a new section is added to: the studio home page, or the
+     * landing page of the project given by `projectId`.
      */
-    landingPageId?: number | null;
-    companyId?: number | null;
+    owner: 'studio' | 'project';
+    projectId?: number | null;
     /** Editing an existing section, or null when adding a new one. */
     section: LandingSection | null;
     /** Type for a new section. Ignored when `section` is provided. */
@@ -48,9 +48,7 @@ const schema = computed(() =>
 
 /** A new section needs an owner; the dialog refuses to save without one. */
 const hasOwner = computed(
-    () =>
-        typeof props.landingPageId === 'number' ||
-        typeof props.companyId === 'number',
+    () => props.owner === 'studio' || typeof props.projectId === 'number',
 );
 
 const form = reactive({
@@ -142,8 +140,8 @@ function submit() {
         '/admin/landing-sections',
         {
             ...(payload as object),
-            landing_page_id: props.landingPageId ?? null,
-            company_id: props.companyId ?? null,
+            owner: props.owner,
+            project_id: props.projectId ?? null,
             type: activeType.value,
         } as unknown as RequestPayload,
         options,

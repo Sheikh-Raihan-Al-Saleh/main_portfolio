@@ -3,7 +3,7 @@ import { motion } from 'motion-v';
 import { computed, ref } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { uploadUrl } from '@/lib/media';
+import { mediaUrl } from '@/lib/media';
 import { inViewOnce, perspectiveCard, stagger } from '@/lib/motion';
 import type { LandingSection } from '@/types';
 
@@ -51,7 +51,7 @@ const activeImage = computed(() =>
                 @click="openIndex = index"
             >
                 <img
-                    :src="uploadUrl(image)"
+                    :src="mediaUrl(image)"
                     :alt="`${section.heading ?? 'Gallery'} image ${index + 1}`"
                     loading="lazy"
                     class="aspect-[4/3] w-full rounded-xl object-cover transition duration-500 group-hover:scale-[1.02]"
@@ -65,7 +65,7 @@ const activeImage = computed(() =>
                 }}</DialogTitle>
                 <img
                     v-if="activeImage"
-                    :src="uploadUrl(activeImage)"
+                    :src="mediaUrl(activeImage)"
                     :alt="section.heading ?? 'Gallery image'"
                     class="h-auto w-full rounded-lg"
                 />

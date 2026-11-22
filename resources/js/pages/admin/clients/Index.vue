@@ -48,7 +48,7 @@ defineOptions({
 
 const { items, move, saving } = useReorder<Client>(
     () => props.clients,
-    clientRoutes.reorder().url,
+    'clients',
 );
 
 const open = ref(false);

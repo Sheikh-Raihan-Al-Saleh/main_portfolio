@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form, usePage } from '@inertiajs/vue3';
 import { CalendarRange, FileText, ImageIcon, Rocket, Type } from '@lucide/vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import FileField from '@/components/admin/FileField.vue';
 import FormSection from '@/components/admin/form/FormSection.vue';
 import FormTabs from '@/components/admin/form/FormTabs.vue';
@@ -21,23 +21,25 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { oversizedFileMessage } from '@/lib/media';
 import projects from '@/routes/admin/projects';
-import type { Project } from '@/types';
+import type { Project, SelectOption } from '@/types';
 
 type Props = {
     project?: Project;
     /** Wayfinder form props: `ProjectController.store.form()` or `.update.form(id)`. */
     action: Record<string, unknown>;
     submitLabel: string;
-    /** `ProjectContext::options()`, for the context select. */
-    contexts: { value: string; label: string }[];
-    /** Stored gallery images (edit only); ticking one removes it on save. */
-    galleryItems?: { path: string; url: string }[];
+    /** Who the project belongs to: the studio or the founder. */
+    owners: SelectOption[];
+    /** Known technology names, suggested while typing the stack. */
+    technologyOptions: string[];
 };
 
 const props = withDefaults(defineProps<Props>(), {
     project: undefined,
-    galleryItems: () => [],
 });
+
+/** Stored gallery images (edit only); ticking one removes it on save. */
+const galleryItems = computed(() => props.project?.images ?? []);
 
 const page = usePage();
 const gallerySizeError = ref<string | null>(null);
@@ -67,7 +69,7 @@ const tabs: FormTab[] = [
         label: 'Basics',
         description: 'Title, where it appears',
         icon: Type,
-        fields: ['title', 'slug', 'context', 'summary'],
+        fields: ['title', 'slug', 'owner', 'summary'],
     },
     {
         id: 'story',
@@ -166,17 +168,19 @@ const tabs: FormTab[] = [
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="context">Appears on</Label>
+                        <Label for="owner">Belongs to</Label>
                         <Select
-                            name="context"
-                            :default-value="props.project?.context ?? 'company'"
+                            name="owner"
+                            :default-value="
+                                props.project?.owner_type ?? 'studio'
+                            "
                         >
-                            <SelectTrigger id="context">
-                                <SelectValue placeholder="Pick a context" />
+                            <SelectTrigger id="owner">
+                                <SelectValue placeholder="Studio or founder" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem
-                                    v-for="option in contexts"
+                                    v-for="option in owners"
                                     :key="option.value"
                                     :value="option.value"
                                 >
@@ -188,7 +192,7 @@ const tabs: FormTab[] = [
                             Company work: home page and archive. Personal work:
                             your portfolio.
                         </p>
-                        <InputError :message="errors.context" />
+                        <InputError :message="errors.owner" />
                     </div>
                 </FormSection>
             </template>
@@ -221,7 +225,10 @@ const tabs: FormTab[] = [
                         <Label>Tech stack</Label>
                         <TagInput
                             name="tech_stack"
-                            :model-value="project?.tech_stack"
+                            :model-value="
+                                project?.technologies.map((tech) => tech.name)
+                            "
+                            :suggestions="technologyOptions"
                             placeholder="Laravel, Vue, MySQL…"
                         />
                         <InputError :message="errors.tech_stack" />
@@ -346,21 +353,21 @@ const tabs: FormTab[] = [
                         >
                             <label
                                 v-for="item in galleryItems"
-                                :key="item.path"
+                                :key="item.id"
                                 class="group relative cursor-pointer"
-                                :title="`Remove ${item.path.split('/').pop()}`"
+                                :title="`Remove ${item.alt ?? 'image'}`"
                             >
                                 <img
-                                    :src="item.url"
+                                    :src="item.url ?? ''"
                                     alt=""
                                     class="h-16 w-24 rounded-lg border border-border object-cover transition group-has-[:checked]:opacity-30"
                                 />
                                 <input
                                     type="checkbox"
                                     name="remove_gallery[]"
-                                    :value="item.path"
+                                    :value="item.id"
                                     class="absolute top-1 right-1 size-4 accent-destructive"
-                                    :aria-label="`Remove gallery image ${item.path.split('/').pop()}`"
+                                    :aria-label="`Remove gallery image ${item.id}`"
                                 />
                             </label>
                         </div>

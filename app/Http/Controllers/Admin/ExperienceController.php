@@ -2,102 +2,63 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Concerns\HandlesMediaUploads;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ExperienceRequest;
 use App\Models\Experience;
+use App\Services\ExperienceService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ExperienceController extends Controller
 {
-    use HandlesMediaUploads;
+    public function __construct(
+        private readonly ExperienceService $experiences,
+    ) {}
 
     public function index(): Response
     {
-        return inertia('admin/experiences/Index', [
-            'experiences' => Experience::query()->ordered()->get(),
+        return Inertia::render('admin/experiences/Index', [
+            'experiences' => $this->experiences->adminIndex(),
         ]);
     }
 
     public function create(): Response
     {
-        return inertia('admin/experiences/Create');
+        return Inertia::render('admin/experiences/Create');
     }
 
     public function store(ExperienceRequest $request): RedirectResponse
     {
-        $experience = new Experience($this->attributes($request));
-        $experience->logo_path = $this->storeMedia($request->file('logo'), 'experiences');
-        $experience->sort_order = (int) Experience::query()->max('sort_order') + 1;
-        $experience->save();
+        $this->experiences->create($request->validated());
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Experience created.')]);
+        $this->toast(__('Experience created.'));
 
         return to_route('admin.experiences.index');
     }
 
     public function edit(Experience $experience): Response
     {
-        return inertia('admin/experiences/Edit', ['experience' => $experience]);
+        return Inertia::render('admin/experiences/Edit', [
+            'experience' => $this->experiences->loadForEdit($experience),
+        ]);
     }
 
     public function update(ExperienceRequest $request, Experience $experience): RedirectResponse
     {
-        $experience->fill($this->attributes($request));
+        $this->experiences->update($experience, $request->validated());
 
-        if ($request->boolean('remove_logo')) {
-            $this->deleteMedia($experience->logo_path);
-            $experience->logo_path = null;
-        }
-
-        $experience->logo_path = $this->storeMedia(
-            $request->file('logo'), 'experiences', $experience->logo_path,
-        );
-        $experience->save();
-
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Experience updated.')]);
+        $this->toast(__('Experience updated.'));
 
         return to_route('admin.experiences.index');
     }
 
     public function destroy(Experience $experience): RedirectResponse
     {
-        $this->deleteMedia($experience->logo_path);
-        $experience->delete();
+        $this->experiences->delete($experience);
 
-        Inertia::flash('toast', ['type' => 'error', 'message' => __('Experience deleted.')]);
-
-        return back();
-    }
-
-    public function reorder(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'ids' => ['required', 'array'],
-            'ids.*' => ['integer', 'exists:experiences,id'],
-        ]);
-
-        DB::transaction(function () use ($validated): void {
-            foreach ($validated['ids'] as $position => $id) {
-                Experience::query()->whereKey($id)->update(['sort_order' => $position]);
-            }
-        });
+        $this->toast(__('Experience deleted.'), 'error');
 
         return back();
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function attributes(ExperienceRequest $request): array
-    {
-        return $request->safe()->only([
-            'company', 'role', 'employment_type', 'location', 'start_date',
-            'end_date', 'description', 'highlights', 'company_url',
-        ]);
     }
 }

@@ -2,9 +2,11 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Company;
-use App\Models\ContactMessage;
-use App\Models\Profile;
+use App\Http\Resources\FounderResource;
+use App\Http\Resources\StudioResource;
+use App\Services\ContactMessageService;
+use App\Services\FounderService;
+use App\Services\StudioService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -40,20 +42,19 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
             ],
-            // Shared on every request so the layout's nav and footer always
-            // have profile data, whatever page is being rendered.
-            'profile' => fn () => Profile::current(),
-            // Likewise for the company, so the public header and footer can
-            // brand themselves as the studio on the home route and as the
-            // founder on /about without each page re-sending them.
-            'company' => fn () => Company::current(),
-            // Only queried for signed-in admins, so public page loads stay query-free.
+            // The company name and logos, used on every page: header, footer,
+            // loader, login, admin sidebar and page titles. Cached in StudioService.
+            'brand' => fn () => app(StudioService::class)->brand(),
+            // The studio and founder records, for the public header, footer and
+            // contact details. One query each per request (memoised).
+            'studio' => fn () => StudioResource::make(app(StudioService::class)->current())->resolve(),
+            'founder' => fn () => FounderResource::make(app(FounderService::class)->current())->resolve(),
+            // Only counted for signed-in admins, so public pages skip the query.
             'unreadMessages' => fn () => $request->user()?->is_admin
-                ? ContactMessage::unread()->count()
+                ? app(ContactMessageService::class)->unreadCount()
                 : 0,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             // PHP's upload limits, so admin file pickers can reject an oversized

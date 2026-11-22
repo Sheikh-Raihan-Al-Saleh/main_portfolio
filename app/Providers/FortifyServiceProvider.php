@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\Actions\Fortify\ResetUserPassword;
-use App\Models\Project;
+use App\Services\ProjectService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -43,32 +43,18 @@ class FortifyServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure Fortify views.
-     */
-    /**
-     * A few published project covers for the sign-in pages' brand panel.
-     * Only what is already public on the site, and only what the panel shows.
+     * A few published project covers for the 3D scene on the sign-in pages.
      *
      * @return array<int, array{title: string, cover: string}>
      */
     private function showcase(): array
     {
-        return Project::query()
-            ->published()
-            ->whereNotNull('cover_image_path')
-            ->ordered()
-            ->take(6)
-            ->get()
-            ->filter(fn (Project $project): bool => $project->cover_image_url !== null)
-            ->take(3)
-            ->map(fn (Project $project): array => [
-                'title' => $project->title,
-                'cover' => (string) $project->cover_image_url,
-            ])
-            ->values()
-            ->all();
+        return app(ProjectService::class)->loginShowcase();
     }
 
+    /**
+     * Configure Fortify views.
+     */
     private function configureViews(): void
     {
         Fortify::loginView(fn (Request $request) => Inertia::render('auth/Login', [

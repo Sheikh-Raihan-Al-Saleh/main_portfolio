@@ -72,8 +72,7 @@ function dateValue(value: string | null | undefined): string {
                     <Input
                         id="degree"
                         name="degree"
-                        required
-                        :default-value="education?.degree"
+                        :default-value="education?.degree ?? ''"
                         placeholder="BSc"
                     />
                     <InputError :message="errors.degree" />
@@ -113,7 +112,6 @@ function dateValue(value: string | null | undefined): string {
                         id="start_date"
                         name="start_date"
                         type="date"
-                        required
                         :default-value="dateValue(education?.start_date)"
                     />
                     <InputError :message="errors.start_date" />

@@ -21,9 +21,11 @@ function adminGetRoutes(): array
         '/admin/educations',
         '/admin/educations/create',
         '/admin/messages',
-        '/admin/profile',
-        '/admin/company',
+        '/admin/studio',
+        '/admin/studio/content',
+        '/admin/founder',
         '/admin/clients',
+        '/admin/technologies',
     ];
 }
 

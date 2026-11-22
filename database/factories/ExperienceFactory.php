@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Experience;
+use App\Services\FounderService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,6 +19,7 @@ class ExperienceFactory extends Factory
     public function definition(): array
     {
         return [
+            'founder_id' => fn (): int => app(FounderService::class)->current()->id,
             'company' => fake()->company(),
             'role' => fake()->jobTitle(),
             'employment_type' => 'Full-time',
@@ -25,7 +27,8 @@ class ExperienceFactory extends Factory
             'start_date' => fake()->dateTimeBetween('-6 years', '-2 years'),
             'end_date' => fake()->dateTimeBetween('-2 years', 'now'),
             'description' => fake()->paragraph(),
-            'highlights' => [fake()->sentence(), fake()->sentence()],
+            'company_url' => null,
+            'logo_path' => null,
             'sort_order' => 0,
         ];
     }

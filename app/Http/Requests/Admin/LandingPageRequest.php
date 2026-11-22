@@ -20,14 +20,6 @@ class LandingPageRequest extends FormRequest
             'eyebrow' => ['nullable', 'string', 'max:80'],
             'headline' => ['nullable', 'string', 'max:180'],
             'subheadline' => ['nullable', 'string', 'max:600'],
-            // Legacy single hero media (kept for backward compatibility)
-            'hero_media' => ['nullable', 'image', 'max:6144'],
-            'remove_hero_media' => ['boolean'],
-            // New multiple hero media paths (desktop, tablet, mobile)
-            'hero_media_paths' => ['nullable', 'array', 'max:3'],
-            'hero_media_paths.*' => ['nullable', 'image', 'max:6144'],
-            'remove_hero_media_slots' => ['nullable', 'array', 'max:3'],
-            'remove_hero_media_slots.*' => ['boolean'],
             'hero_video_url' => ['nullable', 'url', 'max:2048'],
             'primary_cta_label' => ['nullable', 'string', 'max:80'],
             'primary_cta_url' => ['nullable', 'string', 'max:2048'],
@@ -38,33 +30,23 @@ class LandingPageRequest extends FormRequest
             'accent_to' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'seo_title' => ['nullable', 'string', 'max:180'],
             'seo_description' => ['nullable', 'string', 'max:300'],
+            'is_published' => ['boolean'],
+
             'og_image' => ['nullable', 'image', 'max:4096'],
             'remove_og_image' => ['boolean'],
-            'is_published' => ['boolean'],
-        ];
-    }
 
-    /**
-     * Model attributes only -- files and UI-only flags stay with the controller.
-     *
-     * @return array<string, mixed>
-     */
-    public function landingAttributes(): array
-    {
-        return $this->safe()->only([
-            'eyebrow', 'headline', 'subheadline', 'hero_video_url',
-            'primary_cta_label', 'primary_cta_url',
-            'secondary_cta_label', 'secondary_cta_url',
-            'accent_from', 'accent_to', 'seo_title', 'seo_description',
-            'is_published',
-        ]);
+            // Hero screenshots by slot: 0 desktop, 1 tablet, 2 phone.
+            'hero_media' => ['nullable', 'array', 'max:3'],
+            'hero_media.*' => ['nullable', 'image', 'max:6144'],
+            'remove_hero_media' => ['nullable', 'array', 'max:3'],
+            'remove_hero_media.*' => ['boolean'],
+        ];
     }
 
     protected function prepareForValidation(): void
     {
         $this->merge([
             'is_published' => $this->boolean('is_published'),
-            'remove_hero_media' => $this->boolean('remove_hero_media'),
             'remove_og_image' => $this->boolean('remove_og_image'),
         ]);
     }

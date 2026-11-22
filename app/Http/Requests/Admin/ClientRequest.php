@@ -19,8 +19,8 @@ class ClientRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:120'],
-            'industry' => ['nullable', 'string', 'max:80'],
-            'summary' => ['nullable', 'string', 'max:300'],
+            'industry' => ['nullable', 'string', 'max:120'],
+            'summary' => ['nullable', 'string', 'max:500'],
             'website_url' => ['nullable', 'url', 'max:255'],
             // SVG is allowed (the seeded logos are SVGs), so formats are listed by
             // extension: the `image` rule rejects svg outright. Uploads are served

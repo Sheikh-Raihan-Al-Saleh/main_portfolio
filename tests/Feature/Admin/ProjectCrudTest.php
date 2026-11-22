@@ -1,256 +1,117 @@
 <?php
 
-use App\Enums\LandingSectionType;
-use App\Enums\ProjectContext;
 use App\Models\LandingSection;
 use App\Models\Project;
 use App\Models\ProjectLandingPage;
-use App\Models\User;
+use App\Models\Technology;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
-    $this->admin = User::factory()->create(['is_admin' => true]);
+    Storage::fake('uploads');
+    $this->admin = admin();
 });
 
-test('an admin can create a project', function () {
+test('the project list and forms load', function () {
+    Project::factory()->count(2)->create();
+
+    $this->actingAs($this->admin)->get('/admin/projects')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->component('admin/projects/Index')->has('projects', 2));
+
+    $this->actingAs($this->admin)->get('/admin/projects/create')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->has('owners', 2)->has('technologyOptions'));
+});
+
+test('the project list can be searched', function () {
+    Project::factory()->create(['title' => 'Alpha ERP']);
+    Project::factory()->create(['title' => 'Beta Shop']);
+
+    $this->actingAs($this->admin)->get('/admin/projects?search=ERP')
+        ->assertInertia(fn ($page) => $page->has('projects', 1)->where('projects.0.title', 'Alpha ERP'));
+});
+
+test('an admin can create a project with technologies, cover and gallery', function () {
+    Technology::factory()->create(['name' => 'Laravel', 'slug' => 'laravel']);
+
     $this->actingAs($this->admin)
         ->post('/admin/projects', [
-            'title' => 'Realtime Analytics Dashboard',
-            'context' => ProjectContext::Company->value,
-            'summary' => 'Streaming event analytics.',
-            'description' => "First paragraph.\n\nSecond paragraph.",
-            'tech_stack' => ['Laravel', 'Vue'],
-            'is_published' => true,
-            'is_featured' => true,
+            'owner' => 'founder',
+            'title' => 'My Side Project',
+            'summary' => 'A thing',
+            'is_published' => '1',
+            'tech_stack' => ['laravel', 'Vue.js'],
+            'cover_image' => UploadedFile::fake()->image('cover.jpg'),
+            'gallery' => [UploadedFile::fake()->image('a.jpg'), UploadedFile::fake()->image('b.jpg')],
         ])
-        ->assertRedirect('/admin/projects');
+        ->assertRedirect('/admin/projects')
+        ->assertSessionHasNoErrors();
 
-    $project = Project::sole();
+    $project = Project::query()->with(['technologies', 'images'])->sole();
 
-    expect($project->title)->toBe('Realtime Analytics Dashboard')
-        ->and($project->slug)->toBe('realtime-analytics-dashboard')
-        ->and($project->context)->toBe(ProjectContext::Company)
-        ->and($project->tech_stack)->toBe(['Laravel', 'Vue'])
-        ->and($project->is_published)->toBeTrue()
-        ->and($project->is_featured)->toBeTrue();
-});
+    expect($project->owner_type)->toBe('founder')
+        ->and($project->slug)->toBe('my-side-project')
+        ->and($project->published_at)->not->toBeNull()
+        ->and($project->technologies->pluck('slug')->all())->toBe(['laravel', 'vuejs'])
+        ->and($project->images)->toHaveCount(2)
+        ->and(Technology::query()->count())->toBe(2);
 
-test('a project requires a context', function () {
-    $this->actingAs($this->admin)
-        ->post('/admin/projects', ['title' => 'No Context'])
-        ->assertSessionHasErrors('context');
-});
-
-test('the project form is given every context to choose from', function () {
-    $project = Project::factory()->create(['context' => ProjectContext::Personal]);
-
-    $this->actingAs($this->admin)
-        ->get('/admin/projects/create')
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('admin/projects/Create')
-            ->where('contexts', ProjectContext::options()),
-        );
-
-    $this->actingAs($this->admin)
-        ->get("/admin/projects/{$project->slug}/edit")
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('admin/projects/Edit')
-            ->where('contexts', ProjectContext::options())
-            ->where('project.context', ProjectContext::Personal->value),
-        );
-});
-
-test('a project can be moved between the company and personal contexts', function () {
-    $project = Project::factory()->create(['context' => ProjectContext::Company]);
-
-    $this->actingAs($this->admin)
-        ->put("/admin/projects/{$project->slug}", [
-            'title' => $project->title,
-            'context' => ProjectContext::Personal->value,
-        ])
-        ->assertRedirect('/admin/projects');
-
-    expect($project->fresh()->context)->toBe(ProjectContext::Personal);
-});
-
-test('slugs are made unique instead of colliding', function () {
-    Project::factory()->create(['title' => 'Portfolio', 'slug' => 'portfolio']);
-
-    $this->actingAs($this->admin)->post('/admin/projects', [
-        'title' => 'Portfolio',
-        'context' => ProjectContext::Company->value,
-        'is_published' => true,
-    ]);
-
-    expect(Project::where('slug', 'portfolio-2')->exists())->toBeTrue();
-});
-
-test('a cover image is stored on the public disk', function () {
-    Storage::fake('uploads');
-
-    $this->actingAs($this->admin)->post('/admin/projects', [
-        'title' => 'With Cover',
-        'context' => ProjectContext::Company->value,
-        'cover_image' => UploadedFile::fake()->image('cover.jpg'),
-    ]);
-
-    $project = Project::sole();
-
-    expect($project->cover_image_path)->not->toBeNull();
     Storage::disk('uploads')->assertExists($project->cover_image_path);
 });
 
-test('replacing a cover image deletes the previous file', function () {
-    Storage::fake('uploads');
+test('slugs stay unique', function () {
+    Project::factory()->create(['slug' => 'shop']);
 
-    $project = Project::factory()->create([
-        'cover_image_path' => UploadedFile::fake()->image('old.jpg')->store('projects', 'public'),
-    ]);
-    $old = $project->cover_image_path;
+    $this->actingAs($this->admin)->post('/admin/projects', ['owner' => 'studio', 'title' => 'Shop'])->assertSessionHasNoErrors();
 
-    $this->actingAs($this->admin)->put("/admin/projects/{$project->slug}", [
-        'title' => $project->title,
-        'context' => $project->context->value,
-        'cover_image' => UploadedFile::fake()->image('new.jpg'),
-    ]);
-
-    Storage::disk('uploads')->assertMissing($old);
-    Storage::disk('uploads')->assertExists($project->fresh()->cover_image_path);
+    expect(Project::query()->latest('id')->value('slug'))->toBe('shop-2');
 });
 
-test('deleting a project removes its uploaded images', function () {
-    Storage::fake('uploads');
-
-    $project = Project::factory()->create([
-        'cover_image_path' => UploadedFile::fake()->image('cover.jpg')->store('projects', 'public'),
-    ]);
-    $path = $project->cover_image_path;
-
-    $this->actingAs($this->admin)->delete("/admin/projects/{$project->slug}");
-
-    expect(Project::count())->toBe(0);
-    Storage::disk('uploads')->assertMissing($path);
-});
-
-test('a project requires a title', function () {
-    $this->actingAs($this->admin)
-        ->post('/admin/projects', ['title' => ''])
-        ->assertSessionHasErrors('title');
-});
-
-test('a completion date cannot precede the start date', function () {
-    $this->actingAs($this->admin)
-        ->post('/admin/projects', [
-            'title' => 'Backwards',
-            'started_at' => '2025-06-01',
-            'completed_at' => '2025-01-01',
-        ])
-        ->assertSessionHasErrors('completed_at');
-});
-
-test('reordering persists the new sort order', function () {
-    $first = Project::factory()->create(['sort_order' => 0]);
-    $second = Project::factory()->create(['sort_order' => 1]);
-
-    $this->actingAs($this->admin)
-        ->post('/admin/projects/reorder', ['ids' => [$second->id, $first->id]]);
-
-    expect($second->fresh()->sort_order)->toBe(0)
-        ->and($first->fresh()->sort_order)->toBe(1);
-});
-
-test('deleting a project also deletes its landing page media', function () {
-    Storage::fake('uploads');
-    foreach (['hero/legacy.png', 'hero/a.png', 'og/og.png', 'steps/one.png'] as $file) {
-        Storage::disk('uploads')->put("landing/{$file}", 'x');
-    }
-
+test('updating a project removes ticked gallery images and syncs technologies', function () {
     $project = Project::factory()->create();
-    $landingPage = ProjectLandingPage::factory()->for($project)->create([
-        'hero_media_path' => 'landing/hero/legacy.png',
-        'hero_media_paths' => ['landing/hero/a.png', null, null],
-        'og_image_path' => 'landing/og/og.png',
-    ]);
-    LandingSection::factory()->for($landingPage, 'landingPage')
-        ->ofType(LandingSectionType::DemoWalkthrough)
-        ->create(['data' => [
-            'frame' => 'browser',
-            'steps' => [['image_path' => 'landing/steps/one.png', 'title' => 'One', 'caption' => null]],
-        ]]);
-
-    $this->actingAs($this->admin)
-        ->delete("/admin/projects/{$project->slug}")
-        ->assertRedirect();
-
-    expect(ProjectLandingPage::count())->toBe(0)
-        ->and(LandingSection::count())->toBe(0);
-    foreach (['hero/legacy.png', 'hero/a.png', 'og/og.png', 'steps/one.png'] as $file) {
-        Storage::disk('uploads')->assertMissing("landing/{$file}");
-    }
-});
-
-test('ticked gallery images are removed and the rest kept', function () {
-    Storage::fake('uploads');
-    Storage::disk('uploads')->put('projects/gallery/keep.png', 'x');
-    Storage::disk('uploads')->put('projects/gallery/drop.png', 'x');
-
-    $project = Project::factory()->create([
-        'gallery' => ['projects/gallery/keep.png', 'projects/gallery/drop.png'],
-    ]);
+    Storage::disk('uploads')->put('projects/gallery/old.jpg', 'x');
+    $image = $project->images()->create(['path' => 'projects/gallery/old.jpg', 'sort_order' => 0]);
 
     $this->actingAs($this->admin)
         ->put("/admin/projects/{$project->slug}", [
+            'owner' => 'studio',
             'title' => $project->title,
-            'context' => $project->context->value,
-            'remove_gallery' => ['projects/gallery/drop.png'],
+            'tech_stack' => ['Go'],
+            'remove_gallery' => [$image->id],
         ])
-        ->assertRedirect();
+        ->assertRedirect('/admin/projects');
 
-    expect($project->fresh()->gallery)->toBe(['projects/gallery/keep.png']);
-    Storage::disk('uploads')->assertExists('projects/gallery/keep.png');
-    Storage::disk('uploads')->assertMissing('projects/gallery/drop.png');
+    expect($project->images()->count())->toBe(0)
+        ->and($project->technologies()->pluck('name')->all())->toBe(['Go']);
+    Storage::disk('uploads')->assertMissing('projects/gallery/old.jpg');
 });
 
-test('gallery removal cannot delete files outside the project gallery', function () {
-    Storage::fake('uploads');
-    Storage::disk('uploads')->put('profile/avatar.png', 'x');
+test('a forged gallery removal cannot touch another project', function () {
+    $mine = Project::factory()->create();
+    $theirs = Project::factory()->create();
+    $image = $theirs->images()->create(['path' => 'projects/gallery/x.jpg', 'sort_order' => 0]);
 
-    $project = Project::factory()->create(['gallery' => []]);
+    $this->actingAs($this->admin)->put("/admin/projects/{$mine->slug}", [
+        'owner' => 'studio',
+        'title' => $mine->title,
+        'remove_gallery' => [$image->id],
+    ]);
 
-    $this->actingAs($this->admin)
-        ->put("/admin/projects/{$project->slug}", [
-            'title' => $project->title,
-            'context' => $project->context->value,
-            'remove_gallery' => ['profile/avatar.png', '../.env'],
-        ])
-        ->assertRedirect();
-
-    Storage::disk('uploads')->assertExists('profile/avatar.png');
+    expect($theirs->images()->count())->toBe(1);
 });
 
-test('the edit page lists gallery images by path for removal', function () {
-    $project = Project::factory()->create(['gallery' => ['projects/gallery/a.png']]);
+test('deleting a project removes its landing page, blocks and files', function () {
+    $page = ProjectLandingPage::factory()->create();
+    $project = $page->project;
+    LandingSection::factory()->count(2)->create(['sectionable_id' => $page->id]);
+    Storage::disk('uploads')->put('projects/cover.jpg', 'x');
+    $project->update(['cover_image_path' => 'projects/cover.jpg']);
 
-    $this->actingAs($this->admin)
-        ->get("/admin/projects/{$project->slug}/edit")
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->has('galleryItems', 1)
-            ->where('galleryItems.0.path', 'projects/gallery/a.png'),
-        );
-});
+    $this->actingAs($this->admin)->delete("/admin/projects/{$project->slug}")->assertRedirect();
 
-test('project search treats LIKE wildcards literally', function () {
-    Project::factory()->create(['title' => '100% uptime', 'summary' => null]);
-    Project::factory()->create(['title' => '1000 users', 'summary' => null]);
-
-    $this->actingAs($this->admin)
-        ->get('/admin/projects?search=100%25')
-        ->assertInertia(fn ($page) => $page
-            ->has('projects', 1)
-            ->where('projects.0.title', '100% uptime'),
-        );
+    expect(Project::query()->count())->toBe(0)
+        ->and(ProjectLandingPage::query()->count())->toBe(0)
+        ->and(LandingSection::query()->count())->toBe(0);
+    Storage::disk('uploads')->assertMissing('projects/cover.jpg');
 });

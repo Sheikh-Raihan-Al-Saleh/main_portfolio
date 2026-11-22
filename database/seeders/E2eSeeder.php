@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Company;
-use App\Models\Profile;
 use App\Models\Project;
-use App\Models\ProjectLandingPage;
 use App\Models\User;
+use App\Services\FounderService;
+use App\Services\StudioService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -56,13 +55,16 @@ class E2eSeeder extends Seeder
             );
         }
 
-        Company::current()->update([
-            'logo_path' => $this->image('e2e/logo.png', 480, 120, [79, 70, 229], 'LOGO'),
-        ]);
+        $studios = app(StudioService::class);
+        $studios->current()->forceFill([
+            'logo_path' => $this->image('e2e/logo.png', 480, 120, [17, 17, 17], 'LOGO'),
+            'logo_mark_path' => $this->image('e2e/logo-mark.png', 128, 128, [17, 17, 17], 'MARK'),
+        ])->save();
+        $studios->forgetBrand();
 
-        Profile::current()->update([
+        app(FounderService::class)->current()->forceFill([
             'avatar_path' => $this->image('e2e/avatar.png', 600, 750, [16, 185, 129], 'AVATAR'),
-        ]);
+        ])->save();
 
         /** @var list<array{0: int<0, 255>, 1: int<0, 255>, 2: int<0, 255>}> $palette */
         $palette = [[79, 70, 229], [14, 165, 233], [168, 85, 247], [234, 88, 12], [16, 185, 129], [225, 29, 72]];
@@ -73,21 +75,21 @@ class E2eSeeder extends Seeder
             ]);
         });
 
-        $landingProject = Project::query()->published()->companyWork()->orderBy('id')->firstOrFail();
+        $landingProject = Project::query()->published()->where('owner_type', 'studio')->orderBy('id')->firstOrFail();
 
-        ProjectLandingPage::query()->updateOrCreate(
-            ['project_id' => $landingProject->id],
-            [
-                'headline' => "{$landingProject->title}, end to end",
-                'subheadline' => 'A case study rendered from e2e fixtures.',
-                'hero_media_paths' => [
-                    $this->image('e2e/hero-desktop.png', 1920, 1080, [30, 41, 59], 'DESKTOP'),
-                    $this->image('e2e/hero-tablet.png', 768, 576, [51, 65, 85], 'TABLET'),
-                    $this->image('e2e/hero-phone.png', 375, 667, [71, 85, 105], 'PHONE'),
-                ],
-                'is_published' => true,
-            ],
-        );
+        $landingPage = $landingProject->landingPage()->updateOrCreate([], [
+            'headline' => "{$landingProject->title}, end to end",
+            'subheadline' => 'A case study rendered from e2e fixtures.',
+            'is_published' => true,
+        ]);
+
+        foreach ([
+            0 => $this->image('e2e/hero-desktop.png', 1920, 1080, [30, 41, 59], 'DESKTOP'),
+            1 => $this->image('e2e/hero-tablet.png', 768, 576, [51, 65, 85], 'TABLET'),
+            2 => $this->image('e2e/hero-phone.png', 375, 667, [71, 85, 105], 'PHONE'),
+        ] as $slot => $path) {
+            $landingPage->heroMedia()->updateOrCreate(['slot' => $slot], ['path' => $path]);
+        }
     }
 
     /**

@@ -6,7 +6,7 @@ import DeviceFrame from '@/components/landing/frames/DeviceFrame.vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
 import { usePrefersReducedMotion } from '@/composables/usePrefersReducedMotion';
 import { useScrollProgress } from '@/composables/useScrollProgress';
-import { uploadUrl } from '@/lib/media';
+import { mediaUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import type { LandingSection } from '@/types';
 
@@ -57,7 +57,7 @@ function select(index: number) {
         <ol v-if="reduced" class="space-y-10">
             <li v-for="(step, index) in steps" :key="index" class="space-y-3">
                 <h3 class="text-lg font-bold text-foreground">
-                    <span class="mr-2 text-brand">{{ index + 1 }}.</span
+                    <span class="mr-2 text-brand-text">{{ index + 1 }}.</span
                     >{{ step.title }}
                 </h3>
                 <p v-if="step.caption" class="text-sm text-muted-foreground">
@@ -68,7 +68,7 @@ function select(index: number) {
                     v-if="step.image_path"
                     v-bind="frameProps"
                     ><img
-                        :src="uploadUrl(step.image_path)"
+                        :src="mediaUrl(step.image_path)"
                         :alt="step.title"
                         loading="lazy"
                         class="w-full"
@@ -91,7 +91,7 @@ function select(index: number) {
                                 <motion.img
                                     v-if="activeStep?.image_path"
                                     :key="activeIndex"
-                                    :src="uploadUrl(activeStep.image_path)"
+                                    :src="mediaUrl(activeStep.image_path)"
                                     :alt="activeStep.title"
                                     class="absolute inset-0 size-full object-cover object-top"
                                     :initial="{ opacity: 0, scale: 1.03 }"
@@ -131,7 +131,7 @@ function select(index: number) {
                                     cn(
                                         'grid size-8 shrink-0 place-items-center rounded-full text-xs font-bold transition-colors',
                                         index === activeIndex
-                                            ? 'bg-signal text-signal-foreground shadow-md'
+                                            ? 'bg-brand text-brand-foreground shadow-md'
                                             : 'bg-muted text-muted-foreground',
                                     )
                                 "

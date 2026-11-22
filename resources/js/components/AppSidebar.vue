@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import {
     Briefcase,
     Building2,
+    Cpu,
     ExternalLink,
     FolderKanban,
     GraduationCap,
@@ -18,7 +19,6 @@ import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
-import CircuitBackground from '@/components/site/CircuitBackground.vue';
 import {
     Sidebar,
     SidebarContent,
@@ -27,14 +27,14 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes/admin';
 import clients from '@/routes/admin/clients';
-import company from '@/routes/admin/company';
 import educations from '@/routes/admin/educations';
 import experiences from '@/routes/admin/experiences';
+import founder from '@/routes/admin/founder';
 import messages from '@/routes/admin/messages';
-import profile from '@/routes/admin/profile';
 import projects from '@/routes/admin/projects';
 import skills from '@/routes/admin/skills';
-import studioSections from '@/routes/admin/studio-sections';
+import studio from '@/routes/admin/studio';
+import technologies from '@/routes/admin/technologies';
 import type { NavItem } from '@/types';
 
 const page = usePage();
@@ -49,18 +49,19 @@ const unreadMessages = computed(
  * pages first, then the founder's portfolio.
  */
 const companyNavItems = computed<NavItem[]>(() => [
-    { title: 'Company', href: company.edit(), icon: Building2 },
+    { title: 'Studio & brand', href: studio.edit(), icon: Building2 },
     {
-        title: 'Home sections',
-        href: studioSections.edit(),
+        title: 'Home page copy',
+        href: studio.content.edit(),
         icon: LayoutTemplate,
     },
     { title: 'Clients', href: clients.index(), icon: Users },
     { title: 'Projects', href: projects.index(), icon: FolderKanban },
+    { title: 'Technologies', href: technologies.index(), icon: Cpu },
 ]);
 
 const founderNavItems: NavItem[] = [
-    { title: 'Founder', href: profile.edit(), icon: UserRound },
+    { title: 'Founder', href: founder.edit(), icon: UserRound },
     { title: 'Skills', href: skills.index(), icon: Sparkles },
     { title: 'Experience', href: experiences.index(), icon: Briefcase },
     { title: 'Education', href: educations.index(), icon: GraduationCap },
@@ -93,7 +94,7 @@ const footerNavItems: NavItem[] = [
             >
                 <AppLogo />
                 <span
-                    class="ml-auto rounded-full bg-brand-subtle px-2 py-0.5 text-[0.65rem] font-semibold text-brand group-data-[collapsible=icon]:hidden"
+                    class="ml-auto rounded-full bg-brand-subtle px-2 py-0.5 text-[0.65rem] font-semibold text-brand-text group-data-[collapsible=icon]:hidden"
                     >Admin</span
                 >
             </Link>
@@ -115,26 +116,19 @@ const footerNavItems: NavItem[] = [
         </SidebarContent>
 
         <SidebarFooter>
-            <!-- Live site card, with the public site's circuit motif -->
+            <!-- Live site card -->
             <a
                 href="/"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="group relative mx-1 mb-1 overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--signal)] to-[var(--grad-to)] p-4 text-white group-data-[collapsible=icon]:hidden"
+                class="group relative mx-1 mb-1 overflow-hidden rounded-2xl bg-ink p-4 text-paper group-data-[collapsible=icon]:hidden"
             >
-                <div
-                    class="absolute inset-0 opacity-60 [--background:transparent] [--foreground:#ffffff] [--grad-from:#ffffff] [--grad-to:#ffffff]"
-                >
-                    <CircuitBackground />
-                </div>
-                <p class="relative text-sm font-semibold">
-                    Your sites are live
-                </p>
-                <p class="relative mt-0.5 text-xs text-white/75">
-                    Preview the studio and the portfolio.
+                <p class="text-sm font-semibold">Your sites are live</p>
+                <p class="mt-0.5 text-xs text-paper/70">
+                    Preview the studio and the founder portfolio.
                 </p>
                 <span
-                    class="relative mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-xs font-medium backdrop-blur transition-colors group-hover:bg-white/25"
+                    class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand px-2.5 py-1 text-xs font-medium text-brand-foreground transition-colors group-hover:bg-paper group-hover:text-ink"
                 >
                     <ExternalLink class="size-3.5" />
                     View live site

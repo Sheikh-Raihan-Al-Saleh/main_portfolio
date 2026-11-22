@@ -77,7 +77,7 @@ async function requestFullscreen() {
                                 class="size-full border-0"
                                 :title="section.heading ?? 'Live project demo'"
                                 loading="lazy"
-                                referrerpolicy="no-referrer"
+                                referrerpolicy="strict-origin-when-cross-origin"
                                 :allowfullscreen="
                                     data.allow_fullscreen ?? false
                                 "
@@ -120,7 +120,7 @@ async function requestFullscreen() {
                             class="size-full border-0"
                             :title="section.heading ?? 'Live project demo'"
                             loading="lazy"
-                            referrerpolicy="no-referrer"
+                            referrerpolicy="strict-origin-when-cross-origin"
                             :allowfullscreen="data.allow_fullscreen ?? false"
                             sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                         />

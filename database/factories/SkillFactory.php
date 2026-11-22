@@ -3,9 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\Skill;
+use App\Services\FounderService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
+ * Skills go into one of the current founder's categories by default.
+ *
  * @extends Factory<Skill>
  */
 class SkillFactory extends Factory
@@ -18,11 +21,19 @@ class SkillFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->word(),
-            'category' => fake()->randomElement(array_keys(Skill::categories())),
+            'skill_category_id' => fn (): int => app(FounderService::class)->current()
+                ->skillCategories()->orderBy('sort_order')->value('id'),
+            'technology_id' => null,
+            'name' => ucfirst(fake()->unique()->word()),
             'proficiency' => fake()->numberBetween(60, 98),
+            'icon' => null,
             'is_featured' => false,
             'sort_order' => 0,
         ];
+    }
+
+    public function featured(): static
+    {
+        return $this->state(fn () => ['is_featured' => true]);
     }
 }

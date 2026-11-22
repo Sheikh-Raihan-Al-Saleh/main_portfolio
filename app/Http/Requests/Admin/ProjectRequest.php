@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Enums\ProjectContext;
 use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -19,63 +18,38 @@ class ProjectRequest extends FormRequest
      */
     public function rules(): array
     {
-        $projectId = $this->currentProject()?->id;
+        $project = $this->route('project');
 
         return [
+            'owner' => ['required', Rule::in(['studio', 'founder'])],
             'title' => ['required', 'string', 'max:180'],
             'slug' => [
                 'nullable', 'string', 'max:200', 'alpha_dash',
-                Rule::unique('projects', 'slug')->ignore($projectId),
+                Rule::unique('projects', 'slug')->ignore($project instanceof Project ? $project->id : null),
             ],
-            'context' => ['required', Rule::enum(ProjectContext::class)],
-            'summary' => ['nullable', 'string', 'max:300'],
+            'summary' => ['nullable', 'string', 'max:500'],
             'description' => ['nullable', 'string', 'max:20000'],
-            'cover_image' => ['nullable', 'image', 'max:4096'],
-            'remove_cover_image' => ['boolean'],
-            'gallery' => ['nullable', 'array', 'max:12'],
-            'gallery.*' => ['image', 'max:4096'],
-            'remove_gallery' => ['nullable', 'array'],
-            'remove_gallery.*' => ['string', 'max:2048'],
-            'tech_stack' => ['nullable', 'array', 'max:30'],
-            'tech_stack.*' => ['string', 'max:40'],
+            'role' => ['nullable', 'string', 'max:120'],
             'repo_url' => ['nullable', 'url', 'max:255'],
             'live_url' => ['nullable', 'url', 'max:255'],
-            'role' => ['nullable', 'string', 'max:120'],
             'is_featured' => ['boolean'],
             'is_published' => ['boolean'],
             'started_at' => ['nullable', 'date'],
             'completed_at' => ['nullable', 'date', 'after_or_equal:started_at'],
+
+            'cover_image' => ['nullable', 'image', 'max:4096'],
+            'remove_cover_image' => ['boolean'],
+
+            'gallery' => ['nullable', 'array', 'max:12'],
+            'gallery.*' => ['image', 'max:4096'],
+            // IDs of existing project_images rows to delete.
+            'remove_gallery' => ['nullable', 'array'],
+            'remove_gallery.*' => ['integer'],
+
+            // Technology names; new ones are added to the shared vocabulary.
+            'tech_stack' => ['nullable', 'array', 'max:30'],
+            'tech_stack.*' => ['string', 'max:60'],
         ];
-    }
-
-    /**
-     * Model attributes only -- files and UI-only flags are handled by the controller.
-     *
-     * @return array<string, mixed>
-     */
-    public function projectAttributes(): array
-    {
-        $data = $this->safe()->only([
-            'title', 'context', 'summary', 'description', 'tech_stack', 'repo_url',
-            'live_url', 'role', 'is_featured', 'is_published', 'started_at', 'completed_at',
-        ]);
-
-        $slug = $this->safe()->string('slug')->trim()->value();
-        $ignoreId = $this->currentProject()?->id;
-
-        $data['slug'] = Project::uniqueSlug($slug !== '' ? $slug : $data['title'], $ignoreId);
-
-        return $data;
-    }
-
-    /**
-     * The project being updated, or null when storing a new one.
-     */
-    private function currentProject(): ?Project
-    {
-        $project = $this->route('project');
-
-        return $project instanceof Project ? $project : null;
     }
 
     protected function prepareForValidation(): void

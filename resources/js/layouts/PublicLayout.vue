@@ -1,75 +1,54 @@
 <script setup lang="ts">
 import { usePage } from '@inertiajs/vue3';
 import { MotionConfig } from 'motion-v';
-import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
-import CustomCursor from '@/components/site/CustomCursor.vue';
+import { onBeforeUnmount, onMounted, watch } from 'vue';
 import SiteFooter from '@/components/site/SiteFooter.vue';
 import SiteHeader from '@/components/site/SiteHeader.vue';
 import SiteLoader from '@/components/site/SiteLoader.vue';
 import { Toaster } from '@/components/ui/sonner';
-import { usePublicNav } from '@/composables/usePublicNav';
+import { useSite } from '@/composables/useSite';
 
 /**
- * The public site's shell.
+ * The public website shell: loader, header, page, footer.
  *
- * The site has two faces — the studio and the founder — that share one design
- * system and differ by accent. `data-site` on the wrapper selects the face's
- * tokens (see resources/css/site.css). It is mirrored onto <body> on the
- * client as well, because dialogs and toasts portal out of the wrapper and
- * would otherwise fall back to the admin palette.
+ * `data-site` selects the accent of the current face (studio or founder, see
+ * site.css). It is mirrored onto <body> because dialogs and toasts render
+ * outside this wrapper.
  */
 const page = usePage();
-const nav = usePublicNav();
+const { face } = useSite();
 
-const site = computed(() => (nav.isCompanySite.value ? 'studio' : 'founder'));
-
-onMounted(() => {
-    document.body.dataset.site = site.value;
-});
-
-watch(site, (value) => {
-    document.body.dataset.site = value;
-});
-
-onBeforeUnmount(() => {
-    delete document.body.dataset.site;
-});
+onMounted(() => (document.body.dataset.site = face.value));
+watch(face, (value) => (document.body.dataset.site = value));
+onBeforeUnmount(() => delete document.body.dataset.site);
 </script>
 
 <template>
     <MotionConfig reduced-motion="user">
         <div
             id="top"
-            :data-site="site"
-            class="site-canvas min-h-screen overflow-x-clip text-foreground antialiased"
+            :data-site="face"
+            class="site min-h-screen overflow-x-clip antialiased"
         >
             <a
                 href="#main"
-                class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-100 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-foreground focus:ring-2 focus:ring-ring"
+                class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[110] focus:rounded-full focus:bg-ink focus:px-5 focus:py-3 focus:text-paper"
             >
                 Skip to content
             </a>
 
-            <SiteLoader :nav="nav" />
+            <SiteLoader />
+            <SiteHeader />
 
-            <SiteHeader :nav="nav" />
-
-            <main id="main" class="relative">
-                <!--
-                    Plain page wrapper with a CSS entrance that replays as the
-                    key changes on navigation. Motion-based page transitions
-                    left stale content behind during Inertia visits.
-                -->
+            <main id="main">
                 <div :key="page.url" class="page-enter">
                     <slot />
                 </div>
             </main>
 
-            <SiteFooter :nav="nav" />
+            <SiteFooter />
 
             <Toaster position="bottom-right" rich-colors />
-
-            <CustomCursor />
         </div>
     </MotionConfig>
 </template>

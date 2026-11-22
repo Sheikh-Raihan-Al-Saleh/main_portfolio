@@ -18,12 +18,10 @@ export default defineConfig({
                 bunny('JetBrains Mono', {
                     weights: [400, 500, 600, 700],
                 }),
-                bunny('Plus Jakarta Sans', {
-                    weights: [500, 600, 700, 800],
-                }),
-                // Condensed display face for the public site's headlines.
-                bunny('Anton', {
+                // Serif display face for the public site's editorial headlines.
+                bunny('Instrument Serif', {
                     weights: [400],
+                    styles: ['normal', 'italic'],
                 }),
             ],
         }),

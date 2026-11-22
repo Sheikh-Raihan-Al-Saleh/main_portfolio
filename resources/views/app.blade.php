@@ -22,7 +22,7 @@
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {
-                background-color: oklch(1 0 0);
+                background-color: #f7f5f0;
             }
 
             html.dark {
@@ -30,15 +30,23 @@
             }
         </style>
 
-        <link rel="icon" href="/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        {{-- Favicon: the studio's logo mark when one is uploaded, else the bundled icon. --}}
+        @php($brand = app(\App\Services\StudioService::class)->brand())
+        @if ($brand['logo_mark_url'])
+            <link rel="icon" href="{{ $brand['logo_mark_url'] }}">
+            <link rel="apple-touch-icon" href="{{ $brand['logo_mark_url'] }}">
+        @else
+            <link rel="icon" href="/favicon.ico" sizes="any">
+            <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+            <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        @endif
+        <meta property="og:site_name" content="{{ $brand['name'] }}">
 
         @fonts
 
         @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         <x-inertia::head>
-            <title>{{ config('app.name', 'Laravel') }}</title>
+            <title>{{ $brand['name'] }}</title>
         </x-inertia::head>
         {{-- The boot screen needs JavaScript to leave; without it, never show it. --}}
         <noscript><style>.site-loader { display: none !important; }</style></noscript>

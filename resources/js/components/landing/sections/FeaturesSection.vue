@@ -14,11 +14,11 @@ type Props = {
 const props = defineProps<Props>();
 const items = computed(() => props.section.data.items ?? []);
 const gradients = [
-    'from-signal to-signal',
+    'from-brand to-brand',
     'from-foreground to-foreground',
-    'from-signal to-signal',
+    'from-brand to-brand',
     'from-foreground to-foreground',
-    'from-signal to-signal',
+    'from-brand to-brand',
     'from-foreground to-foreground',
 ];
 </script>
@@ -47,7 +47,7 @@ const gradients = [
                     <div class="mb-4 flex items-center gap-3">
                         <div
                             :class="[
-                                'grid size-11 place-items-center rounded-xl bg-gradient-to-br text-white mix-blend-normal shadow-md [&.from-foreground]:text-background [&.from-signal]:text-signal-foreground',
+                                'grid size-11 place-items-center rounded-xl bg-gradient-to-br text-white mix-blend-normal shadow-md [&.from-brand]:text-brand-foreground [&.from-foreground]:text-background',
                                 gradients[idx % gradients.length],
                             ]"
                         >
@@ -70,7 +70,7 @@ const gradients = [
                         {{ item.text }}
                     </p>
                     <div
-                        class="mt-4 flex items-center gap-1 text-xs font-medium text-brand opacity-0 transition group-hover:opacity-100"
+                        class="mt-4 flex items-center gap-1 text-xs font-medium text-brand-text opacity-0 transition group-hover:opacity-100"
                     >
                         Learn more <span aria-hidden="true">→</span>
                     </div>

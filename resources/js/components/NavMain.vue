@@ -38,7 +38,7 @@ const { isCurrentUrl } = useCurrentUrl();
                         <span>{{ item.title }}</span>
                         <span
                             v-if="item.badge"
-                            class="ml-auto rounded-full bg-gradient-to-r from-[var(--signal)] to-[var(--grad-to)] px-1.5 py-0.5 text-[0.68rem] leading-none font-semibold text-white tabular-nums shadow-sm group-data-[collapsible=icon]:hidden"
+                            class="ml-auto rounded-full bg-brand px-1.5 py-0.5 text-[0.68rem] leading-none font-semibold text-white tabular-nums shadow-sm group-data-[collapsible=icon]:hidden"
                         >
                             {{ item.badge }}
                         </span>

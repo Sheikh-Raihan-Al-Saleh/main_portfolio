@@ -6,7 +6,7 @@ namespace App\Support;
  * Default copy for the studio's fixed story sections.
  *
  * The home page's numbered chapters (what we build, engineering, why us, the
- * closing CTA) render from `companies.content`, but a fresh install has not
+ * closing CTA) render from `studios.content`, but a fresh install has not
  * been edited yet — so these defaults are what the page reads, and what the
  * admin editor pre-fills. They deliberately match the copy that used to live
  * hardcoded in the Vue sections, so no page changes on deploy.
@@ -250,46 +250,14 @@ class StudioContent
     }
 
     /**
-     * Merge stored content over the defaults, so a payload missing a key
-     * (new sections added later, older rows) still renders completely.
+     * Stored content merged over the defaults, so a payload missing a key
+     * (sections added later, older rows) still renders completely.
      *
      * @param  array<string, mixed>|null  $content
      * @return array<string, mixed>
      */
     public static function merge(?array $content): array
     {
-        $defaults = self::defaults();
-
-        if ($content === null || $content === []) {
-            return $defaults;
-        }
-
-        return self::mergeRecursive($defaults, $content);
-    }
-
-    /**
-     * Union-merge arrays at every level, stored values winning. Scalar and
-     * list values from storage replace the default wholesale — a list is
-     * never element-merged, or removed items would resurrect.
-     *
-     * @param  array<string, mixed>  $defaults
-     * @param  array<string, mixed>  $stored
-     * @return array<string, mixed>
-     */
-    private static function mergeRecursive(array $defaults, array $stored): array
-    {
-        $merged = $defaults;
-
-        foreach ($stored as $key => $value) {
-            if (is_array($value) && isset($defaults[$key]) && is_array($defaults[$key]) && ! array_is_list($value)) {
-                $merged[$key] = self::mergeRecursive($defaults[$key], $value);
-
-                continue;
-            }
-
-            $merged[$key] = $value;
-        }
-
-        return $merged;
+        return ContentMerger::merge(self::defaults(), $content);
     }
 }

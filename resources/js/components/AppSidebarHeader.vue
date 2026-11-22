@@ -2,8 +2,8 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import { Bell, ExternalLink } from '@lucide/vue';
 import { computed } from 'vue';
+import ThemeToggle from '@/components/admin/ThemeToggle.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
-import ThemeToggle from '@/components/portfolio/ThemeToggle.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import messages from '@/routes/admin/messages';
 import type { BreadcrumbItem } from '@/types';
@@ -43,7 +43,7 @@ const unread = computed(() => (page.props.unreadMessages as number) ?? 0);
                 <Bell class="size-4" />
                 <span
                     v-if="unread"
-                    class="absolute -top-1 -right-1 grid min-w-4 place-items-center rounded-full bg-gradient-to-r from-[var(--signal)] to-[var(--grad-to)] px-1 text-[0.6rem] leading-4 font-semibold text-white"
+                    class="absolute -top-1 -right-1 grid min-w-4 place-items-center rounded-full bg-brand px-1 text-[0.6rem] leading-4 font-semibold text-white"
                     >{{ unread }}</span
                 >
             </Link>

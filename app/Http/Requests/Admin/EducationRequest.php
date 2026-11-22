@@ -17,14 +17,13 @@ class EducationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'institution' => ['required', 'string', 'max:150'],
-            'degree' => ['required', 'string', 'max:150'],
-            'field_of_study' => ['nullable', 'string', 'max:150'],
-            'start_date' => ['required', 'date'],
+            'institution' => ['required', 'string', 'max:180'],
+            'degree' => ['nullable', 'string', 'max:180'],
+            'field_of_study' => ['nullable', 'string', 'max:180'],
+            'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'grade' => ['nullable', 'string', 'max:60'],
             'description' => ['nullable', 'string', 'max:3000'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
         ];
     }
 }

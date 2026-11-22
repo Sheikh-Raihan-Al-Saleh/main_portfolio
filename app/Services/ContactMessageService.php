@@ -1,0 +1,105 @@
+<?php
+
+namespace App\Services;
+
+use App\Mail\NewContactMessage;
+use App\Models\ContactMessage;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Throwable;
+
+use function Illuminate\Support\defer;
+
+/**
+ * Public enquiries: receiving them, notifying the owner, and the admin inbox.
+ */
+class ContactMessageService
+{
+    public function __construct(
+        private readonly StudioService $studios,
+        private readonly FounderService $founders,
+    ) {}
+
+    /**
+     * Save an enquiry and email the owner after the response is sent.
+     *
+     * @param  array<string, mixed>  $data  Validated form data.
+     */
+    public function receive(array $data, ?string $ip, ?string $userAgent): ContactMessage
+    {
+        $recipient = ($data['site'] ?? 'studio') === 'founder'
+            ? $this->founders->current()
+            : $this->studios->current();
+
+        $message = new ContactMessage([
+            ...collect($data)->only(['name', 'email', 'subject', 'message'])->all(),
+            'ip_address' => $ip,
+            'user_agent' => str($userAgent)->limit(250)->value(),
+        ]);
+        $message->recipient()->associate($recipient);
+        $message->save();
+
+        $notifyAddress = $recipient->public_email ?? config('mail.from.address');
+
+        // Sent after the response is flushed: a slow mail server never holds
+        // up the visitor, and no queue worker has to run.
+        defer(fn () => $this->notify($message, $notifyAddress));
+
+        return $message;
+    }
+
+    /**
+     * @return LengthAwarePaginator<int, ContactMessage>
+     */
+    public function inbox(?string $filter): LengthAwarePaginator
+    {
+        return ContactMessage::query()
+            ->when($filter === 'unread', fn ($query) => $query->unread())
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+    }
+
+    public function unreadCount(): int
+    {
+        return ContactMessage::query()->unread()->count();
+    }
+
+    public function markRead(ContactMessage $message): void
+    {
+        if ($message->read_at === null) {
+            $message->forceFill(['read_at' => now()])->save();
+        }
+    }
+
+    public function markUnread(ContactMessage $message): void
+    {
+        $message->forceFill(['read_at' => null])->save();
+    }
+
+    public function delete(ContactMessage $message): void
+    {
+        $message->delete();
+    }
+
+    /**
+     * The message is already saved, so a mail failure must not surface to the
+     * visitor as a failed submission: log it and move on.
+     */
+    private function notify(ContactMessage $message, ?string $address): void
+    {
+        if (blank($address)) {
+            return;
+        }
+
+        try {
+            Mail::to($address)->send(new NewContactMessage($message, $this->studios->brand()));
+        } catch (Throwable $e) {
+            Log::error('Failed to send contact notification.', [
+                'contact_message_id' => $message->id,
+                'exception' => $e->getMessage(),
+            ]);
+        }
+    }
+}

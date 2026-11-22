@@ -1,180 +1,201 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { ArrowUp, ArrowUpRight } from '@lucide/vue';
-import SocialIcon from '@/components/portfolio/SocialIcon.vue';
-import BrandMark from '@/components/site/BrandMark.vue';
-import { useFooterContent } from '@/composables/useFooterContent';
-import type { PublicNav } from '@/composables/usePublicNav';
+import { ArrowUp } from '@lucide/vue';
+import { computed } from 'vue';
+import BrandLogo from '@/components/brand/BrandLogo.vue';
+import SocialLinks from '@/components/site/SocialLinks.vue';
+import { useSite } from '@/composables/useSite';
+import { fillTokens } from '@/lib/text';
+import { home } from '@/routes';
+import type { FooterLink } from '@/types';
 
 /**
- * The public footer, shared by both faces. Everything in it is edited in
- * Admin → Company / Founder → Footer for whichever record owns the page.
+ * The public footer: the company logo as a large anchor, the footer columns
+ * edited in the admin (with {{token}} placeholders filled in), availability,
+ * social links and the legal line.
  */
-type Props = {
-    nav: PublicNav;
-};
+const { brand, studio, founder, face } = useSite();
 
-defineProps<Props>();
+const owner = computed(() =>
+    face.value === 'founder' ? founder.value : studio.value,
+);
 
-const {
-    columns,
-    legalLinks,
-    socialLinks,
-    isAvailable,
-    statusText,
-    copyright,
-    backToTop,
-} = useFooterContent();
+const available = computed(() =>
+    face.value === 'founder'
+        ? founder.value.is_available_for_work
+        : studio.value.is_accepting_projects,
+);
 
-function scrollToTop(): void {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+const tokens = computed(() => {
+    const socials = Object.fromEntries(
+        owner.value.socials.map((link) => [link.platform, link.url]),
+    );
+
+    return {
+        name: owner.value.name,
+        year: new Date().getFullYear(),
+        email: owner.value.public_email,
+        phone: owner.value.phone,
+        location: owner.value.location,
+        ...socials,
+    };
+});
+
+const footer = computed(() => owner.value.footer);
+
+/** A link is shown only when its URL resolved to something real. */
+function resolveLink(
+    link: FooterLink,
+): { label: string; url: string | null } | null {
+    const label = fillTokens(link.label, tokens.value).trim();
+    const url = fillTokens(link.url, tokens.value).trim();
+    const empty = url === '' || url === 'mailto:' || url === 'tel:';
+
+    if (!label) {
+        return null;
+    }
+
+    // A labelled entry without a URL (e.g. the location) is plain text.
+    if (empty && link.url) {
+        return null;
+    }
+
+    return { label, url: empty ? null : url };
 }
+
+const columns = computed(() =>
+    (footer.value.columns ?? [])
+        .map((column) => ({
+            title: column.title,
+            links: column.links
+                .map(resolveLink)
+                .filter((link) => link !== null),
+        }))
+        .filter((column) => column.links.length > 0),
+);
+
+const legal = computed(() =>
+    (footer.value.legal_links ?? [])
+        .map(resolveLink)
+        .filter((link) => link !== null && link.url !== null),
+);
+
+const statusText = computed(() =>
+    available.value
+        ? footer.value.status_text
+        : footer.value.status_text_unavailable,
+);
+
+const isInternal = (url: string) =>
+    url.startsWith('/') && !url.startsWith('//');
 </script>
 
 <template>
-    <footer class="relative overflow-hidden border-t border-border">
-        <!-- The sign-off: one giant line that leads to the contact form -->
-        <div class="site-container border-b border-border py-14 sm:py-20">
-            <p class="ui-label text-muted-foreground">
-                Have a project in mind?
-            </p>
-            <a
-                :href="
-                    nav.isCompanySite.value ? '/#contact' : '/founder#contact'
-                "
-                class="group mt-4 flex items-end justify-between gap-6"
-            >
-                <span
-                    class="ui-display text-[clamp(4rem,15vw,15rem)] transition-colors duration-500 group-hover:text-[var(--accent-text)]"
-                    >Let's talk</span
-                >
-                <span
-                    class="mb-[2vw] grid size-16 shrink-0 place-items-center rounded-full bg-[var(--accent-fill)] text-[var(--accent-ink)] transition-transform duration-500 group-hover:rotate-45 sm:size-24"
-                    aria-hidden="true"
-                >
-                    <ArrowUpRight class="size-7 sm:size-10" />
-                </span>
-            </a>
-        </div>
+    <footer class="relative mt-10 border-t border-ink bg-paper">
+        <div class="container-site pt-16 pb-10 sm:pt-24">
+            <div class="grid gap-14 lg:grid-cols-12">
+                <div class="lg:col-span-5">
+                    <Link :href="home().url" :aria-label="`${brand.name} home`">
+                        <BrandLogo size="xl" />
+                    </Link>
+                    <p v-if="brand.tagline" class="lead mt-8 max-w-md">
+                        {{ brand.tagline }}
+                    </p>
 
-        <div
-            class="site-container relative grid gap-12 py-16 lg:grid-cols-12 lg:py-20"
-        >
-            <div class="flex flex-col gap-5 lg:col-span-4">
-                <Link
-                    :href="nav.homeHref.value"
-                    :aria-label="nav.owner.value?.name ?? 'Home'"
-                    class="inline-flex w-fit"
-                >
-                    <BrandMark
-                        :logo-url="nav.brandLogoUrl.value"
-                        :name="nav.owner.value?.name"
-                        :initials="nav.initials.value"
-                        initials-class="footer-logo-icon size-14 rounded-2xl bg-foreground text-lg text-background"
-                        image-class="h-16 sm:h-20"
-                    />
-                </Link>
-                <p
-                    v-if="nav.owner.value?.tagline"
-                    class="max-w-sm text-sm leading-relaxed text-muted-foreground"
-                >
-                    {{ nav.owner.value.tagline }}
-                </p>
-                <p
-                    v-if="statusText"
-                    class="inline-flex w-fit items-center gap-2.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium"
-                >
-                    <span
-                        :class="
-                            isAvailable
-                                ? 'ui-pulse-dot'
-                                : 'size-2 rounded-full bg-muted-foreground'
-                        "
-                    />
-                    {{ statusText }}
-                </p>
-                <div v-if="socialLinks.length" class="flex gap-2">
-                    <a
-                        v-for="link in socialLinks"
-                        :key="link.label"
-                        :href="link.href"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        :aria-label="link.label"
-                        class="grid size-10 place-items-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:border-brand hover:text-brand"
+                    <p
+                        v-if="statusText"
+                        class="mt-8 inline-flex items-center gap-3 text-sm text-ink-soft"
                     >
-                        <SocialIcon :name="link.name" class="size-4" />
+                        <span
+                            class="status-dot"
+                            :class="!available && 'status-dot-off'"
+                        />
+                        {{ statusText }}
+                    </p>
+
+                    <SocialLinks :links="owner.socials" class="mt-8" />
+                </div>
+
+                <nav
+                    aria-label="Footer"
+                    class="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:col-span-7"
+                >
+                    <div v-for="column in columns" :key="column.title">
+                        <h3 class="eyebrow eyebrow-plain mb-5">
+                            {{ column.title }}
+                        </h3>
+                        <ul class="grid gap-3">
+                            <li v-for="link in column.links" :key="link!.label">
+                                <template v-if="link!.url">
+                                    <Link
+                                        v-if="isInternal(link!.url)"
+                                        :href="link!.url"
+                                        class="link-underline text-ink-soft hover:text-ink"
+                                    >
+                                        {{ link!.label }}
+                                    </Link>
+                                    <a
+                                        v-else
+                                        :href="link!.url"
+                                        class="link-underline text-ink-soft hover:text-ink"
+                                        :target="
+                                            link!.url.startsWith('http')
+                                                ? '_blank'
+                                                : undefined
+                                        "
+                                        :rel="
+                                            link!.url.startsWith('http')
+                                                ? 'noopener noreferrer'
+                                                : undefined
+                                        "
+                                    >
+                                        {{ link!.label }}
+                                    </a>
+                                </template>
+                                <span v-else class="text-stone">{{
+                                    link!.label
+                                }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+
+            <!-- The name, set huge, as the closing typographic gesture. -->
+            <p
+                class="display mt-20 overflow-hidden text-[clamp(3.5rem,15vw,15rem)] leading-[0.8] tracking-tight text-ink"
+                aria-hidden="true"
+            >
+                {{ brand.short_name }}<em>.</em>
+            </p>
+
+            <div
+                class="rule mt-10 flex flex-col gap-4 pt-6 text-sm text-stone sm:flex-row sm:items-center sm:justify-between"
+            >
+                <p>
+                    {{
+                        fillTokens(footer.copyright, tokens) ||
+                        `© ${tokens.year} ${brand.name}`
+                    }}
+                </p>
+
+                <div class="flex flex-wrap items-center gap-6">
+                    <a
+                        v-for="link in legal"
+                        :key="link!.label"
+                        :href="link!.url!"
+                        class="link-underline hover:text-ink"
+                    >
+                        {{ link!.label }}
+                    </a>
+                    <a
+                        href="#top"
+                        class="inline-flex items-center gap-2 hover:text-ink"
+                    >
+                        {{ footer.back_to_top || 'Back to top' }}
+                        <ArrowUp class="size-4" aria-hidden="true" />
                     </a>
                 </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:col-span-8">
-                <div v-for="column in columns" :key="column.title">
-                    <h2 class="text-sm font-semibold">{{ column.title }}</h2>
-                    <ul class="mt-4 grid gap-2.5 text-sm">
-                        <li v-for="item in column.links" :key="item.label">
-                            <a
-                                v-if="item.href"
-                                :href="item.href"
-                                :target="item.external ? '_blank' : undefined"
-                                :rel="
-                                    item.external
-                                        ? 'noopener noreferrer'
-                                        : undefined
-                                "
-                                class="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
-                            >
-                                {{ item.label }}
-                                <ArrowUpRight
-                                    v-if="item.external"
-                                    class="size-3 opacity-60"
-                                />
-                            </a>
-                            <span v-else class="text-muted-foreground">{{
-                                item.label
-                            }}</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="relative border-t border-border">
-            <div
-                class="site-container flex flex-col gap-4 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between"
-            >
-                <p v-if="copyright">{{ copyright }}</p>
-                <div
-                    v-if="legalLinks.length"
-                    class="flex flex-wrap gap-x-5 gap-y-1"
-                >
-                    <template
-                        v-for="(link, i) in legalLinks"
-                        :key="`${link.label}-${i}`"
-                    >
-                        <a
-                            v-if="link.href"
-                            :href="link.href"
-                            :target="link.external ? '_blank' : undefined"
-                            :rel="
-                                link.external
-                                    ? 'noopener noreferrer'
-                                    : undefined
-                            "
-                            class="hover:text-foreground"
-                            >{{ link.label }}</a
-                        >
-                        <span v-else>{{ link.label }}</span>
-                    </template>
-                </div>
-                <a
-                    href="#top"
-                    class="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-brand"
-                    @click.prevent="scrollToTop"
-                >
-                    <ArrowUp class="size-3.5" />
-                    {{ backToTop }}
-                </a>
             </div>
         </div>
     </footer>

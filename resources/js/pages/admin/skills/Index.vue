@@ -2,7 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 import { Pencil, Plus, Sparkles } from '@lucide/vue';
 import { motion } from 'motion-v';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import SkillController from '@/actions/App/Http/Controllers/Admin/SkillController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
@@ -21,15 +21,33 @@ import {
 import { useReorder } from '@/composables/useReorder';
 import { fadeUp } from '@/lib/motion';
 import skillRoutes from '@/routes/admin/skills';
-import type { Skill } from '@/types';
+import type { Skill, SkillCategory } from '@/types';
+import SkillCategoryManager from './SkillCategoryManager.vue';
 import SkillForm from './SkillForm.vue';
 
 type Props = {
-    skills: Skill[];
-    categories: Record<string, string>;
+    /** The founder's categories, in order, each with its skills. */
+    categories: SkillCategory[];
 };
 
 const props = defineProps<Props>();
+
+const skills = computed(() =>
+    props.categories.flatMap((category) => category.skills),
+);
+
+const categoryNames = computed<Record<number, string>>(() =>
+    Object.fromEntries(
+        props.categories.map((category) => [category.id, category.name]),
+    ),
+);
+
+const categoryOptions = computed(() =>
+    props.categories.map((category) => ({
+        value: category.id,
+        label: category.name,
+    })),
+);
 
 defineOptions({
     layout: {
@@ -37,19 +55,7 @@ defineOptions({
     },
 });
 
-const { items, move, saving } = useReorder<Skill>(
-    () => props.skills,
-    skillRoutes.reorder().url,
-);
-
-const categoryColors: Record<string, string> = {
-    frontend: 'bg-primary/10 text-primary',
-    backend: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-    devops: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-    database: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
-    design: 'bg-pink-500/10 text-pink-600 dark:text-pink-400',
-    mobile: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
-};
+const { items, move, saving } = useReorder<Skill>(() => skills.value, 'skills');
 
 /** Create and edit happen in a modal, so the list stays in view. */
 const dialogOpen = ref(false);
@@ -75,16 +81,14 @@ function openEdit(skill: Skill) {
             description="Grouped by category on the public site, in the order set here."
         >
             <template #actions>
-                <Button
-                    class="bg-gradient-to-r from-[var(--signal)] to-[var(--grad-to)] text-white shadow-[0_10px_24px_-12px_var(--brand-glow)] hover:opacity-95"
-                    type="button"
-                    @click="openCreate"
-                >
+                <Button type="button" @click="openCreate">
                     <Plus class="size-4" />
                     New skill
                 </Button>
             </template>
         </AdminPageHeader>
+
+        <SkillCategoryManager :categories="categories" class="mb-6" />
 
         <motion.div
             :variants="fadeUp"
@@ -139,8 +143,9 @@ function openEdit(skill: Skill) {
                                     <span
                                         class="block truncate text-xs text-muted-foreground sm:hidden"
                                         >{{
-                                            categories[skill.category] ??
-                                            skill.category
+                                            categoryNames[
+                                                skill.skill_category_id
+                                            ]
                                         }}
                                         · {{ skill.proficiency }}%</span
                                     >
@@ -158,15 +163,9 @@ function openEdit(skill: Skill) {
                         <TableCell class="hidden sm:table-cell">
                             <Badge
                                 variant="secondary"
-                                :class="[
-                                    'border-0',
-                                    categoryColors[skill.category] ??
-                                        'bg-muted text-muted-foreground',
-                                ]"
+                                class="border-0 bg-muted text-muted-foreground"
                             >
-                                {{
-                                    categories[skill.category] ?? skill.category
-                                }}
+                                {{ categoryNames[skill.skill_category_id] }}
                             </Badge>
                         </TableCell>
 
@@ -176,7 +175,7 @@ function openEdit(skill: Skill) {
                                     class="h-2 w-full max-w-24 overflow-hidden rounded-full bg-muted"
                                 >
                                     <div
-                                        class="h-full rounded-full bg-gradient-to-r from-[var(--grad-from)] to-[var(--grad-to)]"
+                                        class="h-full rounded-full bg-brand"
                                         :style="{
                                             width: `${skill.proficiency}%`,
                                         }"
@@ -244,7 +243,7 @@ function openEdit(skill: Skill) {
                 :key="editing?.id ?? 'new'"
                 mode="dialog"
                 :skill="editing ?? undefined"
-                :categories="categories"
+                :category-options="categoryOptions"
                 :action="
                     editing
                         ? SkillController.update.form(editing.id)

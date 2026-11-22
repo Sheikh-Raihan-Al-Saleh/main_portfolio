@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Education;
+use App\Services\FounderService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,6 +19,7 @@ class EducationFactory extends Factory
     public function definition(): array
     {
         return [
+            'founder_id' => fn (): int => app(FounderService::class)->current()->id,
             'institution' => fake()->company().' University',
             'degree' => 'BSc',
             'field_of_study' => 'Computer Science',

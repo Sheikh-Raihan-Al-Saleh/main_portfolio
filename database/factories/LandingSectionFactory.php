@@ -3,9 +3,9 @@
 namespace Database\Factories;
 
 use App\Enums\LandingSectionType;
-use App\Models\Company;
 use App\Models\LandingSection;
 use App\Models\ProjectLandingPage;
+use App\Models\Studio;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,7 +21,8 @@ class LandingSectionFactory extends Factory
     public function definition(): array
     {
         return [
-            'landing_page_id' => ProjectLandingPage::factory(),
+            'sectionable_type' => 'landing_page',
+            'sectionable_id' => ProjectLandingPage::factory(),
             'type' => LandingSectionType::Features,
             'eyebrow' => null,
             'heading' => rtrim(fake()->sentence(4), '.'),
@@ -50,14 +51,13 @@ class LandingSectionFactory extends Factory
     }
 
     /**
-     * Move the section off the default project landing page and onto the given
-     * company, so it composes part of the home route instead of a case study.
+     * A block on the studio home page instead of a landing page.
      */
-    public function onCompany(Company $company): static
+    public function onStudio(Studio $studio): static
     {
         return $this->state(fn (): array => [
-            'landing_page_id' => null,
-            'company_id' => $company->getKey(),
+            'sectionable_type' => $studio->getMorphClass(),
+            'sectionable_id' => $studio->getKey(),
         ]);
     }
 

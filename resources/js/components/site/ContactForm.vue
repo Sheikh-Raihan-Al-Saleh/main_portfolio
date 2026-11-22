@@ -1,120 +1,104 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
-import { Send } from '@lucide/vue';
+import { ArrowUpRight } from '@lucide/vue';
 import { ref } from 'vue';
-import ContactController from '@/actions/App/Http/Controllers/ContactController';
+import ContactController from '@/actions/App/Http/Controllers/Public/ContactController';
 import InputError from '@/components/InputError.vue';
 
 /**
- * The public contact form. Both faces post to the same endpoint; the accent
- * comes from the face's tokens.
+ * The public contact form, used by both faces of the site. `site` records
+ * which one the enquiry came from, so it reaches the right inbox.
  */
 type Props = {
-    replyNote?: string | null;
+    site: 'studio' | 'founder';
     messagePlaceholder?: string;
     submitLabel?: string;
-    processingLabel?: string;
+    replyNote?: string | null;
 };
 
 withDefaults(defineProps<Props>(), {
-    replyNote: 'Typically replies within 2–3 days',
-    messagePlaceholder: 'Tell me a little about what you have in mind…',
+    messagePlaceholder: 'A few lines about what you have in mind…',
     submitLabel: 'Send message',
-    processingLabel: 'Sending…',
+    replyNote: null,
 });
 
-const emit = defineEmits<{ sent: [] }>();
-
-/** Bumped on success so the form remounts and clears itself. */
+/** Bumped on success so the form remounts empty. */
 const formKey = ref(0);
 
-function handleSuccess() {
-    formKey.value += 1;
-    emit('sent');
-}
-
-const fields = [
-    {
-        id: 'name',
-        label: 'Name',
-        type: 'text',
-        required: true,
-        autocomplete: 'name',
-        placeholder: 'Ada Lovelace',
-    },
-    {
-        id: 'email',
-        label: 'Email',
-        type: 'email',
-        required: true,
-        autocomplete: 'email',
-        placeholder: 'you@example.com',
-    },
-] as const;
-
-const input =
-    'mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-base outline-none sm:text-sm transition-[border-color,box-shadow] placeholder:text-muted-foreground/70 focus:border-[var(--ring)] focus:ring-4 focus:ring-[var(--brand-glow)]';
+const field =
+    'peer w-full border-0 border-b border-line bg-transparent px-0 pt-7 pb-3 text-lg text-ink outline-none transition-colors placeholder:text-transparent focus:border-ink';
+const label =
+    'pointer-events-none absolute top-1 left-0 text-xs font-medium tracking-[0.12em] text-stone uppercase transition-colors peer-focus:text-brand-text';
 </script>
 
 <template>
     <Form
         :key="formKey"
         v-bind="ContactController.store.form()"
-        class="flex flex-col gap-5"
+        class="grid gap-8"
         reset-on-success
         v-slot="{ errors, processing }"
-        @success="handleSuccess"
+        @success="formKey++"
     >
-        <div class="grid gap-5 sm:grid-cols-2">
-            <div v-for="field in fields" :key="field.id">
-                <label
-                    :for="`contact-${field.id}`"
-                    class="text-sm font-medium"
-                    >{{ field.label }}</label
-                >
+        <input type="hidden" name="site" :value="site" />
+
+        <div class="grid gap-8 sm:grid-cols-2">
+            <div class="relative">
                 <input
-                    :id="`contact-${field.id}`"
-                    :name="field.id"
-                    :type="field.type"
-                    :required="field.required"
-                    :autocomplete="field.autocomplete"
-                    :placeholder="field.placeholder"
-                    :class="input"
+                    id="contact-name"
+                    name="name"
+                    type="text"
+                    required
+                    autocomplete="name"
+                    placeholder="Name"
+                    :class="field"
                 />
-                <InputError :message="errors[field.id]" class="mt-1.5" />
+                <label for="contact-name" :class="label">Your name</label>
+                <InputError :message="errors.name" class="mt-2" />
+            </div>
+            <div class="relative">
+                <input
+                    id="contact-email"
+                    name="email"
+                    type="email"
+                    required
+                    autocomplete="email"
+                    placeholder="Email"
+                    :class="field"
+                />
+                <label for="contact-email" :class="label">Email</label>
+                <InputError :message="errors.email" class="mt-2" />
             </div>
         </div>
 
-        <div>
-            <label for="contact-subject" class="text-sm font-medium">
-                Subject
-                <span class="font-normal text-muted-foreground"
-                    >(optional)</span
-                >
-            </label>
+        <div class="relative">
             <input
                 id="contact-subject"
                 name="subject"
                 type="text"
-                placeholder="Project inquiry"
-                :class="input"
+                placeholder="Subject"
+                :class="field"
             />
-            <InputError :message="errors.subject" class="mt-1.5" />
+            <label for="contact-subject" :class="label"
+                >Subject (optional)</label
+            >
+            <InputError :message="errors.subject" class="mt-2" />
         </div>
 
-        <div>
-            <label for="contact-message" class="text-sm font-medium"
-                >Message</label
-            >
+        <div class="relative">
             <textarea
                 id="contact-message"
                 name="message"
                 required
-                rows="5"
+                rows="4"
                 :placeholder="messagePlaceholder"
-                :class="[input, 'resize-y']"
+                :class="[
+                    field,
+                    'resize-y placeholder:text-stone/60 focus:placeholder:text-stone',
+                ]"
             />
-            <InputError :message="errors.message" class="mt-1.5" />
+            <label for="contact-message" :class="label">Message</label>
+            <InputError :message="errors.message" class="mt-2" />
         </div>
 
         <!-- Honeypot: hidden from people, attractive to bots. -->
@@ -129,22 +113,12 @@ const input =
             />
         </div>
 
-        <div class="flex flex-wrap items-center gap-4 pt-1">
-            <button
-                type="submit"
-                :disabled="processing"
-                class="ui-btn ui-btn-primary"
-            >
-                <Send class="size-4" />
-                {{ processing ? processingLabel : submitLabel }}
+        <div class="flex flex-wrap items-center gap-5">
+            <button type="submit" class="btn btn-ink" :disabled="processing">
+                {{ processing ? 'Sending…' : submitLabel }}
+                <ArrowUpRight class="btn-arrow size-4" aria-hidden="true" />
             </button>
-            <span
-                v-if="replyNote"
-                class="inline-flex items-center gap-2 text-sm text-muted-foreground"
-            >
-                <span class="ui-pulse-dot" />
-                {{ replyNote }}
-            </span>
+            <p v-if="replyNote" class="meta">{{ replyNote }}</p>
         </div>
     </Form>
 </template>

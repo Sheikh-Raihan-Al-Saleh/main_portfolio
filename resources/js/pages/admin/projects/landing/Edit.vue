@@ -33,7 +33,6 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useReorder } from '@/composables/useReorder';
-import { uploadUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import projects from '@/routes/admin/projects';
 import type {
@@ -63,7 +62,7 @@ const {
     items: orderedSections,
     move,
     saving,
-} = useReorder(() => props.sections, '/admin/landing-sections/reorder');
+} = useReorder(() => props.sections, 'landing-sections');
 
 const editorOpen = ref(false);
 const editingSection = ref<LandingSection | null>(null);
@@ -124,7 +123,7 @@ const tabs: FormTab[] = [
         label: 'Hero images',
         description: 'Device mockups',
         icon: ImageIcon,
-        fields: ['hero_media_paths', 'remove_hero_media_slots'],
+        fields: ['hero_media', 'remove_hero_media'],
     },
     {
         id: 'buttons',
@@ -155,10 +154,9 @@ const tabs: FormTab[] = [
     },
 ];
 
-/** Static /uploads/ URL for an already-stored hero slot, so saved server
- * images preview in the form instead of only freshly picked local files. */
+/** The saved image in a hero slot, so it previews in the form. */
 function heroPreview(index: number): string | null {
-    return uploadUrl(props.landingPage?.hero_media_paths?.[index]) ?? null;
+    return props.landingPage?.hero_media[index] ?? null;
 }
 </script>
 
@@ -196,7 +194,7 @@ function heroPreview(index: number): string | null {
         <div
             role="tablist"
             aria-label="Landing page"
-            class="mb-6 inline-flex rounded-full border border-border bg-card p-1 shadow-[var(--shadow-soft)]"
+            class="mb-6 inline-flex rounded-full border border-border bg-card p-1"
         >
             <button
                 v-for="option in views"
@@ -294,8 +292,8 @@ function heroPreview(index: number): string | null {
                             <div class="grid gap-5 lg:grid-cols-3">
                                 <div class="grid gap-2">
                                     <FileField
-                                        name="hero_media_paths[0]"
-                                        remove-name="remove_hero_media_slots[0]"
+                                        name="hero_media[0]"
+                                        remove-name="remove_hero_media[0]"
                                         label="Desktop · 1920×1080"
                                         :current-url="heroPreview(0)"
                                         accept="image/*"
@@ -303,13 +301,13 @@ function heroPreview(index: number): string | null {
                                         preview
                                     />
                                     <InputError
-                                        :message="errors['hero_media_paths.0']"
+                                        :message="errors['hero_media.0']"
                                     />
                                 </div>
                                 <div class="grid gap-2">
                                     <FileField
-                                        name="hero_media_paths[1]"
-                                        remove-name="remove_hero_media_slots[1]"
+                                        name="hero_media[1]"
+                                        remove-name="remove_hero_media[1]"
                                         label="Tablet · 768×576"
                                         :current-url="heroPreview(1)"
                                         accept="image/*"
@@ -317,13 +315,13 @@ function heroPreview(index: number): string | null {
                                         preview
                                     />
                                     <InputError
-                                        :message="errors['hero_media_paths.1']"
+                                        :message="errors['hero_media.1']"
                                     />
                                 </div>
                                 <div class="grid gap-2">
                                     <FileField
-                                        name="hero_media_paths[2]"
-                                        remove-name="remove_hero_media_slots[2]"
+                                        name="hero_media[2]"
+                                        remove-name="remove_hero_media[2]"
                                         label="Phone · 375×667"
                                         :current-url="heroPreview(2)"
                                         accept="image/*"
@@ -331,7 +329,7 @@ function heroPreview(index: number): string | null {
                                         preview
                                     />
                                     <InputError
-                                        :message="errors['hero_media_paths.2']"
+                                        :message="errors['hero_media.2']"
                                     />
                                 </div>
                             </div>
@@ -581,9 +579,9 @@ function heroPreview(index: number): string | null {
         </section>
 
         <SectionEditorDialog
-            v-if="landingPage"
             v-model:open="editorOpen"
-            :landing-page-id="landingPage.id"
+            owner="project"
+            :project-id="project.id"
             :section="editingSection"
             :type="newSectionType"
         />

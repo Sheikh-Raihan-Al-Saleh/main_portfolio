@@ -1,0 +1,112 @@
+/*
+| Admin panel helpers. The panel is built from shadcn-vue components, which
+| read the shared tokens in app.css; these few classes add the cards, tiles
+| and headings its pages share, in the same paper-and-ink style as the site.
+*/
+
+@layer components {
+    .ui-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+    }
+
+    .ui-card-hover {
+        transition:
+            border-color 0.25s ease,
+            transform 0.25s ease;
+    }
+
+    .ui-card-hover:hover {
+        border-color: var(--foreground);
+        transform: translateY(-2px);
+    }
+
+    .ui-glass {
+        background: color-mix(in srgb, var(--card) 80%, transparent);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+    }
+
+    .ui-icon-tile {
+        display: grid;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.75rem;
+        background: var(--brand-subtle);
+        color: var(--brand);
+    }
+
+    .ui-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted-foreground);
+    }
+
+    .ui-eyebrow::before {
+        content: '';
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 999px;
+        background: var(--brand);
+    }
+
+    /* Admin page titles use the site's serif display face. */
+    .admin-title {
+        font-family: var(--font-display);
+        font-weight: 400;
+        letter-spacing: -0.01em;
+        line-height: 1.05;
+    }
+
+    .ui-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 2.5rem;
+        padding: 0 1rem;
+        border-radius: 999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition:
+            background-color 0.2s ease,
+            color 0.2s ease;
+    }
+
+    .ui-btn-sm {
+        min-height: 2.1rem;
+        padding: 0 0.85rem;
+        font-size: 0.8rem;
+    }
+
+    .ui-btn-primary {
+        background: var(--primary);
+        color: var(--primary-foreground);
+    }
+
+    .ui-btn-primary:hover {
+        background: var(--brand);
+        color: var(--brand-foreground);
+    }
+
+    /* Soft accent glow used in a few admin banners. */
+    .ui-blob {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(60px);
+        pointer-events: none;
+    }
+
+    .ui-blob-a {
+        background: var(--brand);
+    }
+}

@@ -1,147 +1,78 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from './support/fixtures';
 
-// Mirrors Database\Seeders\E2eSeeder; only ever exists in the e2e database.
-// Each Playwright project signs in as its own admin, so parallel projects
-// never trip the login rate limit (5 attempts per minute per account).
-const PASSWORD = 'e2e-password-123';
+/**
+ * The sign-in page and the admin panel in a real browser.
+ */
+const ADMIN_PASSWORD = 'e2e-password-123';
 
-function adminEmail(): string {
-    return test.info().project.name === 'mobile'
+async function signIn(page: Page, email: string): Promise<void> {
+    await page.goto('/login');
+    await page.getByLabel('Email address').fill(email);
+    await page.getByLabel('Password', { exact: true }).fill(ADMIN_PASSWORD);
+    await page.getByRole('button', { name: 'Log in' }).click();
+    await expect(page).toHaveURL(/\/admin$/);
+}
+
+/** Each worker signs in with its own account, so sessions never collide. */
+function adminEmail(projectName: string): string {
+    return projectName === 'mobile'
         ? 'e2e-admin-mobile@example.test'
         : 'e2e-admin@example.test';
 }
 
-async function login(page: Page): Promise<void> {
+test('the login page shows the brand and the 3D scene', async ({
+    page,
+    issues,
+}) => {
     await page.goto('/login');
-    await page.getByLabel(/email/i).fill(adminEmail());
-    await page.getByLabel(/^password/i).fill(PASSWORD);
-    await page.getByRole('button', { name: /log in|sign in/i }).click();
-    await expect(page).toHaveURL(/\/admin/);
-}
 
-test.describe('admin panel', () => {
-    test('guests are sent to the login page', async ({ page, issues }) => {
-        await page.goto('/admin');
-        await expect(page).toHaveURL(/\/login$/);
-        void issues;
-    });
+    await expect(page.locator('main [data-brand-logo]').first()).toBeVisible();
+    await expect(page.getByText('Content Studio')).toBeVisible();
 
-    test('a wrong password is rejected', async ({ page, issues }) => {
-        await page.goto('/login');
-        await page.getByLabel(/email/i).fill(adminEmail());
-        await page.getByLabel(/^password/i).fill('not-the-password');
-        await page.getByRole('button', { name: /log in|sign in/i }).click();
-        await expect(page.getByText(/credentials|do not match/i)).toBeVisible();
-        void issues;
-    });
+    // The scene renders a WebGL canvas, or its still collage without WebGL.
+    await expect(
+        page.locator('aside canvas, aside [aria-hidden="true"] img').first(),
+    ).toBeAttached({ timeout: 15_000 });
 
-    test('the admin can sign in and open every editor', async ({
-        page,
-        issues,
-    }) => {
-        await login(page);
-
-        for (const path of [
-            '/admin',
-            '/admin/projects',
-            '/admin/projects/create',
-            '/admin/skills',
-            '/admin/experiences',
-            '/admin/educations',
-            '/admin/clients',
-            '/admin/messages',
-            '/admin/company',
-            '/admin/profile',
-            '/admin/studio-sections',
-        ]) {
-            const response = await page.goto(path);
-            expect(response?.status(), path).toBe(200);
-            await expect(
-                page.locator('main, [data-sidebar], body').first(),
-            ).toBeVisible();
-        }
-
-        void issues;
-    });
-
-    test('the project editor lists gallery images for removal', async ({
-        page,
-        issues,
-    }) => {
-        await login(page);
-        await page.goto('/admin/projects');
-
-        await page
-            .locator('a[href*="/admin/projects/"][href$="/edit"]')
-            .first()
-            .click();
-        await expect(page).toHaveURL(/\/edit$/);
-        await expect(page.locator('input[name="title"]')).toHaveValue(/.+/);
-        void issues;
-    });
+    void issues;
 });
 
-test.describe('sign-in page', () => {
-    test('shows the coding workspace and real project covers', async ({
-        page,
-        issues,
-        isMobile,
-    }) => {
-        await page.goto('/login');
-        await expect(page.locator('h1')).toBeVisible();
+test('a wrong password is rejected with an error', async ({ page, issues }) => {
+    issues.allow(/http 422/);
 
-        if (isMobile) {
-            // Phones get the form first and a single prompt line, not the IDE.
-            await expect(page.getByTestId('code-editor')).toBeHidden();
-        } else {
-            const editor = page.getByTestId('code-editor');
-            await expect(editor).toBeVisible();
-            await expect(editor).toContainText('signIn');
-            await expect(
-                page.getByTestId('auth-showcase').locator('img'),
-            ).toHaveCount(3);
-        }
+    await page.goto('/login');
+    await page.getByLabel('Email address').fill('nobody@example.test');
+    await page.getByLabel('Password', { exact: true }).fill('wrong-password');
+    await page.getByRole('button', { name: 'Log in' }).click();
 
-        void issues;
-    });
+    await expect(page.getByText(/credentials do not match/i)).toBeVisible();
+});
 
-    test('runs the code rain behind the workspace and glitches the title', async ({
-        page,
-        issues,
-    }) => {
-        await page.goto('/login');
+test('an admin can sign in and reach every admin page', async ({
+    page,
+    issues,
+}, info) => {
+    await signIn(page, adminEmail(info.project.name));
 
-        // The rain is actually painting: some pixels of its canvas are lit.
-        const rain = page.getByTestId('code-rain');
-        await expect(rain).toBeVisible();
-        await expect
-            .poll(() =>
-                rain.evaluate((canvas: HTMLCanvasElement) => {
-                    const ctx = canvas.getContext('2d');
-                    const { data } = ctx!.getImageData(
-                        0,
-                        0,
-                        canvas.width,
-                        canvas.height,
-                    );
+    await expect(page.locator('h1').first()).toBeVisible();
 
-                    for (let i = 3; i < data.length; i += 4) {
-                        if (data[i] > 0) {
-                            return true;
-                        }
-                    }
+    for (const path of [
+        '/admin/studio',
+        '/admin/studio/content',
+        '/admin/founder',
+        '/admin/projects',
+        '/admin/projects/create',
+        '/admin/technologies',
+        '/admin/clients',
+        '/admin/skills',
+        '/admin/experiences',
+        '/admin/educations',
+        '/admin/messages',
+    ]) {
+        await page.goto(path);
+        await expect(page.locator('h1').first()).toBeVisible();
+    }
 
-                    return false;
-                }),
-            )
-            .toBe(true);
-
-        // The title carries the glitch copy for its colour-split slices.
-        await expect(page.locator('h1 .glitch')).toHaveAttribute(
-            'data-text',
-            /.+/,
-        );
-        void issues;
-    });
+    void issues;
 });

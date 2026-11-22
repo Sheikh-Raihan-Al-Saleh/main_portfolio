@@ -1,206 +1,196 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
-import { ArrowUpRight, Download, Menu } from '@lucide/vue';
-import { useWindowScroll } from '@vueuse/core';
-import { motion, useScroll, useSpring } from 'motion-v';
-import { computed, ref } from 'vue';
-import ThemeToggle from '@/components/portfolio/ThemeToggle.vue';
-import BrandMark from '@/components/site/BrandMark.vue';
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
-import type { PublicNav } from '@/composables/usePublicNav';
-import { cn } from '@/lib/utils';
+import { Link, router, usePage } from '@inertiajs/vue3';
+import { ArrowUpRight, Menu, X } from '@lucide/vue';
+import { AnimatePresence, motion } from 'motion-v';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import BrandLogo from '@/components/brand/BrandLogo.vue';
+import { useSite } from '@/composables/useSite';
+import { about, founder as founderRoute, home } from '@/routes';
+import projects from '@/routes/projects';
 
 /**
- * The public header, shared by both faces: a floating glass bar that tightens
- * once the page scrolls. The call to action follows the face — the studio
- * asks for a project, the founder offers the résumé (or the contact form).
+ * The public header: the company logo (large, always visible), the page
+ * navigation for the current face of the site, and one call to action.
  */
-type Props = {
-    nav: PublicNav;
-};
+const page = usePage();
+const { studio, founder, face } = useSite();
 
-const props = defineProps<Props>();
+type NavLink = { label: string; href: string };
 
-const { y: scrollY } = useWindowScroll();
+/** Founder sections are in-page anchors on /founder, full links elsewhere. */
+const founderBase = computed(() =>
+    page.component === 'public/Founder' ? '' : founderRoute().url,
+);
 
-// Reading progress along the top edge of the viewport.
-const { scrollYProgress } = useScroll();
-const progress = useSpring(scrollYProgress, { stiffness: 140, damping: 30 });
-const scrolled = computed(() => scrollY.value > 16);
+const links = computed<NavLink[]>(() =>
+    face.value === 'founder'
+        ? [
+              { label: 'About', href: `${founderBase.value}#about` },
+              { label: 'Skills', href: `${founderBase.value}#skills` },
+              { label: 'Work', href: `${founderBase.value}#projects` },
+              { label: 'Experience', href: `${founderBase.value}#experience` },
+              { label: 'Contact', href: `${founderBase.value}#contact` },
+          ]
+        : [
+              { label: 'Work', href: projects.index().url },
+              { label: 'Services', href: `${home().url}#capabilities` },
+              { label: 'About', href: about().url },
+              { label: 'Founder', href: founderRoute().url },
+              { label: 'Contact', href: `${home().url}#contact` },
+          ],
+);
 
-const menuOpen = ref(false);
+const cta = computed(() =>
+    face.value === 'founder'
+        ? founder.value.resume_url
+            ? {
+                  label: 'Resume',
+                  href: founder.value.resume_url,
+                  external: true,
+              }
+            : {
+                  label: 'Get in touch',
+                  href: `${founderBase.value}#contact`,
+                  external: false,
+              }
+        : {
+              label: studio.value.hero.primary_cta.label || 'Start a project',
+              href: `${home().url}#contact`,
+              external: false,
+          },
+);
 
-const links = computed(() => [
-    ...props.nav.sections.value.map((section) => ({
-        key: `s-${section.id}`,
-        label: section.label,
-        href: props.nav.sectionHref(section.id),
-        page: false,
-        active: props.nav.activeSection.value === section.id,
-    })),
-    ...props.nav.pageLinks.value.map((link) => ({
-        key: `p-${link.id}`,
-        label: link.label,
-        href: props.nav.pageLinkHref(link.id) ?? '/',
-        page: true,
-        active: props.nav.isCurrentPageLink(link.id),
-    })),
-]);
+const open = ref(false);
+const scrolled = ref(false);
 
-const cta = computed(() => {
-    if (props.nav.isCompanySite.value) {
-        return { label: 'Start a project', href: '/#contact', resume: false };
-    }
+function onScroll(): void {
+    scrolled.value = window.scrollY > 12;
+}
 
-    return props.nav.profile.value?.resume_url
-        ? { label: 'Résumé', href: '/resume', resume: true }
-        : { label: 'Hire me', href: '/founder#contact', resume: false };
+onMounted(() => {
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
 });
+
+onBeforeUnmount(() => window.removeEventListener('scroll', onScroll));
+
+// Close the mobile menu on navigation, and lock page scroll while it is open.
+const removeListener = router.on('navigate', () => (open.value = false));
+onBeforeUnmount(removeListener);
+
+watch(open, (value) => {
+    document.documentElement.style.overflow = value ? 'hidden' : '';
+});
+
+/** In-page anchors scroll; everything else is an Inertia visit. */
+const isAnchor = (href: string) => href.startsWith('#');
 </script>
 
 <template>
-    <!--
-        A full-width bar: transparent over the hero, then frosted with a
-        hairline underneath once the page scrolls.
-    -->
-    <header
-        :class="
-            cn(
-                'fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300',
-                scrolled
-                    ? 'border-border bg-background/80 backdrop-blur-md backdrop-saturate-150'
-                    : 'border-transparent bg-transparent',
-            )
-        "
-    >
-        <motion.div
-            class="pointer-events-none absolute inset-x-0 bottom-[-1px] h-0.5 origin-left bg-[var(--accent-fill)]"
-            :style="{ scaleX: progress }"
-            aria-hidden="true"
-            data-testid="scroll-progress"
-        />
+    <header class="site-header" :data-scrolled="scrolled || open">
         <div
-            :class="
-                cn(
-                    'site-container flex items-center gap-4 transition-all duration-500',
-                    // Tall at the top so the logo can lead; compact once scrolling.
-                    scrolled ? 'h-16 sm:h-[4.5rem]' : 'h-20 sm:h-24',
-                )
-            "
+            class="container-site flex h-20 items-center justify-between gap-6 sm:h-24"
         >
             <Link
-                :href="nav.homeHref.value"
-                class="shrink-0"
-                :aria-label="nav.owner.value?.name ?? 'Home'"
+                :href="home().url"
+                class="relative z-50 shrink-0"
+                :aria-label="`${studio.name} home`"
             >
-                <BrandMark
-                    :logo-url="nav.brandLogoUrl.value"
-                    :name="nav.owner.value?.name"
-                    :initials="nav.initials.value"
-                    :initials-class="
-                        cn(
-                            'rounded-xl bg-foreground text-background transition-all duration-500',
-                            scrolled
-                                ? 'size-10 text-sm'
-                                : 'size-12 text-base sm:size-14 sm:text-lg',
-                        )
-                    "
-                    :image-class="
-                        cn(
-                            'transition-all duration-500',
-                            scrolled ? 'h-11 sm:h-14' : 'h-14 sm:h-[4.5rem]',
-                        )
-                    "
-                />
+                <BrandLogo size="lg" />
             </Link>
 
-            <nav
-                class="mx-auto hidden items-center gap-1 lg:flex"
-                aria-label="Primary"
-            >
-                <component
-                    :is="link.page ? Link : 'a'"
-                    v-for="link in links"
-                    :key="link.key"
-                    :href="link.href"
-                    :aria-current="
-                        link.active ? (link.page ? 'page' : 'true') : undefined
-                    "
-                    :class="
-                        cn(
-                            // Mono labels with an accent underline that slides in.
-                            'ui-label relative px-3 py-2 transition-colors after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:origin-left after:bg-[var(--accent-fill)] after:transition-transform after:duration-300',
-                            link.active
-                                ? 'text-foreground after:scale-x-100'
-                                : 'text-muted-foreground after:scale-x-0 hover:text-foreground hover:after:scale-x-100',
-                        )
-                    "
-                >
-                    {{ link.label }}
-                </component>
+            <nav aria-label="Main" class="hidden lg:block">
+                <ul class="flex items-center gap-1">
+                    <li v-for="link in links" :key="link.label">
+                        <a
+                            v-if="isAnchor(link.href)"
+                            :href="link.href"
+                            class="rounded-full px-4 py-2 text-[0.95rem] text-ink-soft transition-colors hover:bg-paper-deep hover:text-ink"
+                        >
+                            {{ link.label }}
+                        </a>
+                        <Link
+                            v-else
+                            :href="link.href"
+                            class="rounded-full px-4 py-2 text-[0.95rem] text-ink-soft transition-colors hover:bg-paper-deep hover:text-ink"
+                        >
+                            {{ link.label }}
+                        </Link>
+                    </li>
+                </ul>
             </nav>
 
-            <div class="ml-auto flex items-center gap-2 lg:ml-0">
-                <span class="hidden sm:inline-flex"><ThemeToggle /></span>
+            <div class="flex items-center gap-2">
                 <a
                     :href="cta.href"
-                    :target="cta.resume ? '_blank' : undefined"
-                    :rel="cta.resume ? 'noopener' : undefined"
-                    class="ui-btn ui-btn-primary ui-btn-sm hidden sm:inline-flex"
+                    :target="cta.external ? '_blank' : undefined"
+                    :rel="cta.external ? 'noopener' : undefined"
+                    class="btn btn-ink btn-sm hidden sm:inline-flex"
                 >
-                    <Download v-if="cta.resume" class="size-4" />
                     {{ cta.label }}
-                    <ArrowUpRight v-if="!cta.resume" class="size-4" />
+                    <ArrowUpRight class="btn-arrow size-4" aria-hidden="true" />
                 </a>
+
                 <button
                     type="button"
-                    class="grid size-10 place-items-center rounded-full border border-border bg-card lg:hidden"
-                    aria-label="Open menu"
-                    @click="menuOpen = true"
+                    class="relative z-50 grid size-11 place-items-center rounded-full border border-line bg-paper lg:hidden"
+                    :aria-expanded="open"
+                    aria-controls="mobile-menu"
+                    :aria-label="open ? 'Close menu' : 'Open menu'"
+                    @click="open = !open"
                 >
-                    <Menu class="size-4" />
+                    <X v-if="open" class="size-5" aria-hidden="true" />
+                    <Menu v-else class="size-5" aria-hidden="true" />
                 </button>
             </div>
         </div>
-    </header>
 
-    <Sheet v-model:open="menuOpen">
-        <SheetContent side="right" class="w-80 border-border bg-background">
-            <SheetTitle class="px-5 pt-5 text-sm font-semibold">
-                {{ nav.owner.value?.name ?? 'Menu' }}
-            </SheetTitle>
-            <nav class="mt-2 flex flex-col gap-1 px-3" aria-label="Mobile">
-                <component
-                    :is="link.page ? Link : 'a'"
-                    v-for="link in links"
-                    :key="link.key"
-                    :href="link.href"
-                    :aria-current="link.active ? 'true' : undefined"
-                    :class="
-                        cn(
-                            'rounded-xl px-4 py-3 text-base font-medium',
-                            link.active
-                                ? 'bg-brand-subtle text-brand'
-                                : 'hover:bg-muted',
-                        )
-                    "
-                    @click="menuOpen = false"
-                >
-                    {{ link.label }}
-                </component>
-            </nav>
-            <div class="mt-auto flex flex-col gap-4 border-t border-border p-5">
-                <ThemeToggle />
+        <AnimatePresence>
+            <motion.div
+                v-if="open"
+                id="mobile-menu"
+                class="fixed inset-0 z-40 flex flex-col bg-paper px-4 pt-28 pb-10 sm:px-6 lg:hidden"
+                :initial="{ opacity: 0 }"
+                :animate="{ opacity: 1 }"
+                :exit="{ opacity: 0 }"
+                :transition="{ duration: 0.25 }"
+            >
+                <nav aria-label="Mobile">
+                    <ul class="grid">
+                        <motion.li
+                            v-for="(link, i) in links"
+                            :key="link.label"
+                            class="rule"
+                            :initial="{ opacity: 0, y: 16 }"
+                            :animate="{ opacity: 1, y: 0 }"
+                            :transition="{
+                                delay: 0.05 + i * 0.05,
+                                duration: 0.5,
+                            }"
+                        >
+                            <component
+                                :is="isAnchor(link.href) ? 'a' : Link"
+                                :href="link.href"
+                                class="flex items-baseline justify-between py-5"
+                                @click="open = false"
+                            >
+                                <span class="display text-5xl">{{
+                                    link.label
+                                }}</span>
+                                <span class="meta">0{{ i + 1 }}</span>
+                            </component>
+                        </motion.li>
+                    </ul>
+                </nav>
+
                 <a
                     :href="cta.href"
-                    :target="cta.resume ? '_blank' : undefined"
-                    :rel="cta.resume ? 'noopener' : undefined"
-                    class="ui-btn ui-btn-primary"
-                    @click="menuOpen = false"
+                    class="btn btn-ink mt-auto w-full"
+                    @click="open = false"
                 >
                     {{ cta.label }}
                 </a>
-            </div>
-        </SheetContent>
-    </Sheet>
+            </motion.div>
+        </AnimatePresence>
+    </header>
 </template>

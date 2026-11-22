@@ -38,7 +38,7 @@ defineOptions({
 
 const { items, move, saving } = useReorder<Experience>(
     () => props.experiences,
-    experienceRoutes.reorder().url,
+    'experiences',
 );
 
 function period(experience: Experience): string {
@@ -77,11 +77,7 @@ function openEdit(experience: Experience) {
             description="Your work history, shown as a timeline on the public site."
         >
             <template #actions>
-                <Button
-                    class="bg-gradient-to-r from-[var(--signal)] to-[var(--grad-to)] text-white shadow-[0_10px_24px_-12px_var(--brand-glow)] hover:opacity-95"
-                    type="button"
-                    @click="openCreate"
-                >
+                <Button type="button" @click="openCreate">
                     <Plus class="size-4" />
                     New role
                 </Button>

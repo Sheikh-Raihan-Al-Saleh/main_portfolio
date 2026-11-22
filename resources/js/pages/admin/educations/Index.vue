@@ -37,7 +37,7 @@ defineOptions({
 
 const { items, move, saving } = useReorder<Education>(
     () => props.educations,
-    educationRoutes.reorder().url,
+    'educations',
 );
 
 function period(education: Education): string {
@@ -71,11 +71,7 @@ function openEdit(education: Education) {
             description="Degrees and qualifications shown beside your work history."
         >
             <template #actions>
-                <Button
-                    class="bg-gradient-to-r from-[var(--signal)] to-[var(--grad-to)] text-white shadow-[0_10px_24px_-12px_var(--brand-glow)] hover:opacity-95"
-                    type="button"
-                    @click="openCreate"
-                >
+                <Button type="button" @click="openCreate">
                     <Plus class="size-4" />
                     New entry
                 </Button>

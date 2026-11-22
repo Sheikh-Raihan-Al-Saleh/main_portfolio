@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { resolveIcon } from '@/lib/iconResolver';
 import type { StudioContent } from '@/types';
 
-/** A loose JSON object, as stored in the company's `content` column. */
+/** A loose JSON object, as stored in the studio's `content` column. */
 type RecordOf = Record<string, unknown>;
 
 /**

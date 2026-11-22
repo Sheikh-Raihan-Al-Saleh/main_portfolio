@@ -2,111 +2,82 @@
 
 namespace App\Models;
 
-use App\Concerns\ResolvesMediaUrls;
-use App\Enums\ProjectContext;
+use App\Services\MediaService;
+use Carbon\CarbonInterface;
 use Database\Factories\ProjectFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\RouteKey;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
 
 /**
+ * A piece of portfolio work, owned by the studio or the founder.
+ *
  * @property int $id
+ * @property string $owner_type
+ * @property int $owner_id
  * @property string $title
  * @property string $slug
- * @property ProjectContext $context
  * @property string|null $summary
  * @property string|null $description
  * @property string|null $cover_image_path
- * @property array<int, string>|null $gallery
- * @property array<int, string>|null $tech_stack
+ * @property string|null $role
  * @property string|null $repo_url
  * @property string|null $live_url
- * @property string|null $role
  * @property bool $is_featured
  * @property bool $is_published
- * @property bool $has_landing_page
  * @property int $sort_order
  * @property Carbon|null $started_at
  * @property Carbon|null $completed_at
+ * @property CarbonInterface|null $published_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read string|null $cover_image_url
- * @property-read array<int, string> $gallery_urls
- * @property-read string|null $landing_url
+ * @property-read bool|null $has_landing_page Selected with withExists() by ProjectService.
+ * @property-read Studio|Founder $owner
+ * @property-read Collection<int, ProjectImage> $images
+ * @property-read Collection<int, Technology> $technologies
  * @property-read ProjectLandingPage|null $landingPage
  */
 #[Fillable([
-    'title', 'slug', 'context', 'summary', 'description', 'cover_image_path', 'gallery',
-    'tech_stack', 'repo_url', 'live_url', 'role', 'is_featured', 'is_published',
-    'sort_order', 'started_at', 'completed_at',
+    'title', 'slug', 'summary', 'description', 'cover_image_path', 'role',
+    'repo_url', 'live_url', 'is_featured', 'is_published', 'sort_order',
+    'started_at', 'completed_at', 'published_at',
 ])]
-#[Appends(['cover_image_url', 'gallery_urls', 'landing_url'])]
-#[Hidden(['landingPage'])]
+#[Appends(['cover_image_url'])]
 #[RouteKey('slug')]
 class Project extends Model
 {
     /** @use HasFactory<ProjectFactory> */
     use HasFactory;
 
-    use ResolvesMediaUrls;
-
-    /**
-     * Mirrors the column default so a project that has not been reloaded still
-     * reports the personal context rather than null.
-     *
-     * @var array<string, mixed>
-     */
-    /**
-     * landing_url is appended to every serialized project and needs the
-     * landing page's publish flag, so it is always loaded with the project
-     * (one query per list, not one per project), slimmed to the columns the
-     * accessor reads, and kept out of the JSON by #[Hidden].
-     *
-     * @var list<string>
-     */
-    protected $with = ['landingPage:id,project_id,is_published'];
-
-    protected $attributes = [
-        'has_landing_page' => false,
-        'context' => ProjectContext::Personal->value,
-    ];
-
-    protected static function booted(): void
+    /** @return MorphTo<Model, $this> */
+    public function owner(): MorphTo
     {
-        static::saving(function (self $project): void {
-            if (blank($project->slug)) {
-                $project->slug = self::uniqueSlug($project->title, $project->id);
-            }
-        });
+        return $this->morphTo();
     }
 
-    /**
-     * Build a URL-safe slug, appending a counter until it no longer collides.
-     */
-    public static function uniqueSlug(string $title, ?int $ignoreId = null): string
+    /** @return HasMany<ProjectImage, $this> */
+    public function images(): HasMany
     {
-        $base = Str::slug($title) ?: 'project';
-        $slug = $base;
-        $suffix = 2;
+        return $this->hasMany(ProjectImage::class)->orderBy('sort_order')->orderBy('id');
+    }
 
-        while (self::query()
-            ->where('slug', $slug)
-            ->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))
-            ->exists()
-        ) {
-            $slug = "{$base}-{$suffix}";
-            $suffix++;
-        }
-
-        return $slug;
+    /** @return BelongsToMany<Technology, $this> */
+    public function technologies(): BelongsToMany
+    {
+        return $this->belongsToMany(Technology::class)
+            ->withPivot('sort_order')
+            ->orderByPivot('sort_order');
     }
 
     /** @return HasOne<ProjectLandingPage, $this> */
@@ -115,39 +86,9 @@ class Project extends Model
         return $this->hasOne(ProjectLandingPage::class);
     }
 
-    /**
-     * Marketing landing page URL, or null when there is no published one.
-     *
-     * Relies on `has_landing_page` first so an unloaded relation does not
-     * trigger a query for the overwhelming majority of projects that have no
-     * case study at all.
-     */
-    protected function getLandingUrlAttribute(): ?string
-    {
-        if (! $this->has_landing_page) {
-            return null;
-        }
-
-        return $this->landingPage?->is_published
-            ? route('landing.show', $this->slug, absolute: false)
-            : null;
-    }
-
     protected function getCoverImageUrlAttribute(): ?string
     {
-        return $this->mediaUrl($this->cover_image_path);
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    protected function getGalleryUrlsAttribute(): array
-    {
-        // Missing files are dropped rather than rendered as empty <img> tags.
-        return array_values(array_filter(array_map(
-            fn (string $path): ?string => $this->mediaUrl($path),
-            $this->gallery ?? [],
-        )));
+        return MediaService::url($this->cover_image_path);
     }
 
     /** @param  Builder<Project>  $query */
@@ -157,33 +98,23 @@ class Project extends Model
         $query->where('is_published', true);
     }
 
-    /**
-     * Work delivered for the company, shown on the home route.
-     *
-     * @param  Builder<Project>  $query
-     */
-    #[Scope]
-    protected function companyWork(Builder $query): void
-    {
-        $query->where('context', ProjectContext::Company->value);
-    }
-
-    /**
-     * The founder's own work, shown on the About route.
-     *
-     * @param  Builder<Project>  $query
-     */
-    #[Scope]
-    protected function personalWork(Builder $query): void
-    {
-        $query->where('context', ProjectContext::Personal->value);
-    }
-
     /** @param  Builder<Project>  $query */
     #[Scope]
     protected function featured(Builder $query): void
     {
         $query->where('is_featured', true);
+    }
+
+    /**
+     * Work owned by one studio or founder.
+     *
+     * @param  Builder<Project>  $query
+     */
+    #[Scope]
+    protected function ownedBy(Builder $query, Model $owner): void
+    {
+        $query->where('owner_type', $owner->getMorphClass())
+            ->where('owner_id', $owner->getKey());
     }
 
     /** @param  Builder<Project>  $query */
@@ -199,14 +130,12 @@ class Project extends Model
     protected function casts(): array
     {
         return [
-            'gallery' => 'array',
-            'tech_stack' => 'array',
-            'context' => ProjectContext::class,
             'is_featured' => 'boolean',
             'is_published' => 'boolean',
-            'has_landing_page' => 'boolean',
+            'sort_order' => 'integer',
             'started_at' => 'date',
             'completed_at' => 'date',
+            'published_at' => 'datetime',
         ];
     }
 }

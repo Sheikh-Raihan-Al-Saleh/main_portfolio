@@ -31,6 +31,8 @@ const props = withDefaults(defineProps<Props>(), {
 const host = ref<HTMLElement | null>(null);
 const surface = ref<HTMLCanvasElement | null>(null);
 const live = ref(false);
+// A missing file shows a neutral placeholder instead of a broken image.
+const failed = ref(false);
 
 let handle: LiquidHandle | null = null;
 let unmounted = false;
@@ -59,7 +61,14 @@ onBeforeUnmount(() => {
         :class="cn('relative overflow-hidden', props.class)"
         data-liquid-image
     >
+        <div
+            v-if="failed"
+            class="absolute inset-0 bg-paper-deep"
+            role="img"
+            :aria-label="alt"
+        />
         <img
+            v-else
             :src="src"
             :alt="alt"
             :loading="eager ? 'eager' : 'lazy'"
@@ -71,12 +80,13 @@ onBeforeUnmount(() => {
                     props.imgClass,
                 )
             "
+            @error="failed = true"
         />
         <canvas
             ref="surface"
             data-liquid-surface
             class="pointer-events-none absolute inset-0 size-full transition-opacity duration-500"
-            :class="live ? 'opacity-100' : 'opacity-0'"
+            :class="live && !failed ? 'opacity-100' : 'opacity-0'"
             aria-hidden="true"
         />
     </div>

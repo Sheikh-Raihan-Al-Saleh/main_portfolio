@@ -48,7 +48,7 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
                         :class="[
                             'w-full justify-start rounded-xl',
                             {
-                                'bg-brand-subtle text-brand hover:bg-brand-subtle':
+                                'bg-brand-subtle text-brand-text hover:bg-brand-subtle':
                                     isCurrentOrParentUrl(item.href),
                             },
                         ]"

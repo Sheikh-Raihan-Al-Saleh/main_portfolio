@@ -1,141 +1,122 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import { computed } from 'vue';
 import SectionList from '@/components/landing/SectionList.vue';
-import ProjectMarquee from '@/components/site/ProjectMarquee.vue';
-import StudioAbout from '@/components/studio/StudioAbout.vue';
-import StudioCapabilities from '@/components/studio/StudioCapabilities.vue';
-import StudioContact from '@/components/studio/StudioContact.vue';
-import StudioCta from '@/components/studio/StudioCta.vue';
-import StudioEngineering from '@/components/studio/StudioEngineering.vue';
-import StudioFounderBridge from '@/components/studio/StudioFounderBridge.vue';
+import ContactSection from '@/components/site/ContactSection.vue';
+import AboutSection from '@/components/studio/AboutSection.vue';
+import CapabilitiesSection from '@/components/studio/CapabilitiesSection.vue';
+import ClientStrip from '@/components/studio/ClientStrip.vue';
+import CtaBanner from '@/components/studio/CtaBanner.vue';
+import FounderBridge from '@/components/studio/FounderBridge.vue';
+import ProcessSection from '@/components/studio/ProcessSection.vue';
 import StudioHero from '@/components/studio/StudioHero.vue';
-import StudioTrustBand from '@/components/studio/StudioTrustBand.vue';
-import StudioValue from '@/components/studio/StudioValue.vue';
-import StudioWork from '@/components/studio/StudioWork.vue';
+import ValueSection from '@/components/studio/ValueSection.vue';
+import WorkSection from '@/components/studio/WorkSection.vue';
+import { useSite } from '@/composables/useSite';
+import { founder as founderRoute } from '@/routes';
+import projectRoutes from '@/routes/projects';
 import type {
     Client,
-    Company,
-    CompanyStats,
     LandingSection,
-    Profile,
-    Project,
+    ProjectCard,
+    StudioContent,
+    StudioStats,
 } from '@/types';
 
-type Props = {
-    company: Company;
-    profile: Profile;
-    projects: Project[];
+/**
+ * The studio home page (/).
+ */
+defineProps<{
+    content: StudioContent;
+    projects: ProjectCard[];
     totalProjects: number;
-    personalProjects: Project[];
-    totalPersonalProjects: number;
+    founderProjects: ProjectCard[];
+    totalFounderProjects: number;
     clients: Client[];
     sections: LandingSection[];
-    stats: CompanyStats;
-};
+    stats: StudioStats;
+}>();
 
-const props = defineProps<Props>();
-
-const title = computed(
-    () =>
-        props.company.meta_title ??
-        `${props.company.name} — ${props.company.headline ?? 'Software Studio'}`,
-);
-
-/**
- * Builder blocks are named after the company (`features-9`, `stats-10`) so their
- * ids are stable, unique and meaningful in the DOM.
- */
-function anchorFor(section: LandingSection): string {
-    return `${section.type}-${section.id}`;
-}
-
-/**
- * The phrases on the marquee under the hero. The admin-authored list drives
- * it; the studio's live stats are appended so the band carries real numbers.
- * Blanks are dropped by the marquee.
- */
-const tickerItems = computed(() => {
-    const projects = props.stats.projects;
-    const stored = props.company.studio_content.ticker.items ?? [];
-
-    return [
-        props.company.headline ?? 'Software studio',
-        ...stored,
-        props.company.accepting_projects ? 'Available for new projects' : '',
-        projects !== null && projects > 0
-            ? `${projects}+ products shipped`
-            : '',
-    ];
-});
+const { studio } = useSite();
 </script>
 
 <template>
-    <Head :title="title">
+    <Head :title="studio.meta.title || studio.name">
         <meta
-            v-if="company.meta_description"
+            v-if="studio.meta.description"
             name="description"
-            :content="company.meta_description"
+            :content="studio.meta.description"
         />
-        <meta property="og:title" :content="title" />
+        <meta property="og:title" :content="studio.meta.title || studio.name" />
         <meta
-            v-if="company.meta_description"
-            property="og:description"
-            :content="company.meta_description"
-        />
-        <meta
-            v-if="company.og_image_url"
+            v-if="studio.og_image_url"
             property="og:image"
-            :content="company.og_image_url"
+            :content="studio.og_image_url"
         />
-        <meta name="twitter:card" content="summary_large_image" />
     </Head>
 
-    <StudioHero :company="company" :stats="stats" :ticker="tickerItems" />
+    <StudioHero :stats="stats" :ticker="content.ticker.items" />
 
-    <ProjectMarquee
-        :projects="[...projects, ...personalProjects]"
-        label="Recent work"
-    />
+    <ClientStrip :clients="clients" :label="content.clients.eyebrow" />
 
-    <StudioTrustBand :clients="clients" :company="company" :items="[]" />
+    <CapabilitiesSection :content="content.capabilities" />
 
-    <!--
-        The studio's story, in the order it has to be told: what we build,
-        what we have built, how it is engineered, why us, who you are talking
-        to, and finally the ask.
-    -->
-    <StudioCapabilities :company="company" index="01" />
-
-    <StudioWork
-        :company="company"
-        :projects="projects"
-        :total-projects="totalProjects"
+    <WorkSection
+        id="work"
         index="02"
+        :eyebrow="content.work.eyebrow"
+        :title="content.work.title"
+        :highlight="content.work.highlight"
+        :description="content.work.description"
+        :projects="projects"
+        :total="totalProjects"
+        :archive-href="projectRoutes.index({ query: { owner: 'studio' } }).url"
+        :archive-label="content.work.archive_label"
+        :empty-text="content.work.empty_text"
     />
 
-    <StudioEngineering :company="company" index="03" />
+    <ProcessSection :content="content.engineering" />
 
-    <StudioValue :company="company" index="04" />
+    <ValueSection :content="content.value" />
 
-    <StudioAbout :company="company" :profile="profile" index="05" />
+    <AboutSection :content="content.about" />
 
-    <StudioFounderBridge :company="company" :profile="profile" />
+    <FounderBridge :content="content.founder_bridge" />
 
-    <StudioWork
-        :company="company"
-        :projects="personalProjects"
-        :total-projects="totalPersonalProjects"
-        section-id="founder-work"
-        content-key="founder_work"
-        archive-href="/founder#projects"
-        muted
+    <WorkSection
+        v-if="founderProjects.length"
+        :eyebrow="content.founder_work.eyebrow"
+        :title="content.founder_work.title"
+        :highlight="content.founder_work.highlight"
+        :description="content.founder_work.description"
+        :projects="founderProjects"
+        :total="totalFounderProjects"
+        :archive-href="founderRoute().url"
+        :archive-label="content.founder_work.archive_label"
+        :feature="false"
+        always-show-archive
     />
 
-    <!-- Composed blocks from the admin section builder -->
-    <SectionList :sections="sections" :anchor-for="anchorFor" />
+    <SectionList
+        :sections="sections"
+        :anchor-for="(section) => `block-${section.id}`"
+    />
 
-    <StudioCta :company="company" />
+    <CtaBanner :content="content.cta" />
 
-    <StudioContact :company="company" />
+    <ContactSection
+        site="studio"
+        :eyebrow="content.contact.eyebrow"
+        :title="content.contact.title"
+        :highlight="content.contact.highlight"
+        :description="content.contact.description"
+        :email="studio.public_email"
+        :phone="studio.phone"
+        :location="studio.location"
+        :socials="studio.socials"
+        :email-heading="content.contact.email_heading"
+        :email-note="content.contact.email_note"
+        :placeholder="content.contact.form_placeholder"
+        :submit-label="content.contact.form_submit"
+        :reply-note="content.contact.form_reply_note"
+    />
 </template>

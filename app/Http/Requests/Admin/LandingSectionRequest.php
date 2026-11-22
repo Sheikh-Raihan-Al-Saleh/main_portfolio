@@ -37,18 +37,10 @@ class LandingSectionRequest extends FormRequest
             // stored payload in the wrong shape.
             $rules['type'] = ['required', Rule::enum(LandingSectionType::class)];
 
-            // A section belongs to exactly one owner -- a project's landing
-            // page, or the company home page -- so require one. Supplying both
-            // is rejected by the after-callback below, which can report a
-            // clearer message than the built-in rules allow.
-            $rules['landing_page_id'] = [
-                'nullable', 'integer', 'exists:project_landing_pages,id',
-                'required_without:company_id',
-            ];
-            $rules['company_id'] = [
-                'nullable', 'integer', 'exists:companies,id',
-                'required_without:landing_page_id',
-            ];
+            // The page the block is added to: the studio home page, or a
+            // project's landing page (created on demand if not saved yet).
+            $rules['owner'] = ['required', Rule::in(['studio', 'project'])];
+            $rules['project_id'] = ['required_if:owner,project', 'nullable', 'integer', 'exists:projects,id'];
         }
 
         return array_merge($rules, $this->sectionType()?->rules() ?? []);
@@ -79,39 +71,9 @@ class LandingSectionRequest extends FormRequest
         return LandingSectionType::tryFrom((string) $this->input('type'));
     }
 
-    /**
-     * Model attributes only. `data` is deliberately taken from the validated
-     * set so unknown keys never reach the JSON column.
-     *
-     * @return array<string, mixed>
-     */
-    public function sectionAttributes(): array
-    {
-        $attributes = $this->safe()->only([
-            'eyebrow', 'heading', 'subheading', 'body', 'is_visible', 'data',
-        ]);
-
-        if ($this->isMethod('POST')) {
-            // The owner is set once, at creation, and is deliberately not
-            // accepted on update so a section cannot be moved between pages.
-            $attributes['type'] = $this->sectionType();
-            $attributes['landing_page_id'] = $this->safe()->input('landing_page_id');
-            $attributes['company_id'] = $this->safe()->input('company_id');
-        }
-
-        return $attributes;
-    }
-
     protected function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
-            if ($this->isMethod('POST') && $this->filled('landing_page_id') && $this->filled('company_id')) {
-                $message = 'A section belongs to either a landing page or the company, not both.';
-
-                $validator->errors()->add('landing_page_id', $message);
-                $validator->errors()->add('company_id', $message);
-            }
-
             if ($this->sectionType() !== LandingSectionType::DemoEmbed) {
                 return;
             }

@@ -3,7 +3,7 @@ import { Play, Volume2, VolumeX } from '@lucide/vue';
 import { motion } from 'motion-v';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
-import { uploadUrl } from '@/lib/media';
+import { mediaUrl } from '@/lib/media';
 import { scaleIn } from '@/lib/motion';
 import type { LandingSection } from '@/types';
 
@@ -13,8 +13,8 @@ type Props = {
 };
 const props = defineProps<Props>();
 const data = computed(() => props.section.data);
-const posterUrl = computed(() => uploadUrl(data.value.poster_path));
-const videoUrl = computed(() => uploadUrl(data.value.video_path));
+const posterUrl = computed(() => mediaUrl(data.value.poster_path));
+const videoUrl = computed(() => mediaUrl(data.value.video_path));
 const activated = ref(false);
 const embedUrl = computed(() => {
     const url = data.value.video_url;
@@ -26,28 +26,44 @@ const embedUrl = computed(() => {
     if (data.value.provider === 'youtube') {
         const id = youtubeId(url);
 
+        // YouTube rejects embeds that arrive without a Referer (error 153),
+        // so the iframe must not use referrerpolicy="no-referrer".
         return id
-            ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`
+            ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&playsinline=1&rel=0`
             : null;
     }
 
     if (data.value.provider === 'vimeo') {
-        const id = url.split('/').filter(Boolean).pop();
+        const id = vimeoId(url);
 
         return id ? `https://player.vimeo.com/video/${id}?autoplay=1` : null;
     }
 
     return null;
 });
+/** Video ID from watch, youtu.be, shorts, embed and live links. */
 function youtubeId(url: string): string | null {
     try {
-        const parsed = new URL(url);
+        const parsed = new URL(url.trim());
+        const segments = parsed.pathname.split('/').filter(Boolean);
+        const id =
+            parsed.hostname === 'youtu.be'
+                ? segments[0]
+                : ['shorts', 'embed', 'live', 'v'].includes(segments[0])
+                  ? segments[1]
+                  : parsed.searchParams.get('v');
 
-        if (parsed.hostname === 'youtu.be') {
-            return parsed.pathname.slice(1) || null;
-        }
+        return id && /^[\w-]{11}$/.test(id) ? id : null;
+    } catch {
+        return null;
+    }
+}
+/** Numeric video ID from a Vimeo link, ignoring query strings like ?share=. */
+function vimeoId(url: string): string | null {
+    try {
+        const segments = new URL(url.trim()).pathname.split('/');
 
-        return parsed.searchParams.get('v');
+        return segments.filter((s) => /^\d+$/.test(s)).pop() ?? null;
     } catch {
         return null;
     }
@@ -169,7 +185,7 @@ function toggleMute() {
                                 picture-in-picture;
                             "
                             allowfullscreen
-                            referrerpolicy="no-referrer"
+                            referrerpolicy="strict-origin-when-cross-origin"
                         />
                     </div>
                     <button

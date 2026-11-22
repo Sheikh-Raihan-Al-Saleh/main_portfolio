@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { X } from '@lucide/vue';
-import { ref } from 'vue';
+import { ref, useId } from 'vue';
 import { Input } from '@/components/ui/input';
 
 type Props = {
@@ -11,6 +11,8 @@ type Props = {
     name?: string;
     modelValue?: string[] | null;
     placeholder?: string;
+    /** Known values offered while typing (a native datalist). */
+    suggestions?: string[];
 };
 
 const props = defineProps<Props>();
@@ -19,6 +21,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<{ 'update:modelValue': [string[]] }>();
 
 const tags = ref<string[]>([...(props.modelValue ?? [])]);
+const listId = `tag-suggestions-${useId()}`;
 const draft = ref('');
 
 function sync() {
@@ -75,11 +78,20 @@ function handleBackspace() {
 
         <Input
             v-model="draft"
+            :list="suggestions?.length ? listId : undefined"
             :placeholder="placeholder ?? 'Type and press Enter'"
             @keydown.enter.prevent="addTag"
             @keydown.delete="handleBackspace"
             @blur="addTag"
         />
+
+        <datalist v-if="suggestions?.length" :id="listId">
+            <option
+                v-for="option in suggestions"
+                :key="option"
+                :value="option"
+            />
+        </datalist>
 
         <!-- The actual submitted values, for native form usage. -->
         <template v-if="name">

@@ -9,20 +9,20 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
+ * @property int $founder_id
  * @property string $institution
- * @property string $degree
+ * @property string|null $degree
  * @property string|null $field_of_study
- * @property Carbon $start_date
+ * @property Carbon|null $start_date
  * @property Carbon|null $end_date
  * @property string|null $grade
  * @property string|null $description
  * @property int $sort_order
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
  */
 #[Table('educations')]
 #[Fillable([
@@ -33,6 +33,12 @@ class Education extends Model
 {
     /** @use HasFactory<EducationFactory> */
     use HasFactory;
+
+    /** @return BelongsTo<Founder, $this> */
+    public function founder(): BelongsTo
+    {
+        return $this->belongsTo(Founder::class);
+    }
 
     /** @param  Builder<Education>  $query */
     #[Scope]
@@ -49,6 +55,7 @@ class Education extends Model
         return [
             'start_date' => 'date',
             'end_date' => 'date',
+            'sort_order' => 'integer',
         ];
     }
 }

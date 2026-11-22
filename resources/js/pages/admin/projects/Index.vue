@@ -44,7 +44,7 @@ defineOptions({
 
 const { items, move, saving } = useReorder<Project>(
     () => props.projects,
-    projectRoutes.reorder().url,
+    'projects',
 );
 
 const search = ref(props.filters.search ?? '');
@@ -76,10 +76,7 @@ watch(search, (value) => {
             description="Everything in your portfolio. Drag order controls how they appear on the site."
         >
             <template #actions>
-                <Button
-                    as-child
-                    class="bg-gradient-to-r from-[var(--signal)] to-[var(--grad-to)] text-white shadow-[0_10px_24px_-12px_var(--brand-glow)] hover:opacity-95"
-                >
+                <Button as-child>
                     <Link :href="projectRoutes.create()">
                         <Plus class="size-4" />
                         New project
@@ -191,14 +188,14 @@ watch(search, (value) => {
                         <TableCell class="hidden md:table-cell">
                             <div class="flex flex-wrap gap-1">
                                 <Badge
-                                    v-for="tech in (
-                                        project.tech_stack ?? []
-                                    ).slice(0, 3)"
-                                    :key="tech"
+                                    v-for="tech in project.technologies.slice(
+                                        0,
+                                        3,
+                                    )"
+                                    :key="tech.id"
                                     variant="secondary"
-                                    class="border-0 bg-blue-500/10 text-blue-600 dark:text-blue-400"
                                 >
-                                    {{ tech }}
+                                    {{ tech.name }}
                                 </Badge>
                             </div>
                         </TableCell>
@@ -207,15 +204,15 @@ watch(search, (value) => {
                             <Badge
                                 variant="outline"
                                 :class="
-                                    project.context === 'company'
-                                        ? 'border-0 bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                                        : 'border-0 bg-violet-500/10 text-violet-600 dark:text-violet-400'
+                                    project.owner_type === 'studio'
+                                        ? 'border-0 bg-brand-subtle text-brand-text'
+                                        : 'border-0 bg-secondary text-secondary-foreground'
                                 "
                             >
                                 {{
-                                    project.context === 'company'
-                                        ? 'Company'
-                                        : 'Personal'
+                                    project.owner_type === 'studio'
+                                        ? 'Studio'
+                                        : 'Founder'
                                 }}
                             </Badge>
                         </TableCell>
@@ -276,7 +273,7 @@ watch(search, (value) => {
                                     size="icon-sm"
                                     :class="
                                         project.has_landing_page
-                                            ? 'text-brand'
+                                            ? 'text-brand-text'
                                             : undefined
                                     "
                                 >

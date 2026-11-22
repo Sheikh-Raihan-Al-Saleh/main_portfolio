@@ -1,9 +1,14 @@
 /**
- * Public URL for a path stored on the `uploads` disk. Uploads are static files
- * under public/uploads, so the URL is built here rather than per component.
+ * Public URL for a path stored on the `uploads` disk (e.g. a section block's
+ * image). Mirrors App\Services\MediaService::url(): uploads are static files
+ * under /uploads, and the URL stays relative so it works on any host.
  */
-export function uploadUrl(path: string | null | undefined): string | undefined {
-    return path ? `/uploads/${path}` : undefined;
+export function mediaUrl(path: string | null | undefined): string | undefined {
+    if (!path) {
+        return undefined;
+    }
+
+    return `/uploads/${path.replace(/^\/+/, '')}`;
 }
 
 function formatBytes(bytes: number): string {

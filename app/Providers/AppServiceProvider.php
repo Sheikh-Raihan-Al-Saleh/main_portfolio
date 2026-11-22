@@ -2,7 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Founder;
+use App\Models\ProjectLandingPage;
+use App\Models\Studio;
+use App\Services\FounderService;
+use App\Services\StudioService;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -17,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->usePublicPathOfFrontController();
         $this->raiseLocalServerUploadLimits();
+
+        // One instance per request, so their once() memoised reads (the
+        // studio and founder records) are shared by middleware and controllers.
+        $this->app->scoped(StudioService::class);
+        $this->app->scoped(FounderService::class);
     }
 
     /**
@@ -94,6 +106,25 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureModels();
+    }
+
+    /**
+     * Eloquent rules shared by every model.
+     */
+    protected function configureModels(): void
+    {
+        // Polymorphic columns store these short, stable aliases instead of
+        // class names, so renaming a model never breaks stored rows.
+        Relation::enforceMorphMap([
+            'studio' => Studio::class,
+            'founder' => Founder::class,
+            'landing_page' => ProjectLandingPage::class,
+        ]);
+
+        // A relation used without with() throws outside production, so an
+        // N+1 query is caught in development and tests instead of shipping.
+        Model::preventLazyLoading(! app()->isProduction());
     }
 
     /**

@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { motion } from 'motion-v';
 import { computed } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
-import MarqueeRow from '@/components/motion/MarqueeRow.vue';
-import TechBadge from '@/components/portfolio/TechBadge.vue';
-import { inViewOnce, stagger } from '@/lib/motion';
+import Marquee from '@/components/site/Marquee.vue';
 import type { LandingSection } from '@/types';
 
+/**
+ * The tech stack block: a wrapped list of tags, or a scrolling ticker once
+ * the list is long enough to need one.
+ */
 type Props = {
     section: Extract<LandingSection, { type: 'tech' }>;
     anchor?: string;
 };
+
 const props = defineProps<Props>();
+
 const items = computed(() => props.section.data.items ?? []);
 const useMarquee = computed(() => items.value.length >= 8);
 </script>
@@ -25,36 +28,29 @@ const useMarquee = computed(() => items.value.length >= 8);
         wide
         muted
     >
-        <motion.div
-            v-if="!useMarquee"
-            :variants="stagger(0.05)"
-            initial="hidden"
-            while-in-view="visible"
-            :in-view-options="inViewOnce"
-            class="flex flex-wrap justify-center gap-2.5"
-        >
-            <span
+        <ul v-if="!useMarquee" class="flex flex-wrap gap-3">
+            <li
                 v-for="tech in items"
                 :key="tech"
-                class="card-3d inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground"
+                class="display rounded-full border border-ink px-6 py-3 text-2xl"
             >
-                <span class="size-2 rounded-full bg-signal" /> {{ tech }}
-            </span>
-        </motion.div>
-        <MarqueeRow v-else :duration="32">
-            <span
-                v-for="tech in items"
-                :key="tech"
-                class="inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm"
-            >
-                <span class="size-2 rounded-full bg-signal" /> {{ tech }}
-            </span>
-        </MarqueeRow>
-        <div
-            v-if="useMarquee"
-            class="sr-only flex flex-wrap justify-center gap-2"
-        >
-            <TechBadge v-for="item in items" :key="item" :label="item" />
-        </div>
+                {{ tech }}
+            </li>
+        </ul>
+
+        <template v-else>
+            <Marquee :duration="32" gap="1rem">
+                <span
+                    v-for="tech in items"
+                    :key="tech"
+                    class="display rounded-full border border-ink px-6 py-3 text-2xl whitespace-nowrap"
+                >
+                    {{ tech }}
+                </span>
+            </Marquee>
+            <ul class="sr-only">
+                <li v-for="tech in items" :key="tech">{{ tech }}</li>
+            </ul>
+        </template>
     </SectionShell>
 </template>

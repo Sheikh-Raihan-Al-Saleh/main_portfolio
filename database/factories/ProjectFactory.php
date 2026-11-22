@@ -2,12 +2,16 @@
 
 namespace Database\Factories;
 
-use App\Enums\ProjectContext;
 use App\Models\Project;
+use App\Services\FounderService;
+use App\Services\StudioService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
+ * Projects belong to the current studio by default, the same record the
+ * public pages read, so a factory-made project shows up on the real site.
+ *
  * @extends Factory<Project>
  */
 class ProjectFactory extends Factory
@@ -22,29 +26,27 @@ class ProjectFactory extends Factory
         $title = Str::title(rtrim(fake()->unique()->sentence(3), '.'));
 
         return [
+            'owner_type' => 'studio',
+            'owner_id' => fn (): int => app(StudioService::class)->current()->id,
             'title' => $title,
             'slug' => Str::slug($title),
-            'context' => ProjectContext::Personal->value,
             'summary' => fake()->sentence(12),
             'description' => fake()->paragraphs(4, true),
-            'tech_stack' => fake()->randomElements(
-                ['Laravel', 'Vue', 'TypeScript', 'Tailwind CSS', 'MySQL', 'Redis', 'Docker', 'AWS'],
-                4,
-            ),
             'repo_url' => 'https://github.com/example/'.Str::slug($title),
             'live_url' => fake()->url(),
-            'role' => 'Full-Stack Developer',
+            'role' => 'Full-stack developer',
             'is_featured' => false,
             'is_published' => true,
             'sort_order' => 0,
             'started_at' => fake()->dateTimeBetween('-3 years', '-1 year'),
             'completed_at' => fake()->dateTimeBetween('-1 year', 'now'),
+            'published_at' => now(),
         ];
     }
 
     public function draft(): static
     {
-        return $this->state(fn () => ['is_published' => false]);
+        return $this->state(fn () => ['is_published' => false, 'published_at' => null]);
     }
 
     public function featured(): static
@@ -52,15 +54,21 @@ class ProjectFactory extends Factory
         return $this->state(fn () => ['is_featured' => true]);
     }
 
-    /** Client work delivered by the studio, shown on the home route. */
-    public function companyWork(): static
+    /** Studio work (client and company projects). */
+    public function forStudio(): static
     {
-        return $this->state(fn () => ['context' => ProjectContext::Company->value]);
+        return $this->state(fn () => [
+            'owner_type' => 'studio',
+            'owner_id' => app(StudioService::class)->current()->id,
+        ]);
     }
 
-    /** The founder's own work, shown on the About route. */
-    public function personalWork(): static
+    /** The founder's personal work. */
+    public function forFounder(): static
     {
-        return $this->state(fn () => ['context' => ProjectContext::Personal->value]);
+        return $this->state(fn () => [
+            'owner_type' => 'founder',
+            'owner_id' => app(FounderService::class)->current()->id,
+        ]);
     }
 }

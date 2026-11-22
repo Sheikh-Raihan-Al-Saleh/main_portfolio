@@ -1,247 +1,181 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowRight, Mail, MapPin, Quote } from '@lucide/vue';
+import { ArrowUpRight } from '@lucide/vue';
 import { computed } from 'vue';
-import AnimatedCounter from '@/components/portfolio/AnimatedCounter.vue';
-import CircuitBackground from '@/components/site/CircuitBackground.vue';
+import BrandLogo from '@/components/brand/BrandLogo.vue';
+import SmartImage from '@/components/media/SmartImage.vue';
+import AnimatedCounter from '@/components/site/AnimatedCounter.vue';
+import ContactSection from '@/components/site/ContactSection.vue';
 import Reveal from '@/components/site/Reveal.vue';
-import SectionHeader from '@/components/site/SectionHeader.vue';
-import StudioContact from '@/components/studio/StudioContact.vue';
-import StudioFounderCard from '@/components/studio/StudioFounderCard.vue';
-import type { Client, Company, CompanyStats, Profile } from '@/types';
+import ClientStrip from '@/components/studio/ClientStrip.vue';
+import { useSite } from '@/composables/useSite';
+import { paragraphs } from '@/lib/text';
+import { founder as founderRoute } from '@/routes';
+import type { Client, StudioStats } from '@/types';
 
-type Props = {
-    company: Company;
-    profile: Profile;
+/**
+ * The studio's About page (/about): the story, the mission, the numbers,
+ * the people behind it and the clients.
+ */
+const props = defineProps<{
     clients: Client[];
-    stats: CompanyStats;
-};
+    stats: StudioStats;
+}>();
 
-const props = defineProps<Props>();
+const { studio, founder } = useSite();
 
-const title = computed(() =>
-    props.company.meta_title
-        ? `${props.company.meta_title} — About`
-        : `About ${props.company.name}`,
-);
-
-type Figure = { value: number; suffix: string; label: string };
-
-const figures = computed<Figure[]>(() =>
+const figures = computed(() =>
     [
         {
             value: props.stats.yearsInBusiness,
-            suffix: '+',
             label: 'Years in business',
+            suffix: '+',
         },
-        { value: props.stats.projects, suffix: '+', label: 'Products shipped' },
-        { value: props.stats.clients, suffix: '', label: 'Clients served' },
-    ].filter((figure): figure is Figure =>
-        Number.isFinite(figure.value as number),
+        { value: props.stats.projects, label: 'Projects shipped', suffix: '' },
+        { value: props.stats.clients, label: 'Clients served', suffix: '' },
+    ].filter(
+        (figure): figure is { value: number; label: string; suffix: string } =>
+            figure.value !== null,
     ),
-);
-
-/** The bio is authored as blank-line separated paragraphs. */
-const paragraphs = computed(() =>
-    (props.company.bio ?? '')
-        .split(/\n\s*\n/)
-        .map((paragraph) => paragraph.trim())
-        .filter(Boolean),
 );
 </script>
 
 <template>
-    <Head :title="title">
+    <Head :title="`About ${studio.name}`">
         <meta
-            v-if="company.meta_description"
+            v-if="studio.meta.description"
             name="description"
-            :content="company.meta_description"
+            :content="studio.meta.description"
         />
-        <meta property="og:title" :content="title" />
     </Head>
 
-    <!-- Page header -->
-    <section class="relative overflow-hidden pt-36 pb-16 lg:pt-44 lg:pb-20">
-        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-            <CircuitBackground />
-            <div class="ui-blob ui-blob-a -top-32 left-1/4 size-[30rem]" />
-            <div class="ui-blob ui-blob-b -top-10 right-1/4 size-[24rem]" />
-        </div>
+    <section class="container-site pt-10 pb-20 sm:pt-16">
+        <Reveal>
+            <p class="eyebrow">About the studio</p>
+            <h1 class="display display-xl mt-8 max-w-[12ch]">
+                {{ studio.headline || 'A small studio,' }}
+                <em>{{ studio.short_name }}</em>
+            </h1>
+        </Reveal>
 
-        <div
-            class="site-container relative flex flex-col items-center gap-6 text-center"
-        >
-            <Reveal><span class="ui-eyebrow">About us</span></Reveal>
-            <Reveal :delay="0.05">
-                <h1 class="ui-display ui-h1 max-w-4xl">
-                    {{ company.headline ?? company.name }}
-                </h1>
-            </Reveal>
-            <Reveal v-if="company.tagline" :delay="0.1">
-                <p
-                    class="max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
-                >
-                    {{ company.tagline }}
-                </p>
-            </Reveal>
-            <Reveal :delay="0.15" class="flex flex-wrap justify-center gap-3">
-                <a
-                    v-if="company.public_email"
-                    :href="`mailto:${company.public_email}`"
-                    class="ui-btn ui-btn-secondary ui-btn-sm"
-                >
-                    <Mail class="size-4" />
-                    {{ company.public_email }}
-                </a>
-                <span
-                    v-if="company.location"
-                    class="ui-btn ui-btn-secondary ui-btn-sm pointer-events-none"
-                >
-                    <MapPin class="size-4" />
-                    {{ company.location }}
-                </span>
-            </Reveal>
-
-            <Reveal
-                v-if="figures.length"
-                :delay="0.2"
-                class="mt-6 w-full max-w-3xl"
-            >
-                <dl class="grid gap-4 sm:grid-cols-3">
-                    <div
-                        v-for="figure in figures"
-                        :key="figure.label"
-                        class="ui-card flex flex-col-reverse gap-1 p-6"
-                    >
-                        <dt class="text-sm text-muted-foreground">
-                            {{ figure.label }}
-                        </dt>
-                        <dd class="ui-display text-gradient text-4xl">
-                            <AnimatedCounter
-                                :value="figure.value"
-                                :suffix="figure.suffix"
-                            />
-                        </dd>
-                    </div>
-                </dl>
-            </Reveal>
-        </div>
-    </section>
-
-    <!-- Studio story -->
-    <section class="site-section bg-card/60">
-        <div class="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
-            <SectionHeader
-                align="left"
-                eyebrow="Who we are"
-                title="How the studio works"
-                highlight="works"
-                class="lg:col-span-5"
-            />
-            <div class="flex flex-col gap-5 lg:col-span-7">
-                <Reveal
-                    v-for="(paragraph, i) in paragraphs"
-                    :key="paragraph.slice(0, 24)"
-                    :delay="i * 0.05"
-                >
-                    <p
-                        class="text-lg leading-relaxed text-pretty text-muted-foreground"
-                    >
-                        {{ paragraph }}
+        <div class="mt-16 grid gap-14 lg:grid-cols-12">
+            <Reveal class="lg:col-span-4">
+                <div class="paper-card flex flex-col items-start gap-8 p-8">
+                    <BrandLogo size="xl" />
+                    <p v-if="studio.tagline" class="body-copy">
+                        {{ studio.tagline }}
                     </p>
-                </Reveal>
-                <Reveal v-if="company.mission">
-                    <blockquote class="ui-card flex gap-4 p-6">
-                        <span class="ui-icon-tile shrink-0"
-                            ><Quote class="size-5"
-                        /></span>
-                        <div>
-                            <p class="text-sm font-medium text-brand">
-                                Our mission
-                            </p>
-                            <p class="mt-1 text-xl leading-snug font-semibold">
-                                {{ company.mission }}
-                            </p>
-                        </div>
-                    </blockquote>
-                </Reveal>
-                <Reveal>
-                    <Link href="/projects" class="ui-btn ui-btn-primary w-fit">
-                        See the work
-                        <ArrowRight class="size-4" />
-                    </Link>
-                </Reveal>
-            </div>
-        </div>
-    </section>
-
-    <!-- Clients -->
-    <section
-        v-if="clients.length"
-        id="clients"
-        class="site-section scroll-mt-24"
-    >
-        <div class="site-container">
-            <SectionHeader
-                eyebrow="Clients"
-                title="Who we work with"
-                highlight="work with"
-                description="The teams who trusted a small studio with their platform."
-            />
-            <div
-                class="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5"
-            >
-                <Reveal
-                    v-for="(client, i) in clients"
-                    :key="client.id"
-                    :delay="(i % 5) * 0.05"
-                >
-                    <component
-                        :is="client.website_url ? 'a' : 'div'"
-                        :href="client.website_url ?? undefined"
-                        :target="client.website_url ? '_blank' : undefined"
-                        :rel="
-                            client.website_url
-                                ? 'noopener noreferrer'
-                                : undefined
-                        "
-                        class="ui-card ui-card-hover flex h-full flex-col items-center justify-center gap-3 p-6 text-center"
-                    >
-                        <img
-                            v-if="client.logo_url"
-                            :src="client.logo_url"
-                            :alt="client.name"
-                            loading="lazy"
-                            class="h-12 w-auto max-w-[80%] object-contain"
-                        />
-                        <span class="text-sm font-semibold">{{
-                            client.name
-                        }}</span>
-                        <span
-                            v-if="client.industry"
-                            class="text-xs text-muted-foreground"
-                            >{{ client.industry }}</span
+                    <dl class="grid w-full">
+                        <div
+                            v-if="studio.founded_year"
+                            class="rule flex justify-between py-3"
                         >
-                    </component>
-                </Reveal>
-            </div>
-        </div>
-    </section>
+                            <dt class="meta">Founded</dt>
+                            <dd class="font-medium">
+                                {{ studio.founded_year }}
+                            </dd>
+                        </div>
+                        <div
+                            v-if="studio.location"
+                            class="rule flex justify-between py-3"
+                        >
+                            <dt class="meta">Based in</dt>
+                            <dd class="font-medium">{{ studio.location }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </Reveal>
 
-    <!-- Founder -->
-    <section id="founder" class="site-section scroll-mt-24 bg-card/60">
-        <div class="site-container">
-            <SectionHeader
-                eyebrow="The founder"
-                title="Who you will actually talk to"
-                highlight="talk to"
-                description="The studio is deliberately small, so the person who scopes the work is the person who builds it."
-            />
-            <Reveal class="mx-auto mt-14 max-w-4xl">
-                <StudioFounderCard :profile="profile" detailed />
+            <Reveal :delay="0.1" class="lg:col-span-7 lg:col-start-6">
+                <p
+                    v-for="(paragraph, i) in paragraphs(studio.bio)"
+                    :key="i"
+                    class="lead mb-6"
+                >
+                    {{ paragraph }}
+                </p>
+
+                <blockquote
+                    v-if="studio.mission"
+                    class="mt-12 border-l-2 border-brand pl-6"
+                >
+                    <p class="meta mb-3">Our mission</p>
+                    <p class="display text-4xl leading-tight sm:text-5xl">
+                        “{{ studio.mission }}”
+                    </p>
+                </blockquote>
             </Reveal>
         </div>
     </section>
 
-    <StudioContact :company="company" />
+    <section
+        v-if="figures.length"
+        class="border-y border-ink bg-ink text-paper"
+        data-tone="dark"
+    >
+        <dl class="container-site grid gap-10 py-16 sm:grid-cols-3">
+            <div v-for="figure in figures" :key="figure.label">
+                <dd class="display text-7xl sm:text-8xl">
+                    <AnimatedCounter
+                        :value="figure.value"
+                        :suffix="figure.suffix"
+                    />
+                </dd>
+                <dt class="meta mt-2 text-paper/60">{{ figure.label }}</dt>
+            </div>
+        </dl>
+    </section>
+
+    <section class="section">
+        <div class="container-site grid items-center gap-14 lg:grid-cols-12">
+            <Reveal class="lg:col-span-5">
+                <SmartImage
+                    :src="founder.avatar_url"
+                    :alt="founder.name"
+                    ratio="4/5"
+                    class="rounded-[2rem]"
+                >
+                    <template #fallback>
+                        <span class="display text-[9rem] text-stone/30">{{
+                            founder.name.charAt(0)
+                        }}</span>
+                    </template>
+                </SmartImage>
+            </Reveal>
+            <Reveal :delay="0.1" class="lg:col-span-6 lg:col-start-7">
+                <p class="eyebrow">The founder</p>
+                <h2 class="display display-md mt-6">{{ founder.name }}</h2>
+                <p class="mt-3 text-xl text-brand-text">
+                    {{ founder.headline }}
+                </p>
+                <p
+                    v-for="(paragraph, i) in paragraphs(
+                        founder.founder_message || founder.bio,
+                    )"
+                    :key="i"
+                    class="body-copy mt-6"
+                >
+                    {{ paragraph }}
+                </p>
+                <Link :href="founderRoute().url" class="btn btn-ink mt-10">
+                    See the founder's portfolio
+                    <ArrowUpRight class="btn-arrow size-4" aria-hidden="true" />
+                </Link>
+            </Reveal>
+        </div>
+    </section>
+
+    <ClientStrip :clients="clients" />
+
+    <ContactSection
+        site="studio"
+        eyebrow="Start a project"
+        title="Tell us what needs building"
+        highlight="building"
+        description="Describe the problem and we will tell you honestly whether software is the fix, what it would take, and what it would cost."
+        :email="studio.public_email"
+        :phone="studio.phone"
+        :location="studio.location"
+        :socials="studio.socials"
+    />
 </template>

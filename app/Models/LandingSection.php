@@ -9,20 +9,17 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 /**
- * One composable block of a marketing page.
- *
- * A section hangs off exactly one owner: the company's home page, or a single
- * project's landing page. Both use the same block types and the same admin
- * editor; only the owner column differs.
+ * One composable block of a marketing page. The owner (sectionable) is the
+ * studio home page or a project landing page.
  *
  * @property int $id
- * @property int|null $landing_page_id
- * @property int|null $company_id
+ * @property string $sectionable_type
+ * @property int $sectionable_id
  * @property LandingSectionType $type
  * @property string|null $eyebrow
  * @property string|null $heading
@@ -33,64 +30,31 @@ use Illuminate\Support\Carbon;
  * @property bool $is_visible
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read ProjectLandingPage|null $landingPage
- * @property-read Company|null $company
  */
-#[Fillable([
-    'landing_page_id', 'company_id', 'type', 'eyebrow', 'heading', 'subheading',
-    'body', 'data', 'sort_order', 'is_visible',
-])]
+#[Fillable(['type', 'eyebrow', 'heading', 'subheading', 'body', 'data', 'sort_order', 'is_visible'])]
 class LandingSection extends Model
 {
     /** @use HasFactory<LandingSectionFactory> */
     use HasFactory;
 
-    protected static function booted(): void
+    /** @return MorphTo<Model, $this> */
+    public function sectionable(): MorphTo
     {
-        // The two owner columns are alternatives, so enforce that at the model
-        // level too: a section with both or neither would be invisible to every
-        // page and could never be reached from the admin either.
-        static::saving(function (self $section): void {
-            $owners = array_filter([
-                $section->landing_page_id === null ? null : 'landing_page_id',
-                $section->company_id === null ? null : 'company_id',
-            ]);
-
-            if (count($owners) !== 1) {
-                throw new \InvalidArgumentException(
-                    'A landing section must belong to exactly one of landing_page_id or company_id.',
-                );
-            }
-        });
-    }
-
-    /** @return BelongsTo<ProjectLandingPage, $this> */
-    public function landingPage(): BelongsTo
-    {
-        return $this->belongsTo(ProjectLandingPage::class, 'landing_page_id');
-    }
-
-    /** @return BelongsTo<Company, $this> */
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(Company::class, 'company_id');
+        return $this->morphTo();
     }
 
     /**
-     * Every stored media path this section owns, flattened from the dot-paths
-     * the type declares. Used to clean up uploads when the section is deleted.
+     * Every stored media path inside `data`, following the dot-paths the type
+     * declares. Used to delete the files when the section goes away.
      *
      * @return array<int, string>
      */
     public function mediaPaths(): array
     {
-        $data = $this->data ?? [];
         $paths = [];
 
         foreach ($this->type->mediaPaths() as $pattern) {
-            // A wildcard pattern yields a list; a plain key yields the scalar,
-            // so normalise both to an array before collecting.
-            foreach (Arr::wrap(data_get($data, $pattern)) as $value) {
+            foreach (Arr::wrap(data_get($this->data ?? [], $pattern)) as $value) {
                 if (is_string($value) && $value !== '') {
                     $paths[] = $value;
                 }
@@ -122,6 +86,7 @@ class LandingSection extends Model
         return [
             'type' => LandingSectionType::class,
             'data' => 'array',
+            'sort_order' => 'integer',
             'is_visible' => 'boolean',
         ];
     }

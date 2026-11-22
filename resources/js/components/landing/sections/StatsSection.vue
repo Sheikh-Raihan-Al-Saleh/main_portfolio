@@ -2,7 +2,7 @@
 import { motion } from 'motion-v';
 import { computed } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
-import AnimatedCounter from '@/components/portfolio/AnimatedCounter.vue';
+import AnimatedCounter from '@/components/site/AnimatedCounter.vue';
 import { inViewOnce, perspectiveCard, stagger } from '@/lib/motion';
 import type { LandingSection } from '@/types';
 
@@ -43,7 +43,7 @@ const items = computed(() => props.section.data.items ?? []);
             >
                 <div class="card-3d relative overflow-hidden p-7 text-center">
                     <div
-                        class="pointer-events-none absolute -top-10 -right-10 size-24 rounded-full bg-gradient-to-br from-signal/15 to-transparent blur-2xl"
+                        class="pointer-events-none absolute -top-10 -right-10 size-24 rounded-full bg-gradient-to-br from-brand/15 to-transparent blur-2xl"
                     />
                     <p
                         class="bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-4xl font-extrabold text-transparent tabular-nums sm:text-5xl"
@@ -57,7 +57,7 @@ const items = computed(() => props.section.data.items ?? []);
                         {{ item.label }}
                     </p>
                     <div
-                        class="mx-auto mt-3 h-1 w-8 rounded-full bg-gradient-to-r from-signal to-signal opacity-90"
+                        class="mx-auto mt-3 h-1 w-8 rounded-full bg-gradient-to-r from-brand to-brand opacity-90"
                     />
                 </div>
             </motion.div>

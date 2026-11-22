@@ -1,78 +1,90 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import ExperienceSection from '@/components/founder/ExperienceSection.vue';
 import FounderAbout from '@/components/founder/FounderAbout.vue';
-import FounderContact from '@/components/founder/FounderContact.vue';
-import FounderExperience from '@/components/founder/FounderExperience.vue';
 import FounderHero from '@/components/founder/FounderHero.vue';
-import FounderProjects from '@/components/founder/FounderProjects.vue';
-import FounderSkills from '@/components/founder/FounderSkills.vue';
-import ProjectMarquee from '@/components/site/ProjectMarquee.vue';
+import SkillsSection from '@/components/founder/SkillsSection.vue';
+import ContactSection from '@/components/site/ContactSection.vue';
+import WorkSection from '@/components/studio/WorkSection.vue';
+import { useSite } from '@/composables/useSite';
 import type {
     Education,
     Experience,
-    PortfolioStats,
-    Profile,
-    Project,
-    SkillGroup,
+    FounderContent,
+    FounderStats,
+    ProjectCard,
+    SkillCategory,
 } from '@/types';
 
-type Props = {
-    profile: Profile;
-    projects: Project[];
-    skillGroups: SkillGroup[];
+/**
+ * The founder's personal portfolio (/founder).
+ */
+defineProps<{
+    content: FounderContent;
+    skillGroups: SkillCategory[];
     experiences: Experience[];
     educations: Education[];
-    stats: PortfolioStats;
-};
+    projects: ProjectCard[];
+    stats: FounderStats;
+}>();
 
-const props = defineProps<Props>();
-
-const title = computed(
-    () =>
-        props.profile.meta_title ??
-        `${props.profile.name} — ${props.profile.headline ?? 'About'}`,
-);
-
-/** A short slice of skill names for the hero's portrait pane. */
-const heroHighlights = computed(() =>
-    props.skillGroups
-        .flatMap((group) => group.skills.map((skill) => skill.name))
-        .slice(0, 6),
-);
+const { founder } = useSite();
 </script>
 
 <template>
-    <Head :title="title">
+    <Head :title="founder.meta.title || founder.name">
         <meta
-            v-if="profile.meta_description"
+            v-if="founder.meta.description"
             name="description"
-            :content="profile.meta_description"
-        />
-        <meta property="og:title" :content="title" />
-        <meta
-            v-if="profile.meta_description"
-            property="og:description"
-            :content="profile.meta_description"
+            :content="founder.meta.description"
         />
         <meta
-            v-if="profile.og_image_url"
+            property="og:title"
+            :content="founder.meta.title || founder.name"
+        />
+        <meta
+            v-if="founder.og_image_url"
             property="og:image"
-            :content="profile.og_image_url"
+            :content="founder.og_image_url"
         />
-        <meta name="twitter:card" content="summary_large_image" />
     </Head>
 
-    <FounderHero
-        :profile="profile"
-        :stats="stats"
-        :highlights="heroHighlights"
-    />
-    <ProjectMarquee :projects="projects" label="Projects" />
+    <FounderHero :content="content" :stats="stats" />
 
-    <FounderAbout :profile="profile" />
-    <FounderSkills :skill-groups="skillGroups" />
-    <FounderProjects :projects="projects" />
-    <FounderExperience :experiences="experiences" :educations="educations" />
-    <FounderContact :profile="profile" />
+    <FounderAbout :copy="content.sections.about" />
+
+    <SkillsSection
+        v-if="skillGroups.length"
+        :copy="content.sections.skills"
+        :groups="skillGroups"
+    />
+
+    <WorkSection
+        id="projects"
+        index="03"
+        :eyebrow="content.sections.projects.eyebrow"
+        :title="content.sections.projects.title"
+        :highlight="content.sections.projects.highlight"
+        :description="content.sections.projects.description"
+        :projects="projects"
+    />
+
+    <ExperienceSection
+        v-if="experiences.length || educations.length"
+        :copy="content.sections.experience"
+        :experiences="experiences"
+        :educations="educations"
+    />
+
+    <ContactSection
+        site="founder"
+        :eyebrow="content.sections.contact.eyebrow"
+        :title="content.sections.contact.title"
+        :highlight="content.sections.contact.highlight"
+        :description="content.sections.contact.description"
+        :email="founder.public_email"
+        :phone="founder.phone"
+        :location="founder.location"
+        :socials="founder.socials"
+    />
 </template>

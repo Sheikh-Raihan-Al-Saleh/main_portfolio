@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils';
 type Props = {
     title?: string;
     description?: string;
-    /** Two columns of fields from `sm` up. */
-    columns?: 1 | 2;
+    /** Two columns from `sm` up; three adds a third column from `lg` up. */
+    columns?: 1 | 2 | 3;
     class?: string;
 };
 
@@ -40,7 +40,11 @@ const props = withDefaults(defineProps<Props>(), {
         </header>
         <div
             :class="
-                cn('grid items-start gap-5', columns === 2 && 'sm:grid-cols-2')
+                cn(
+                    'grid items-start gap-5',
+                    columns === 2 && 'sm:grid-cols-2',
+                    columns === 3 && 'sm:grid-cols-2 lg:grid-cols-3',
+                )
             "
         >
             <slot />

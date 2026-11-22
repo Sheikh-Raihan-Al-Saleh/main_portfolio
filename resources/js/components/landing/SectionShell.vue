@@ -1,13 +1,18 @@
 <script setup lang="ts">
-import { motion } from 'motion-v';
-import { fadeUp, inViewOnce, sectionReveal, stagger } from '@/lib/motion';
+import { computed } from 'vue';
+import Reveal from '@/components/site/Reveal.vue';
 import { cn } from '@/lib/utils';
 
+/**
+ * The frame every content block renders in (studio home blocks and project
+ * landing pages): editorial heading, then the block body.
+ */
 type Props = {
     eyebrow?: string | null;
     heading?: string | null;
     subheading?: string | null;
     anchor?: string;
+    /** A tinted band, to separate consecutive blocks. */
     muted?: boolean;
     wide?: boolean;
     class?: string;
@@ -22,6 +27,10 @@ const props = withDefaults(defineProps<Props>(), {
     wide: false,
     class: undefined,
 });
+
+const hasHeading = computed(() =>
+    Boolean(props.eyebrow || props.heading || props.subheading),
+);
 </script>
 
 <template>
@@ -29,63 +38,36 @@ const props = withDefaults(defineProps<Props>(), {
         :id="props.anchor"
         :class="
             cn(
-                'relative scroll-mt-24 overflow-hidden py-20 sm:py-28',
-                props.muted ? 'ui-band' : '',
+                'section scroll-mt-24',
+                props.muted && 'bg-paper-deep',
                 props.class,
             )
         "
     >
-        <motion.div
-            :variants="sectionReveal"
-            initial="hidden"
-            while-in-view="visible"
-            :in-view-options="inViewOnce"
-            :class="
-                cn(
-                    'relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8',
-                    props.wide ? 'max-w-7xl' : 'max-w-6xl',
-                )
-            "
-        >
-            <motion.div
-                v-if="props.eyebrow || props.heading || props.subheading"
-                :variants="stagger(0.08)"
-                initial="hidden"
-                while-in-view="visible"
-                :in-view-options="inViewOnce"
-                class="mx-auto mb-12 max-w-4xl text-center sm:mb-16"
+        <div class="container-site">
+            <Reveal
+                v-if="hasHeading"
+                class="mb-12 grid gap-6 sm:mb-16 lg:grid-cols-12 lg:items-end"
             >
-                <motion.div
-                    v-if="props.eyebrow"
-                    :variants="fadeUp"
-                    class="flex justify-center"
-                >
-                    <span class="ui-eyebrow">{{ props.eyebrow }}</span>
-                </motion.div>
-                <motion.h2
-                    v-if="props.heading"
-                    :variants="fadeUp"
-                    class="ui-display ui-h2 mt-5 text-foreground"
-                >
-                    {{ props.heading }}
-                </motion.h2>
-                <motion.p
-                    v-if="props.subheading"
-                    :variants="fadeUp"
-                    class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-pretty text-muted-foreground sm:text-xl"
-                >
+                <div class="lg:col-span-7">
+                    <p v-if="props.eyebrow" class="eyebrow mb-5">
+                        {{ props.eyebrow }}
+                    </p>
+                    <h2 v-if="props.heading" class="display display-md">
+                        {{ props.heading }}
+                    </h2>
+                </div>
+                <p v-if="props.subheading" class="lead lg:col-span-5">
                     {{ props.subheading }}
-                </motion.p>
-            </motion.div>
+                </p>
+            </Reveal>
 
-            <motion.div
-                :variants="fadeUp"
-                initial="hidden"
-                while-in-view="visible"
-                :in-view-options="inViewOnce"
+            <Reveal
+                :delay="hasHeading ? 0.1 : 0"
+                :class="props.wide ? '' : 'mx-auto max-w-6xl'"
             >
                 <slot />
-            </motion.div>
-        </motion.div>
+            </Reveal>
+        </div>
     </section>
 </template>

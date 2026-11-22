@@ -1,138 +1,162 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
-import { AnimatePresence, motion } from 'motion-v';
-import { computed, ref } from 'vue';
-import CircuitBackground from '@/components/site/CircuitBackground.vue';
-import ProjectCard from '@/components/site/ProjectCard.vue';
+import { Head } from '@inertiajs/vue3';
+import { computed, ref, watch } from 'vue';
+import ProjectGrid from '@/components/project/ProjectGrid.vue';
 import Reveal from '@/components/site/Reveal.vue';
-import { cn } from '@/lib/utils';
-import projectRoutes from '@/routes/projects';
-import type { Profile, Project } from '@/types';
-
-type Props = {
-    profile: Profile;
-    projects: Project[];
-    technologies: string[];
-    filters: { tech: string | null };
-};
-
-const props = defineProps<Props>();
+import { useSite } from '@/composables/useSite';
+import type { ProjectCard, TechnologyTag } from '@/types';
 
 /**
- * The server ships every published project once and filtering happens here,
- * so switching a tag is instant with no network round-trip (SRS 3.2). The URL
- * is still kept in sync so a filtered view stays shareable and bookmarkable.
+ * The work archive (/projects). Every published project arrives in one
+ * payload and is filtered here, so switching filters is instant. The filters
+ * are mirrored into the URL so a filtered view can be shared.
  */
-const activeTech = ref<string | null>(props.filters.tech);
+const props = defineProps<{
+    projects: ProjectCard[];
+    filters: { tech: string | null; owner: 'studio' | 'founder' | null };
+}>();
 
-const visibleProjects = computed(() =>
-    activeTech.value === null
-        ? props.projects
-        : props.projects.filter((project) =>
-              (project.tech_stack ?? []).includes(activeTech.value as string),
-          ),
+const { studio, founder } = useSite();
+
+const owner = ref<'studio' | 'founder' | null>(props.filters.owner);
+
+/** Technologies that appear on at least one project, alphabetically. */
+const technologies = computed<TechnologyTag[]>(() => {
+    const unique = new Map<string, TechnologyTag>();
+
+    props.projects.forEach((project) =>
+        project.technologies.forEach((tech) => unique.set(tech.slug, tech)),
+    );
+
+    return [...unique.values()].sort((a, b) => a.name.localeCompare(b.name));
+});
+
+// A stale ?tech= link that no project carries falls back to "all".
+const tech = ref<string | null>(
+    technologies.value.some((item) => item.slug === props.filters.tech)
+        ? props.filters.tech
+        : null,
 );
 
-function filterBy(tech: string | null) {
-    activeTech.value = tech;
+const visible = computed(() =>
+    props.projects.filter(
+        (project) =>
+            (owner.value === null || project.owner === owner.value) &&
+            (tech.value === null ||
+                project.technologies.some((item) => item.slug === tech.value)),
+    ),
+);
 
-    router.replace({
-        url: projectRoutes.index({ query: tech ? { tech } : { tech: null } })
-            .url,
-        preserveScroll: true,
-        preserveState: true,
-    });
-}
+const owners = computed(() => [
+    { value: null, label: 'All work' },
+    { value: 'studio' as const, label: studio.value.short_name },
+    { value: 'founder' as const, label: founder.value.name },
+]);
+
+watch([owner, tech], ([ownerValue, techValue]) => {
+    const url = new URL(window.location.href);
+
+    for (const [key, value] of [
+        ['owner', ownerValue],
+        ['tech', techValue],
+    ] as const) {
+        if (value) {
+            url.searchParams.set(key, value);
+        } else {
+            url.searchParams.delete(key);
+        }
+    }
+
+    window.history.replaceState(window.history.state, '', url);
+});
 </script>
 
 <template>
-    <Head :title="`Projects — ${profile.name}`">
+    <Head title="Work">
         <meta
             name="description"
-            :content="`Projects built by ${profile.name}${profile.headline ? ', ' + profile.headline : ''}.`"
+            :content="`Selected projects by ${studio.name} and ${founder.name}.`"
         />
     </Head>
 
-    <section class="relative overflow-hidden pt-36 pb-24 lg:pt-44">
-        <div
-            class="pointer-events-none absolute inset-x-0 top-0 h-[32rem]"
-            aria-hidden="true"
-        >
-            <CircuitBackground />
-            <div class="ui-blob ui-blob-a -top-32 left-1/3 size-[28rem]" />
-        </div>
-
-        <div class="site-container relative">
-            <div class="flex flex-col items-center gap-5 text-center">
-                <Reveal
-                    ><span class="ui-eyebrow"
-                        >Archive · {{ projects.length }} projects</span
-                    ></Reveal
-                >
-                <Reveal :delay="0.05">
-                    <h1 class="ui-display ui-h1">
-                        All <span class="text-gradient">projects</span>
-                    </h1>
-                </Reveal>
-                <Reveal :delay="0.1">
-                    <p class="max-w-xl text-lg text-muted-foreground">
-                        Everything published, newest and most notable first.
-                    </p>
-                </Reveal>
-            </div>
-
-            <Reveal
-                v-if="technologies.length"
-                :delay="0.15"
-                class="mt-10 flex flex-wrap justify-center gap-2"
-            >
-                <div
-                    role="group"
-                    aria-label="Filter by technology"
-                    class="contents"
-                >
-                    <button
-                        v-for="tech in [null, ...technologies]"
-                        :key="tech ?? 'all'"
-                        type="button"
-                        :aria-pressed="activeTech === tech"
-                        :class="
-                            cn(
-                                'rounded-full border px-4 py-2 text-sm font-medium transition-colors',
-                                activeTech === tech
-                                    ? 'border-transparent bg-signal text-signal-foreground shadow-[0_8px_20px_-10px_var(--brand-glow)]'
-                                    : 'border-border bg-card text-muted-foreground hover:text-foreground',
-                            )
-                        "
-                        @click="filterBy(tech)"
-                    >
-                        {{ tech ?? 'All' }}
-                    </button>
-                </div>
-            </Reveal>
-
-            <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                <AnimatePresence>
-                    <motion.div
-                        v-for="project in visibleProjects"
-                        :key="project.id"
-                        layout
-                        :initial="{ opacity: 0, scale: 0.97 }"
-                        :animate="{ opacity: 1, scale: 1 }"
-                        :exit="{ opacity: 0, scale: 0.97 }"
-                        :transition="{ duration: 0.25 }"
-                    >
-                        <ProjectCard :project="project" class="h-full" />
-                    </motion.div>
-                </AnimatePresence>
-            </div>
-
-            <p
-                v-if="!visibleProjects.length"
-                class="py-20 text-center text-muted-foreground"
-            >
-                No projects match that filter.
+    <section class="container-site pt-10 pb-12 sm:pt-16">
+        <Reveal>
+            <p class="eyebrow">Archive</p>
+            <h1 class="display display-xl mt-8">Selected <em>work</em></h1>
+            <p class="lead mt-8 max-w-2xl">
+                Products, platforms and experiments, from client work at
+                {{ studio.name }} to things {{ founder.name }} builds
+                independently.
             </p>
+        </Reveal>
+    </section>
+
+    <section
+        class="container-site sticky top-20 z-30 bg-paper/90 py-4 backdrop-blur sm:top-24"
+    >
+        <div
+            class="flex flex-col gap-4 border-y border-line py-4 lg:flex-row lg:items-center lg:justify-between"
+        >
+            <div
+                class="flex flex-wrap gap-2"
+                role="group"
+                aria-label="Filter by owner"
+            >
+                <button
+                    v-for="option in owners"
+                    :key="option.label"
+                    type="button"
+                    class="tag cursor-pointer transition-colors hover:border-ink"
+                    :class="owner === option.value && 'tag-active'"
+                    :aria-pressed="owner === option.value"
+                    @click="owner = option.value"
+                >
+                    {{ option.label }}
+                </button>
+            </div>
+
+            <div
+                class="mask-fade-x -mx-1 flex gap-2 overflow-x-auto px-1 pb-1"
+                role="group"
+                aria-label="Filter by technology"
+            >
+                <button
+                    type="button"
+                    class="tag shrink-0 cursor-pointer"
+                    :class="tech === null && 'tag-active'"
+                    :aria-pressed="tech === null"
+                    @click="tech = null"
+                >
+                    Any stack
+                </button>
+                <button
+                    v-for="item in technologies"
+                    :key="item.slug"
+                    type="button"
+                    class="tag shrink-0 cursor-pointer transition-colors hover:border-ink"
+                    :class="tech === item.slug && 'tag-active'"
+                    :aria-pressed="tech === item.slug"
+                    @click="tech = tech === item.slug ? null : item.slug"
+                >
+                    {{ item.name }}
+                </button>
+            </div>
         </div>
+    </section>
+
+    <section class="container-site section-tight">
+        <p class="meta mb-10" aria-live="polite">
+            {{ visible.length }}
+            {{ visible.length === 1 ? 'project' : 'projects' }}
+        </p>
+
+        <ProjectGrid
+            v-if="visible.length"
+            :key="`${owner}-${tech}`"
+            :projects="visible"
+        />
+        <p v-else class="lead py-20 text-center text-stone">
+            No projects match these filters yet.
+        </p>
     </section>
 </template>

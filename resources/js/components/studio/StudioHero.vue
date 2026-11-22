@@ -1,188 +1,197 @@
 <script setup lang="ts">
-import { ArrowUpRight } from '@lucide/vue';
+import { ArrowDownRight, ArrowUpRight } from '@lucide/vue';
 import { motion } from 'motion-v';
 import { computed } from 'vue';
-import AnimatedCounter from '@/components/portfolio/AnimatedCounter.vue';
-import EditorialMarquee from '@/components/site/EditorialMarquee.vue';
-import HeroHeadline from '@/components/site/HeroHeadline.vue';
+import BrandLogo from '@/components/brand/BrandLogo.vue';
+import AnimatedCounter from '@/components/site/AnimatedCounter.vue';
 import LiquidBlob from '@/components/site/LiquidBlob.vue';
+import Marquee from '@/components/site/Marquee.vue';
+import { useSite } from '@/composables/useSite';
 import { EASE_OUT } from '@/lib/motion';
-import type { Company, CompanyStats } from '@/types';
+import { fillTokens } from '@/lib/text';
+import type { StudioStats } from '@/types';
 
 /**
- * The studio hero as a poster: a mono masthead (studio, founding year,
- * location, status), the title set in giant condensed type over a flowing
- * liquid shape in the studio's blue, then the promise, the buttons and the
- * live figures on one line, and a blue band of the ticker phrases running
- * underneath.
- *
- * Everything is admin-driven (Company, its stats and ticker). The liquid
- * shape loads when the browser is idle and has a CSS stand-in until then.
+ * The studio home hero: a huge editorial headline, the brand masthead with
+ * the logo shown large, the headline numbers, and a ticker underneath.
+ * The liquid shape behind it is drawn by three.js (lib/liquid/engine.ts).
  */
-type Props = {
-    company: Company;
-    stats: CompanyStats;
-    /** Phrases for the running band under the hero. */
-    ticker?: string[];
-};
+const props = defineProps<{
+    stats: StudioStats;
+    ticker: string[];
+}>();
 
-const props = withDefaults(defineProps<Props>(), { ticker: () => [] });
+const { studio } = useSite();
 
 const title = computed(() =>
-    (props.company.hero_title ?? '{{name}} builds software that ships.')
-        .replaceAll('{{name}}', props.company.name)
-        .trim(),
-);
-
-const primaryCta = computed(() => ({
-    label: props.company.primary_cta_label ?? 'Start a project',
-    url: props.company.primary_cta_url ?? '#contact',
-}));
-
-const secondaryCta = computed(() => ({
-    label: props.company.secondary_cta_label ?? 'See our work',
-    url: props.company.secondary_cta_url ?? '#work',
-}));
-
-type Figure = { value: number; suffix: string; label: string };
-
-/** Only figures with a value, so the hero never claims "0 years". */
-const figures = computed<Figure[]>(() =>
-    [
-        { value: props.stats.projects, suffix: '+', label: 'Products shipped' },
-        { value: props.stats.clients, suffix: '', label: 'Clients' },
+    fillTokens(
+        studio.value.hero.title || '{{name}} builds software that ships.',
         {
-            value: props.stats.yearsInBusiness,
-            suffix: '+',
-            label: 'Years',
+            name: studio.value.name,
         },
-    ].filter((figure): figure is Figure =>
-        Number.isFinite(figure.value as number),
     ),
 );
 
-/** The masthead line: only the facts the admin has filled in. */
-const masthead = computed(() =>
-    [
-        props.company.name,
-        props.company.founded_year
-            ? `Est. ${props.company.founded_year}`
-            : null,
-        props.company.location,
-    ].filter((item): item is string => Boolean(item)),
-);
+/** The last two words of the headline are set in the accent italic. */
+const headline = computed(() => {
+    const words = title.value.trim().split(/\s+/);
+    const split = Math.max(words.length - 2, 1);
 
-const status = computed(
-    () =>
-        props.company.status_text ??
-        (props.company.accepting_projects
-            ? 'Booking new projects'
-            : 'Fully booked'),
-);
-
-function rise(delay: number) {
     return {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.9, ease: EASE_OUT, delay },
-        },
+        lead: words.slice(0, split).join(' '),
+        accent: words.slice(split).join(' '),
     };
-}
+});
+
+const figures = computed(() =>
+    [
+        {
+            value: props.stats.yearsInBusiness,
+            suffix: '+',
+            label: 'Years building',
+        },
+        { value: props.stats.projects, suffix: '', label: 'Projects shipped' },
+        { value: props.stats.clients, suffix: '', label: 'Teams served' },
+    ].filter(
+        (figure): figure is { value: number; suffix: string; label: string } =>
+            figure.value !== null,
+    ),
+);
+
+const reveal = (delay: number) => ({
+    initial: { opacity: 0, y: 40 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 1, ease: EASE_OUT, delay },
+});
 </script>
 
 <template>
-    <section class="relative flex min-h-[100svh] flex-col overflow-hidden">
+    <section class="relative overflow-hidden" aria-labelledby="hero-title">
         <div
-            class="site-container relative flex flex-1 flex-col pt-28 pb-10 sm:pt-32 lg:pb-14"
-        >
-            <!-- Masthead -->
-            <motion.div
-                :variants="rise(0)"
-                initial="hidden"
-                animate="visible"
-                class="ui-label flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-b border-border pb-4"
-            >
-                <span class="flex flex-wrap gap-x-6 gap-y-1">
-                    <span v-for="item in masthead" :key="item">{{ item }}</span>
-                </span>
-                <span class="inline-flex items-center gap-2">
-                    <span
-                        :class="
-                            company.accepting_projects
-                                ? 'ui-pulse-dot'
-                                : 'size-2 rounded-full bg-muted-foreground'
-                        "
-                    />
-                    {{ status }}
-                </span>
-            </motion.div>
+            class="bg-grid pointer-events-none absolute inset-0 opacity-60"
+            aria-hidden="true"
+        />
+        <LiquidBlob
+            class="pointer-events-none absolute -top-16 -right-32 size-[22rem] opacity-70 sm:size-[46rem] sm:opacity-90 lg:-right-24"
+        />
 
-            <!-- Title over the liquid shape -->
-            <div class="relative flex flex-1 items-center py-10 lg:py-6">
-                <LiquidBlob
-                    class="absolute top-1/2 right-[-10%] h-[85%] w-[75%] -translate-y-1/2 sm:right-[-4%] lg:w-[58%]"
-                />
-                <HeroHeadline
-                    :text="title"
-                    :highlight="1"
-                    :delay="150"
-                    class="ui-h1 relative max-w-[16ch]"
-                />
-            </div>
-
-            <!-- Promise, buttons and figures -->
-            <motion.div
-                initial="hidden"
-                animate="visible"
-                class="grid gap-8 border-t border-border pt-6 lg:grid-cols-12 lg:items-end"
-            >
-                <motion.p
-                    v-if="company.hero_statement"
-                    :variants="rise(0.5)"
-                    class="max-w-md text-lg leading-relaxed text-pretty lg:col-span-4"
+        <div class="container-site relative pt-10 pb-16 sm:pt-16 lg:pt-20">
+            <motion.p v-bind="reveal(0.1)" class="eyebrow">
+                {{ studio.hero.eyebrow || studio.headline || 'Product studio' }}
+                <span v-if="studio.location" class="text-stone/70"
+                    >— {{ studio.location }}</span
                 >
-                    {{ company.hero_statement }}
-                </motion.p>
+            </motion.p>
 
-                <motion.div
-                    :variants="rise(0.6)"
-                    class="flex flex-wrap gap-3 lg:col-span-4"
-                >
-                    <a :href="primaryCta.url" class="ui-btn ui-btn-primary">
-                        {{ primaryCta.label }}
-                        <ArrowUpRight class="size-4" />
-                    </a>
-                    <a :href="secondaryCta.url" class="ui-btn ui-btn-secondary">
-                        {{ secondaryCta.label }}
-                    </a>
+            <h1 id="hero-title" class="display display-xl mt-8 max-w-[14ch]">
+                <motion.span v-bind="reveal(0.2)" class="block">{{
+                    headline.lead
+                }}</motion.span>
+                <motion.em v-bind="reveal(0.35)" class="block">{{
+                    headline.accent
+                }}</motion.em>
+            </h1>
+
+            <div class="mt-14 grid gap-12 lg:grid-cols-12 lg:items-start">
+                <motion.div v-bind="reveal(0.5)" class="lg:col-span-6">
+                    <p class="lead max-w-xl">
+                        {{ studio.hero.statement || studio.tagline }}
+                    </p>
+
+                    <div class="mt-10 flex flex-wrap gap-3">
+                        <a
+                            v-if="studio.hero.primary_cta.label"
+                            :href="studio.hero.primary_cta.url || '#contact'"
+                            class="btn btn-ink"
+                        >
+                            {{ studio.hero.primary_cta.label }}
+                            <ArrowUpRight
+                                class="btn-arrow size-4"
+                                aria-hidden="true"
+                            />
+                        </a>
+                        <a
+                            v-if="studio.hero.secondary_cta.label"
+                            :href="studio.hero.secondary_cta.url || '#work'"
+                            class="btn btn-outline"
+                        >
+                            {{ studio.hero.secondary_cta.label }}
+                            <ArrowDownRight
+                                class="btn-arrow size-4"
+                                aria-hidden="true"
+                            />
+                        </a>
+                    </div>
                 </motion.div>
 
-                <motion.dl
-                    v-if="figures.length"
-                    :variants="rise(0.7)"
-                    class="flex gap-8 lg:col-span-4 lg:justify-end"
+                <!-- Masthead: the brand, shown large, with live availability. -->
+                <motion.aside
+                    v-bind="reveal(0.65)"
+                    class="paper-card relative flex flex-col gap-8 p-6 sm:p-8 lg:col-span-5 lg:col-start-8 lg:-mt-48"
+                    aria-label="Studio at a glance"
                 >
-                    <div
-                        v-for="figure in figures"
-                        :key="figure.label"
-                        class="flex flex-col-reverse"
-                    >
-                        <dt class="ui-label text-muted-foreground">
-                            {{ figure.label }}
-                        </dt>
-                        <dd class="ui-display text-5xl sm:text-6xl">
-                            <AnimatedCounter
-                                :value="figure.value"
-                                :suffix="figure.suffix"
+                    <div class="flex items-start justify-between gap-6">
+                        <BrandLogo variant="mark" size="hero" />
+                        <p
+                            class="inline-flex items-center gap-2 text-sm text-ink-soft"
+                        >
+                            <span
+                                class="status-dot"
+                                :class="
+                                    !studio.is_accepting_projects &&
+                                    'status-dot-off'
+                                "
                             />
-                        </dd>
+                            {{
+                                studio.is_accepting_projects
+                                    ? 'Booking projects'
+                                    : 'Fully booked'
+                            }}
+                        </p>
                     </div>
-                </motion.dl>
-            </motion.div>
+
+                    <div>
+                        <p class="display text-4xl sm:text-5xl">
+                            {{ studio.name }}
+                        </p>
+                        <p v-if="studio.tagline" class="body-copy mt-3">
+                            {{ studio.tagline }}
+                        </p>
+                    </div>
+
+                    <dl
+                        v-if="figures.length"
+                        class="rule grid grid-cols-3 gap-4 pt-6"
+                    >
+                        <div v-for="figure in figures" :key="figure.label">
+                            <dt class="meta">{{ figure.label }}</dt>
+                            <dd class="display mt-2 text-4xl sm:text-5xl">
+                                <AnimatedCounter
+                                    :value="figure.value"
+                                    :suffix="figure.suffix"
+                                />
+                            </dd>
+                        </div>
+                    </dl>
+                </motion.aside>
+            </div>
         </div>
 
-        <EditorialMarquee :items="ticker" />
+        <div
+            v-if="ticker.length"
+            data-tone="dark"
+            class="rule-ink border-b border-ink bg-ink py-5 text-paper"
+        >
+            <Marquee :duration="45" gap="2.5rem">
+                <span
+                    v-for="item in ticker"
+                    :key="item"
+                    class="display flex items-center gap-10 text-3xl whitespace-nowrap sm:text-4xl"
+                >
+                    {{ item }}
+                    <span class="text-brand" aria-hidden="true">✦</span>
+                </span>
+            </Marquee>
+        </div>
     </section>
 </template>

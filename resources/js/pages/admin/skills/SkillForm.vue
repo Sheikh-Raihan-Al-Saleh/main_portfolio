@@ -16,7 +16,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import skills from '@/routes/admin/skills';
-import type { Skill } from '@/types';
+import type { SelectOption, Skill } from '@/types';
 
 /**
  * The skill form. Renders as a card on its own page, or as the body of a
@@ -24,7 +24,8 @@ import type { Skill } from '@/types';
  */
 type Props = {
     skill?: Skill;
-    categories: Record<string, string>;
+    /** The founder's skill categories. */
+    categoryOptions: SelectOption<number>[];
     action: Record<string, unknown>;
     submitLabel: string;
     mode?: 'page' | 'dialog';
@@ -79,25 +80,31 @@ const level = ref(props.skill?.proficiency ?? 75);
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="category">Category</Label>
+                    <Label for="skill_category_id">Category</Label>
                     <Select
-                        name="category"
-                        :default-value="skill?.category ?? 'language'"
+                        name="skill_category_id"
+                        :default-value="
+                            String(
+                                skill?.skill_category_id ??
+                                    categoryOptions[0]?.value ??
+                                    '',
+                            )
+                        "
                     >
-                        <SelectTrigger id="category">
+                        <SelectTrigger id="skill_category_id">
                             <SelectValue placeholder="Pick a category" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem
-                                v-for="(label, key) in categories"
-                                :key="key"
-                                :value="key"
+                                v-for="option in categoryOptions"
+                                :key="option.value"
+                                :value="String(option.value)"
                             >
-                                {{ label }}
+                                {{ option.label }}
                             </SelectItem>
                         </SelectContent>
                     </Select>
-                    <InputError :message="errors.category" />
+                    <InputError :message="errors.skill_category_id" />
                 </div>
             </FieldGroup>
 
@@ -123,7 +130,7 @@ const level = ref(props.skill?.proficiency ?? 75);
                             aria-hidden="true"
                         >
                             <div
-                                class="h-full rounded-full bg-gradient-to-r from-[var(--grad-from)] to-[var(--grad-to)] transition-[width] duration-300"
+                                class="h-full rounded-full bg-brand transition-[width] duration-300"
                                 :style="{
                                     width: `${Math.max(0, Math.min(100, Number(level) || 0))}%`,
                                 }"

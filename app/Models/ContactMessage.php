@@ -8,10 +8,15 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
 /**
+ * An enquiry from a public contact form.
+ *
  * @property int $id
+ * @property string|null $recipient_type
+ * @property int|null $recipient_id
  * @property string $name
  * @property string $email
  * @property string|null $subject
@@ -28,11 +33,14 @@ class ContactMessage extends Model
     /** @use HasFactory<ContactMessageFactory> */
     use HasFactory;
 
-    public function markAsRead(): void
+    /**
+     * The studio or founder site the message was sent from.
+     *
+     * @return MorphTo<Model, $this>
+     */
+    public function recipient(): MorphTo
     {
-        if ($this->read_at === null) {
-            $this->forceFill(['read_at' => now()])->save();
-        }
+        return $this->morphTo();
     }
 
     public function isRead(): bool

@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Models\Skill;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class SkillRequest extends FormRequest
 {
@@ -14,17 +12,19 @@ class SkillRequest extends FormRequest
     }
 
     /**
+     * The category is checked against the founder's own categories in
+     * SkillService, so only the shape is validated here.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
     {
         return [
+            'skill_category_id' => ['required', 'integer'],
             'name' => ['required', 'string', 'max:80'],
-            'category' => ['required', 'string', Rule::in(array_keys(Skill::categories()))],
             'proficiency' => ['required', 'integer', 'min:0', 'max:100'],
-            'icon' => ['nullable', 'string', 'max:80'],
+            'icon' => ['nullable', 'string', 'max:40'],
             'is_featured' => ['boolean'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
         ];
     }
 

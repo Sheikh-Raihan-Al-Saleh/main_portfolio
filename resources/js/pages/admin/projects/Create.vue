@@ -3,11 +3,12 @@ import { Head } from '@inertiajs/vue3';
 import ProjectController from '@/actions/App/Http/Controllers/Admin/ProjectController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import projects from '@/routes/admin/projects';
+import type { SelectOption } from '@/types';
 import ProjectForm from './ProjectForm.vue';
 
 type Props = {
-    /** `ProjectContext::options()`, for the context select. */
-    contexts: { value: string; label: string }[];
+    owners: SelectOption[];
+    technologyOptions: string[];
 };
 
 defineProps<Props>();
@@ -33,7 +34,8 @@ defineOptions({
 
         <ProjectForm
             :action="ProjectController.store.form()"
-            :contexts="contexts"
+            :owners="owners"
+            :technology-options="technologyOptions"
             submit-label="Create project"
         />
     </div>

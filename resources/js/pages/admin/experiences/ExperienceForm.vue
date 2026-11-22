@@ -166,7 +166,11 @@ function dateValue(value: string | null | undefined): string {
                     <Label>Highlights</Label>
                     <TagInput
                         name="highlights"
-                        :model-value="experience?.highlights"
+                        :model-value="
+                            experience?.highlights.map(
+                                (highlight) => highlight.body,
+                            )
+                        "
                         placeholder="One achievement per entry, press Enter to add"
                     />
                     <p class="text-xs text-muted-foreground">

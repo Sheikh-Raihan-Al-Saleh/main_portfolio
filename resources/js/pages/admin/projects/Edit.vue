@@ -5,15 +5,13 @@ import ProjectController from '@/actions/App/Http/Controllers/Admin/ProjectContr
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import { Button } from '@/components/ui/button';
 import projects from '@/routes/admin/projects';
-import type { Project } from '@/types';
+import type { Project, SelectOption } from '@/types';
 import ProjectForm from './ProjectForm.vue';
 
 type Props = {
     project: Project;
-    /** `ProjectContext::options()`, for the context select. */
-    contexts: { value: string; label: string }[];
-    /** Stored gallery paths with their URLs, for per-image removal. */
-    galleryItems: { path: string; url: string }[];
+    owners: SelectOption[];
+    technologyOptions: string[];
 };
 
 defineProps<Props>();
@@ -52,8 +50,8 @@ defineOptions({
         <ProjectForm
             :project="project"
             :action="ProjectController.update.form(project.slug)"
-            :contexts="contexts"
-            :gallery-items="galleryItems"
+            :owners="owners"
+            :technology-options="technologyOptions"
             submit-label="Save changes"
         />
     </div>

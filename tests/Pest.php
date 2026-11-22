@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -81,4 +82,12 @@ function requiresSsr(): void
     if (! ssrIsAvailable()) {
         test()->markTestSkipped('Needs an Inertia SSR renderer: run `npm run dev` or `php artisan inertia:start-ssr`.');
     }
+}
+
+/**
+ * A signed-in admin user, for admin panel tests.
+ */
+function admin(): User
+{
+    return User::factory()->create(['is_admin' => true]);
 }
