@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\SkillRequest;
 use App\Models\Skill;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -70,9 +71,11 @@ class SkillController extends Controller
             'ids.*' => ['integer', 'exists:skills,id'],
         ]);
 
-        foreach ($validated['ids'] as $position => $id) {
-            Skill::query()->whereKey($id)->update(['sort_order' => $position]);
-        }
+        DB::transaction(function () use ($validated): void {
+            foreach ($validated['ids'] as $position => $id) {
+                Skill::query()->whereKey($id)->update(['sort_order' => $position]);
+            }
+        });
 
         return back();
     }

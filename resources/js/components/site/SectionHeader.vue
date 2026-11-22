@@ -4,8 +4,13 @@ import Reveal from '@/components/site/Reveal.vue';
 import { cn } from '@/lib/utils';
 
 /**
- * The heading every public section opens with: an eyebrow pill, a title
- * whose highlighted phrase carries the face's gradient, and a short lead.
+ * The editorial heading every public section opens with.
+ *
+ * Full width (the default, `align="center"` for backwards compatibility): a
+ * hairline, the chapter label "(01) — Eyebrow" in a narrow left column, and
+ * a giant condensed title with its lead in the wide column beside it.
+ * `align="left"` stacks the same parts for use inside a half-width column.
+ * The highlighted phrase takes the face's accent.
  */
 type Props = {
     eyebrow?: string;
@@ -13,6 +18,8 @@ type Props = {
     highlight?: string;
     description?: string;
     align?: 'center' | 'left';
+    /** Chapter number shown before the eyebrow, e.g. "01". */
+    index?: string;
     class?: string;
 };
 
@@ -21,6 +28,7 @@ const props = withDefaults(defineProps<Props>(), {
     highlight: '',
     description: '',
     align: 'center',
+    index: '',
     class: undefined,
 });
 
@@ -39,40 +47,57 @@ const parts = computed<{ text: string; mark: boolean }[]>(() => {
         { text: rest.join(highlight), mark: false },
     ].filter((part) => part.text.length > 0);
 });
+
+const stacked = computed(() => props.align === 'left');
 </script>
 
 <template>
     <div
         :class="
             cn(
-                'flex max-w-3xl flex-col gap-5',
-                align === 'center'
-                    ? 'mx-auto items-center text-center'
-                    : 'items-start',
+                'grid gap-6 border-t border-border pt-6',
+                stacked ? '' : 'lg:grid-cols-12 lg:gap-8',
                 props.class,
             )
         "
     >
-        <Reveal v-if="eyebrow">
-            <span class="ui-eyebrow">{{ eyebrow }}</span>
-        </Reveal>
-        <Reveal :delay="0.05">
-            <h2 class="ui-display ui-h2">
-                <template v-for="(part, i) in parts" :key="i">
-                    <span v-if="part.mark" class="text-gradient">{{
-                        part.text
-                    }}</span>
-                    <template v-else>{{ part.text }}</template>
-                </template>
-            </h2>
-        </Reveal>
-        <Reveal v-if="description" :delay="0.1">
-            <p
-                class="text-lg leading-relaxed text-pretty text-muted-foreground"
-            >
-                {{ description }}
+        <Reveal v-if="eyebrow || index" :class="stacked ? '' : 'lg:col-span-3'">
+            <p class="ui-label flex flex-wrap items-center gap-2">
+                <span v-if="index" class="text-muted-foreground"
+                    >({{ index }})</span
+                >
+                <span v-if="index && eyebrow" aria-hidden="true">—</span>
+                <span v-if="eyebrow">{{ eyebrow }}</span>
             </p>
         </Reveal>
-        <slot />
+
+        <div
+            :class="
+                cn(
+                    'flex flex-col gap-6',
+                    stacked ? '' : 'lg:col-span-9',
+                    !eyebrow && !index && !stacked && 'lg:col-start-4',
+                )
+            "
+        >
+            <Reveal :delay="0.05">
+                <h2 class="ui-display ui-h2">
+                    <template v-for="(part, i) in parts" :key="i">
+                        <span v-if="part.mark" class="ui-accent">{{
+                            part.text
+                        }}</span>
+                        <template v-else>{{ part.text }}</template>
+                    </template>
+                </h2>
+            </Reveal>
+            <Reveal v-if="description" :delay="0.1">
+                <p
+                    class="max-w-xl text-lg leading-relaxed text-pretty text-muted-foreground"
+                >
+                    {{ description }}
+                </p>
+            </Reveal>
+            <slot />
+        </div>
     </div>
 </template>

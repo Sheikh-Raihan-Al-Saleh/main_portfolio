@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\Project;
 use App\Models\User;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Fortify\Features;
 
 test('login screen can be rendered', function () {
@@ -74,4 +76,36 @@ test('users are rate limited', function () {
     ]);
 
     $response->assertTooManyRequests();
+});
+
+test('the login screen showcases up to three published project covers', function () {
+    Storage::fake('uploads');
+
+    foreach (range(1, 4) as $i) {
+        Storage::disk('uploads')->put("projects/cover-{$i}.png", 'x');
+        Project::factory()->create(['cover_image_path' => "projects/cover-{$i}.png"]);
+    }
+
+    // Drafts and projects without a cover never reach the sign-in page.
+    Project::factory()->draft()->create(['cover_image_path' => 'projects/cover-1.png']);
+    Project::factory()->create(['cover_image_path' => null]);
+
+    $this->get(route('login'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('auth/Login')
+            ->has('showcase', 3)
+            ->has('showcase.0', fn ($item) => $item
+                ->whereType('title', 'string')
+                ->where('cover', fn (string $url) => str_contains($url, 'uploads/projects/cover-')),
+            ),
+        );
+});
+
+test('the login screen showcase is empty when no project has a cover', function () {
+    Project::factory()->create(['cover_image_path' => null]);
+
+    $this->get(route('login'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->has('showcase', 0));
 });

@@ -7,11 +7,15 @@ import { resolveIcon } from '@/lib/iconResolver';
 import type { Company } from '@/types';
 
 /**
- * What the studio builds: a grid of capability cards, then the four-layer
- * stack drawn as layered slabs beside its explanation.
+ * What the studio builds, as a numbered editorial list: a giant number, the
+ * capability in condensed type, then its summary and stack, each row on a
+ * hairline that fills with the accent on hover. Then the four-layer stack as
+ * a printed spec table beside its explanation.
  */
 type Props = {
     company: Company;
+    /** Chapter number for the section header, e.g. "01". */
+    index?: string;
 };
 
 const props = defineProps<Props>();
@@ -23,107 +27,122 @@ const content = useStudioContent(props.company, 'capabilities');
     <section id="capabilities" class="site-section scroll-mt-24">
         <div class="site-container">
             <SectionHeader
+                :index="index"
                 :eyebrow="content.eyebrow"
                 :title="content.title"
                 :highlight="content.highlight"
                 :description="content.description"
             />
 
-            <div class="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                <Reveal
+            <ol class="mt-16 border-t border-border">
+                <li
                     v-for="(item, i) in content.items ?? []"
                     :key="item.title"
-                    :delay="(i % 3) * 0.08"
+                    class="group relative border-b border-border"
                 >
-                    <article
-                        class="group ui-card ui-card-hover flex h-full flex-col gap-4 p-7"
+                    <Reveal
+                        :delay="0.04"
+                        class="grid gap-4 py-8 sm:py-10 lg:grid-cols-12 lg:items-start lg:gap-8"
                     >
+                        <!-- Accent wash that rises on hover -->
                         <span
-                            class="ui-icon-tile transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6"
+                            class="pointer-events-none absolute inset-0 origin-bottom scale-y-0 bg-[var(--accent-fill)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-y-100"
+                            aria-hidden="true"
+                        />
+
+                        <span
+                            class="ui-display relative text-6xl text-muted-foreground transition-colors duration-500 group-hover:text-[var(--accent-ink)] sm:text-7xl lg:col-span-2"
+                            >{{ String(i + 1).padStart(2, '0') }}</span
+                        >
+
+                        <div
+                            class="relative flex items-start gap-4 lg:col-span-5"
                         >
                             <component
                                 :is="resolveIcon(item.icon)"
-                                class="size-5"
+                                class="mt-2 size-6 shrink-0 transition-colors duration-500 group-hover:text-[var(--accent-ink)]"
                                 aria-hidden="true"
                             />
-                        </span>
-                        <h3 class="ui-h3">{{ item.title }}</h3>
-                        <p
-                            class="text-sm leading-relaxed text-muted-foreground"
-                        >
-                            {{ item.summary }}
-                        </p>
-                        <ul
-                            v-if="item.tech?.length"
-                            class="mt-auto flex flex-wrap gap-1.5 pt-2"
-                        >
-                            <li
-                                v-for="tech in item.tech"
-                                :key="tech"
-                                class="ui-pill"
+                            <h3
+                                class="ui-display text-[clamp(2.25rem,4.5vw,4rem)] transition-colors duration-500 group-hover:text-[var(--accent-ink)]"
                             >
-                                {{ tech }}
-                            </li>
-                        </ul>
-                    </article>
-                </Reveal>
-            </div>
+                                {{ item.title }}
+                            </h3>
+                        </div>
 
-            <!-- The stack -->
-            <Reveal v-if="content.stack?.length" class="mt-20">
-                <div
-                    class="ui-card grid gap-10 overflow-hidden p-8 lg:grid-cols-2 lg:items-center lg:p-12"
-                >
-                    <div class="flex flex-col gap-5">
-                        <span v-if="content.kicker" class="ui-eyebrow w-fit">{{
-                            content.kicker
+                        <div class="relative flex flex-col gap-4 lg:col-span-5">
+                            <p
+                                class="text-lg leading-relaxed text-muted-foreground transition-colors duration-500 group-hover:text-[var(--accent-ink)]"
+                            >
+                                {{ item.summary }}
+                            </p>
+                            <ul
+                                v-if="item.tech?.length"
+                                class="flex flex-wrap gap-1.5"
+                            >
+                                <li
+                                    v-for="tech in item.tech"
+                                    :key="tech"
+                                    class="ui-pill transition-colors duration-500 group-hover:border-[var(--accent-ink)]/40 group-hover:text-[var(--accent-ink)]"
+                                >
+                                    {{ tech }}
+                                </li>
+                            </ul>
+                        </div>
+                    </Reveal>
+                </li>
+            </ol>
+
+            <!-- The stack, as a spec table -->
+            <Reveal
+                v-if="content.stack?.length"
+                class="mt-24 grid gap-10 lg:grid-cols-12"
+            >
+                <div class="flex flex-col gap-6 lg:col-span-5">
+                    <span v-if="content.kicker" class="ui-eyebrow">{{
+                        content.kicker
+                    }}</span>
+                    <h3 class="ui-display text-[clamp(2.5rem,5vw,4.5rem)]">
+                        {{ content.stack_heading }}
+                    </h3>
+                    <p class="text-lg leading-relaxed text-muted-foreground">
+                        {{ content.stack_intro }}
+                    </p>
+                    <a
+                        v-if="content.footer_link"
+                        href="#contact"
+                        class="inline-flex flex-wrap items-center gap-x-2"
+                    >
+                        <span class="text-muted-foreground">{{
+                            content.footer_note
                         }}</span>
-                        <h3 class="ui-display text-3xl sm:text-4xl">
-                            {{ content.stack_heading }}
-                        </h3>
-                        <p class="leading-relaxed text-muted-foreground">
-                            {{ content.stack_intro }}
-                        </p>
-                        <a
-                            v-if="content.footer_link"
-                            href="#contact"
-                            class="inline-flex flex-wrap items-center gap-x-2 text-sm"
-                        >
-                            <span class="text-muted-foreground">{{
-                                content.footer_note
-                            }}</span>
-                            <span class="ui-link font-semibold text-brand">{{
-                                content.footer_link
-                            }}</span>
-                            <ArrowRight class="size-4 text-brand" />
-                        </a>
-                    </div>
-
-                    <ol class="flex flex-col gap-3 [perspective:1200px]">
-                        <li
-                            v-for="(layer, i) in [...content.stack].reverse()"
-                            :key="layer.label"
-                            class="flex items-center justify-between gap-4 rounded-2xl border border-border bg-background px-5 py-4 shadow-[var(--shadow-soft)] transition-transform duration-500 hover:-translate-y-1 lg:[transform:rotateX(14deg)]"
-                            :style="{
-                                marginInline: `${(content.stack.length - 1 - i) * 4}%`,
-                            }"
-                        >
-                            <span class="flex items-center gap-3">
-                                <span
-                                    class="size-2.5 rounded-full bg-gradient-to-br from-[var(--grad-from)] to-[var(--grad-to)]"
-                                    :style="{ opacity: 1 - i * 0.18 }"
-                                />
-                                <span class="font-semibold">{{
-                                    layer.label
-                                }}</span>
-                            </span>
-                            <span
-                                class="text-right text-xs text-muted-foreground"
-                                >{{ layer.meta }}</span
-                            >
-                        </li>
-                    </ol>
+                        <span class="ui-link ui-accent font-semibold">{{
+                            content.footer_link
+                        }}</span>
+                        <ArrowRight class="size-4" />
+                    </a>
                 </div>
+
+                <ol
+                    class="border-t border-foreground lg:col-span-6 lg:col-start-7"
+                >
+                    <li
+                        v-for="(layer, i) in [...content.stack].reverse()"
+                        :key="layer.label"
+                        class="grid grid-cols-[auto_1fr_auto] items-baseline gap-6 border-b border-border py-5"
+                    >
+                        <span class="ui-label text-muted-foreground"
+                            >L{{ content.stack.length - i }}</span
+                        >
+                        <span class="text-xl font-semibold tracking-tight">{{
+                            layer.label
+                        }}</span>
+                        <span
+                            class="ui-label text-right text-muted-foreground"
+                            >{{ layer.meta }}</span
+                        >
+                    </li>
+                </ol>
             </Reveal>
         </div>
     </section>

@@ -87,6 +87,28 @@ class ProjectLandingPage extends Model
         return $this->hasMany(LandingSection::class, 'landing_page_id');
     }
 
+    /**
+     * Every uploaded file this page owns: its hero slots, OG image and the
+     * media inside its sections. Sections cascade at the database level, but
+     * files on disk do not, so whoever deletes the page deletes these too.
+     *
+     * @return array<int, string>
+     */
+    public function mediaPaths(): array
+    {
+        $paths = [
+            $this->hero_media_path,
+            ...array_values($this->hero_media_paths ?? []),
+            $this->og_image_path,
+            ...$this->sections->flatMap(fn (LandingSection $section): array => $section->mediaPaths()),
+        ];
+
+        return array_values(array_unique(array_filter(
+            $paths,
+            fn (mixed $path): bool => is_string($path) && $path !== '',
+        )));
+    }
+
     protected function getHeroMediaUrlAttribute(): ?string
     {
         return $this->mediaUrl($this->hero_media_path);
@@ -106,9 +128,10 @@ class ProjectLandingPage extends Model
             $paths = [$this->hero_media_path];
         }
 
-        // array_values keeps this a JSON list even when a slot is filtered out.
+        // Slots are positional and may hold null for an empty slot; the public
+        // hero only wants the images that exist, as a JSON list.
         return array_values(array_filter(
-            array_map(fn (string $path) => $this->mediaUrl($path), $paths),
+            array_map(fn (?string $path): ?string => $this->mediaUrl($path), $paths),
             fn (?string $url): bool => $url !== null,
         ));
     }

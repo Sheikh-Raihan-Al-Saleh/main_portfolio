@@ -125,7 +125,64 @@ test('replacing hero slot 0 clears the legacy hero path that shared its file', f
     $landingPage = ProjectLandingPage::sole();
 
     expect($landingPage->hero_media_path)->toBeNull()
-        ->and($landingPage->hero_media_paths)->toHaveCount(1);
+        ->and(array_filter($landingPage->hero_media_paths))->toHaveCount(1);
     Storage::disk('uploads')->assertMissing('landing/hero/legacy.png');
     Storage::disk('uploads')->assertExists($landingPage->hero_media_paths[0]);
+});
+
+test('hero slots keep their positions when an earlier slot is empty', function () {
+    Storage::fake('uploads');
+
+    $this->actingAs($this->admin)
+        ->post("/admin/projects/{$this->project->slug}/landing", [
+            'headline' => 'Test',
+            'hero_media_paths' => [0 => UploadedFile::fake()->image('desktop.jpg'), 2 => UploadedFile::fake()->image('phone.jpg')],
+        ])
+        ->assertRedirect();
+
+    $paths = ProjectLandingPage::sole()->hero_media_paths;
+
+    // The phone image stays in the phone slot instead of sliding into slot 1.
+    expect($paths)->toHaveCount(3)
+        ->and($paths[0])->not->toBeNull()
+        ->and($paths[1])->toBeNull()
+        ->and($paths[2])->not->toBeNull();
+});
+
+test('a hero slot can be cleared on its own', function () {
+    Storage::fake('uploads');
+    Storage::disk('uploads')->put('landing/hero/a.png', 'x');
+    Storage::disk('uploads')->put('landing/hero/b.png', 'x');
+
+    ProjectLandingPage::factory()->for($this->project)->create([
+        'hero_media_path' => null,
+        'hero_media_paths' => ['landing/hero/a.png', 'landing/hero/b.png', null],
+    ]);
+
+    $this->actingAs($this->admin)
+        ->post("/admin/projects/{$this->project->slug}/landing", [
+            'headline' => 'Test',
+            'remove_hero_media_slots' => [0 => 0, 1 => 1, 2 => 0],
+        ])
+        ->assertRedirect();
+
+    expect(ProjectLandingPage::sole()->hero_media_paths)->toBe(['landing/hero/a.png', null, null]);
+    Storage::disk('uploads')->assertExists('landing/hero/a.png');
+    Storage::disk('uploads')->assertMissing('landing/hero/b.png');
+});
+
+test('saving without touching the slots leaves them alone', function () {
+    ProjectLandingPage::factory()->for($this->project)->create([
+        'hero_media_paths' => ['landing/hero/a.png', null, 'landing/hero/c.png'],
+    ]);
+
+    $this->actingAs($this->admin)
+        ->post("/admin/projects/{$this->project->slug}/landing", [
+            'headline' => 'Renamed',
+            'remove_hero_media_slots' => [0, 0, 0],
+        ])
+        ->assertRedirect();
+
+    expect(ProjectLandingPage::sole()->hero_media_paths)
+        ->toBe(['landing/hero/a.png', null, 'landing/hero/c.png']);
 });

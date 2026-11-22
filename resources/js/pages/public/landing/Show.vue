@@ -4,7 +4,8 @@ import { ArrowLeft, ArrowUpRight } from '@lucide/vue';
 import { computed } from 'vue';
 import HeroDevicesCarousel from '@/components/landing/HeroDevicesCarousel.vue';
 import SectionList from '@/components/landing/SectionList.vue';
-import CircuitBackground from '@/components/site/CircuitBackground.vue';
+import HeroHeadline from '@/components/site/HeroHeadline.vue';
+import LiquidBlob from '@/components/site/LiquidBlob.vue';
 import { useScrollSpy } from '@/composables/useScrollSpy';
 import { cn } from '@/lib/utils';
 import type {
@@ -74,6 +75,22 @@ function anchorFor(section: LandingSection) {
     return `section-${section.id}`;
 }
 
+/** The facts the spec sheet beside the headline can state, blanks dropped. */
+const specs = computed(() => {
+    const start = props.project.started_at?.slice(0, 4) ?? null;
+    const end = props.project.completed_at?.slice(0, 4) ?? null;
+    const timeline =
+        start && end && start !== end ? `${start} — ${end}` : (end ?? start);
+
+    return [
+        { label: 'Role', value: props.project.role },
+        { label: 'Timeline', value: timeline },
+        { label: 'Type', value: isPersonal.value ? 'Personal' : 'Client work' },
+    ].filter((spec): spec is { label: string; value: string } =>
+        Boolean(spec.value),
+    );
+});
+
 const backHref = computed(() =>
     isPersonal.value ? '/founder#projects' : '/projects',
 );
@@ -102,88 +119,135 @@ const backHref = computed(() =>
 
     <div :style="accentStyle">
         <!-- Hero -->
-        <section class="relative overflow-hidden pt-32 lg:pt-40">
-            <div
-                class="pointer-events-none absolute inset-x-0 top-0 h-[40rem]"
-                aria-hidden="true"
-            >
-                <CircuitBackground />
-                <div class="ui-blob ui-blob-a -top-32 left-1/4 size-[30rem]" />
-                <div class="ui-blob ui-blob-b -top-10 right-1/4 size-[24rem]" />
-            </div>
+        <section class="relative overflow-hidden pt-36 pb-10 lg:pt-44">
+            <!-- The project's liquid shape, in the face's accent -->
+            <LiquidBlob
+                class="absolute top-24 right-[-15%] h-[34rem] w-[80%] sm:right-[-6%] lg:w-[50%]"
+            />
 
-            <div
-                class="site-container relative flex flex-col items-center text-center"
-            >
+            <div class="site-container relative">
                 <Link
                     :href="backHref"
-                    class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+                    class="inline-flex items-center gap-2 font-mono text-xs tracking-wider text-muted-foreground uppercase hover:text-foreground"
                 >
                     <ArrowLeft class="size-4" />
                     {{ isPersonal ? 'Back to portfolio' : 'All projects' }}
                 </Link>
 
-                <span v-if="landingPage.eyebrow" class="ui-eyebrow mt-8">{{
-                    landingPage.eyebrow
-                }}</span>
-
-                <h1 class="ui-display ui-h1 mt-5 max-w-4xl">{{ headline }}</h1>
-
-                <p
-                    v-if="subheadline"
-                    class="mt-6 max-w-2xl text-lg leading-relaxed text-pretty text-muted-foreground sm:text-xl"
+                <div
+                    class="mt-10 grid items-end gap-12 lg:grid-cols-12 lg:gap-10"
                 >
-                    {{ subheadline }}
-                </p>
+                    <div class="flex flex-col items-start gap-7 lg:col-span-8">
+                        <span v-if="landingPage.eyebrow" class="ui-eyebrow">{{
+                            landingPage.eyebrow
+                        }}</span>
 
-                <ul
-                    v-if="project.tech_stack?.length"
-                    class="mt-6 flex flex-wrap justify-center gap-1.5"
-                >
-                    <li
-                        v-for="tech in project.tech_stack.slice(0, 8)"
-                        :key="tech"
-                        class="ui-pill"
-                    >
-                        {{ tech }}
-                    </li>
-                </ul>
+                        <HeroHeadline
+                            :text="headline"
+                            :highlight="2"
+                            :delay="80"
+                            class="ui-h1"
+                        />
 
-                <div class="mt-8 flex flex-wrap justify-center gap-3">
-                    <a
-                        v-if="landingPage.primary_cta_url"
-                        :href="landingPage.primary_cta_url"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="ui-btn ui-btn-primary"
+                        <p
+                            v-if="subheadline"
+                            class="max-w-2xl text-lg leading-relaxed text-pretty text-muted-foreground sm:text-xl"
+                        >
+                            {{ subheadline }}
+                        </p>
+
+                        <div class="flex flex-wrap gap-3">
+                            <a
+                                v-if="landingPage.primary_cta_url"
+                                :href="landingPage.primary_cta_url"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="ui-btn ui-btn-primary"
+                            >
+                                {{
+                                    landingPage.primary_cta_label ?? 'View live'
+                                }}
+                                <ArrowUpRight class="size-4" />
+                            </a>
+                            <a
+                                v-if="landingPage.secondary_cta_url"
+                                :href="landingPage.secondary_cta_url"
+                                class="ui-btn ui-btn-secondary"
+                            >
+                                {{
+                                    landingPage.secondary_cta_label ??
+                                    'Get in touch'
+                                }}
+                            </a>
+                            <a
+                                v-if="
+                                    !landingPage.primary_cta_url &&
+                                    !landingPage.secondary_cta_url
+                                "
+                                :href="
+                                    isPersonal
+                                        ? '/founder#contact'
+                                        : '/#contact'
+                                "
+                                class="ui-btn ui-btn-primary"
+                            >
+                                Start a project
+                                <ArrowUpRight class="size-4" />
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Project spec sheet -->
+                    <dl
+                        v-if="specs.length || project.tech_stack?.length"
+                        class="ui-card grid gap-5 p-6 font-mono text-sm lg:col-span-4"
                     >
-                        {{ landingPage.primary_cta_label ?? 'View live' }}
-                        <ArrowUpRight class="size-4" />
-                    </a>
-                    <a
-                        v-if="landingPage.secondary_cta_url"
-                        :href="landingPage.secondary_cta_url"
-                        class="ui-btn ui-btn-secondary"
-                    >
-                        {{ landingPage.secondary_cta_label ?? 'Get in touch' }}
-                    </a>
-                    <a
-                        v-if="
-                            !landingPage.primary_cta_url &&
-                            !landingPage.secondary_cta_url
-                        "
-                        :href="isPersonal ? '/founder#contact' : '/#contact'"
-                        class="ui-btn ui-btn-primary"
-                    >
-                        Start a project
-                        <ArrowUpRight class="size-4" />
-                    </a>
+                        <div
+                            v-for="spec in specs"
+                            :key="spec.label"
+                            class="flex items-baseline justify-between gap-4 border-b border-border pb-4"
+                        >
+                            <dt
+                                class="text-[11px] tracking-wider text-muted-foreground uppercase"
+                            >
+                                {{ spec.label }}
+                            </dt>
+                            <dd class="text-right font-semibold">
+                                {{ spec.value }}
+                            </dd>
+                        </div>
+                        <div v-if="project.tech_stack?.length">
+                            <dt
+                                class="text-[11px] tracking-wider text-muted-foreground uppercase"
+                            >
+                                Stack
+                            </dt>
+                            <dd class="mt-3 flex flex-wrap gap-1.5">
+                                <span
+                                    v-for="tech in project.tech_stack.slice(
+                                        0,
+                                        10,
+                                    )"
+                                    :key="tech"
+                                    class="ui-pill"
+                                    >{{ tech }}</span
+                                >
+                            </dd>
+                        </div>
+                    </dl>
                 </div>
 
-                <div class="mt-14 w-full sm:mt-20">
-                    <HeroDevicesCarousel
-                        :images="landingPage.hero_media_urls ?? []"
+                <!-- The device stage -->
+                <div class="relative mt-16 sm:mt-20">
+                    <div
+                        class="absolute inset-x-[10%] top-1/4 bottom-0 rounded-full bg-gradient-to-r from-[var(--scene-1)] via-[var(--scene-3)] to-[var(--scene-2)] opacity-20 blur-3xl"
+                        aria-hidden="true"
                     />
+                    <div class="relative">
+                        <HeroDevicesCarousel
+                            :images="landingPage.hero_media_urls ?? []"
+                        />
+                    </div>
                 </div>
             </div>
         </section>

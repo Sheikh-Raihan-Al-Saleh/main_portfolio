@@ -1,19 +1,25 @@
 /* ═══════════════════════════════════════════════════════════
-   PUBLIC SITE DESIGN LAYER
+   PUBLIC SITE DESIGN LAYER — "bold editorial"
    ═══════════════════════════════════════════════════════════
-   One clean, light design system shared by both public faces,
-   each with its own accent:
+   Ink on paper, oversized condensed headlines, mono labels and
+   one vivid accent per face:
 
-   - [data-site='studio']  — the company. Indigo → violet.
-   - [data-site='founder'] — the founder's portfolio. Emerald → cyan.
+   - [data-site='studio']  — the company. Electric blue.
+   - [data-site='founder'] — the founder's portfolio. Lime.
 
-   Both scopes override the shadcn tokens from app.css, so shared
-   components (inputs, the toaster, landing sections) follow the
-   face they are rendered in. The admin panel never sets
-   `data-site`, so it keeps the base tokens.
+   The accent is split into three tokens so it can never turn
+   into unreadable text:
+     --accent-fill  the colour as a surface
+     --accent-ink   text placed on that surface
+     --accent-text  the accent used as text on the page itself
+   Lime fails as text on paper, so in light mode the founder's
+   --accent-text is ink and lime appears as a marker behind it.
 
-   Motion rules: transform/opacity only, and every loop is
-   switched off under reduced motion at the bottom of the file. */
+   The tokens override the shadcn ones from app.css, so shared
+   components follow the face they are rendered in. The admin
+   panel sets data-site='admin' and keeps its own block below.
+
+   Every loop stops under reduced motion. */
 
 /* Fallbacks so the extra tokens resolve outside the public site too. */
 :root {
@@ -22,9 +28,10 @@
     --line: var(--border);
     --grad-from: var(--brand);
     --grad-to: var(--brand-accent);
+    --btn-to: var(--grad-to);
 }
 
-/* ── Shared neutrals ───────────────────────────────────── */
+/* ── Neutrals (admin panel and fallback) ───────────────── */
 
 [data-site] {
     --background: #fafafa;
@@ -72,56 +79,118 @@
     --shadow-color: 0 0% 0%;
 }
 
-/* ── Studio accent ─────────────────────────────────────── */
+/* ── Public: ink on paper ──────────────────────────────── */
+
+:is([data-site='studio'], [data-site='founder']) {
+    --paper: #f2f0ea;
+    --ink: #0b0b0b;
+
+    --background: #f2f0ea;
+    --foreground: #0b0b0b;
+    --card: #f7f5f0;
+    --card-foreground: #0b0b0b;
+    --popover: #f7f5f0;
+    --popover-foreground: #0b0b0b;
+    --primary: #0b0b0b;
+    --primary-foreground: #f2f0ea;
+    --secondary: #e8e5dd;
+    --secondary-foreground: #0b0b0b;
+    --muted: #e8e5dd;
+    --muted-foreground: #55524c;
+    --accent: #e8e5dd;
+    --accent-foreground: #0b0b0b;
+    --border: rgb(11 11 11 / 0.14);
+    --input: rgb(11 11 11 / 0.2);
+    --line: rgb(11 11 11 / 0.08);
+    --ring: #0b0b0b;
+    --shadow-color: 40 10% 10%;
+    --grid-line: rgb(11 11 11 / 0.06);
+    --surface-glow: transparent;
+    --status: #15803d;
+}
+
+.dark :is([data-site='studio'], [data-site='founder']) {
+    --background: #0b0b0b;
+    --foreground: #f2f0ea;
+    --card: #131312;
+    --card-foreground: #f2f0ea;
+    --popover: #161615;
+    --popover-foreground: #f2f0ea;
+    --primary: #f2f0ea;
+    --primary-foreground: #0b0b0b;
+    --secondary: #1b1b1a;
+    --secondary-foreground: #f2f0ea;
+    --muted: #1b1b1a;
+    --muted-foreground: #a8a39a;
+    --accent: #1b1b1a;
+    --accent-foreground: #f2f0ea;
+    --border: rgb(242 240 234 / 0.14);
+    --input: rgb(242 240 234 / 0.2);
+    --line: rgb(242 240 234 / 0.08);
+    --ring: #f2f0ea;
+    --shadow-color: 0 0% 0%;
+    --grid-line: rgb(242 240 234 / 0.06);
+    --status: #4ade80;
+}
+
+/* ── Studio accent: electric blue ──────────────────────── */
 
 [data-site='studio'] {
-    --brand: #4f46e5;
-    --brand-accent: #7c3aed;
-    --brand-subtle: #eef2ff;
-    --brand-glow: rgb(99 102 241 / 0.28);
-    --signal: #4f46e5;
-    --ring: #6366f1;
-    --grad-from: #4f46e5;
-    --grad-to: #9333ea;
-    --scene-1: #6366f1;
-    --scene-2: #a855f7;
-    --scene-3: #38bdf8;
+    --accent-fill: #2b4bff;
+    --accent-ink: #ffffff;
+    --accent-text: #2b4bff;
+
+    /* Legacy names other components still read. */
+    --brand: var(--accent-text);
+    --brand-accent: var(--accent-text);
+    --brand-subtle: rgb(43 75 255 / 0.1);
+    --brand-glow: rgb(43 75 255 / 0.3);
+    --brand-foreground: var(--accent-ink);
+    --signal: var(--accent-fill);
+    --signal-foreground: var(--accent-ink);
+    --grad-from: var(--accent-fill);
+    --grad-mid: var(--accent-fill);
+    --grad-to: var(--accent-fill);
+    --btn-to: var(--accent-fill);
+    --scene-1: #2b4bff;
+    --scene-2: #6d83ff;
+    --scene-3: #0b0b0b;
 }
 
 .dark [data-site='studio'] {
-    --brand: #a5b4fc;
-    --brand-accent: #c4b5fd;
-    --brand-subtle: rgb(99 102 241 / 0.14);
-    --brand-glow: rgb(129 140 248 / 0.35);
-    --signal: #6366f1;
-    --grad-from: #818cf8;
-    --grad-to: #c084fc;
+    --accent-text: #8193ff;
+    --brand-subtle: rgb(129 147 255 / 0.12);
+    --scene-3: #f2f0ea;
 }
 
-/* ── Founder accent ────────────────────────────────────── */
+/* ── Founder accent: lime ──────────────────────────────── */
 
 [data-site='founder'] {
-    --brand: #047857;
-    --brand-accent: #0891b2;
-    --brand-subtle: #ecfdf5;
-    --brand-glow: rgb(16 185 129 / 0.28);
-    --signal: #059669;
-    --ring: #10b981;
-    --grad-from: #059669;
-    --grad-to: #0891b2;
-    --scene-1: #10b981;
-    --scene-2: #06b6d4;
-    --scene-3: #a3e635;
+    --accent-fill: #d4ff3a;
+    --accent-ink: #0b0b0b;
+    /* Lime fails as text on paper; ink carries it, lime marks it. */
+    --accent-text: #0b0b0b;
+
+    --brand: var(--accent-text);
+    --brand-accent: var(--accent-text);
+    --brand-subtle: rgb(212 255 58 / 0.35);
+    --brand-glow: rgb(150 190 0 / 0.3);
+    --brand-foreground: var(--accent-ink);
+    --signal: var(--accent-fill);
+    --signal-foreground: var(--accent-ink);
+    --grad-from: var(--accent-fill);
+    --grad-mid: var(--accent-fill);
+    --grad-to: var(--accent-fill);
+    --btn-to: var(--accent-fill);
+    --scene-1: #d4ff3a;
+    --scene-2: #a3d10f;
+    --scene-3: #0b0b0b;
 }
 
 .dark [data-site='founder'] {
-    --brand: #6ee7b7;
-    --brand-accent: #67e8f9;
-    --brand-subtle: rgb(16 185 129 / 0.14);
-    --brand-glow: rgb(52 211 153 / 0.35);
-    --signal: #10b981;
-    --grad-from: #34d399;
-    --grad-to: #22d3ee;
+    --accent-text: #d4ff3a;
+    --brand-subtle: rgb(212 255 58 / 0.14);
+    --scene-3: #f2f0ea;
 }
 
 /* ── Admin panel ───────────────────────────────────────── */
@@ -236,7 +305,13 @@
    app.css that the landing sections were first built with. */
 
 [data-site] .card-3d {
-    background: var(--card);
+    background:
+        linear-gradient(
+            180deg,
+            var(--surface-glow, transparent),
+            transparent 40%
+        ),
+        var(--card);
     border-color: var(--border);
     border-radius: 1.25rem;
     box-shadow: var(--shadow-soft);
@@ -268,81 +343,144 @@
 
     .site-container {
         width: 100%;
-        max-width: 80rem;
+        max-width: 96rem;
         margin-inline: auto;
-        padding-inline: 1rem;
+        padding-inline: 1.25rem;
     }
 
     @media (min-width: 640px) {
-        .site-container {
-            padding-inline: 1.5rem;
-        }
-    }
-
-    @media (min-width: 1024px) {
         .site-container {
             padding-inline: 2rem;
         }
     }
 
+    @media (min-width: 1280px) {
+        .site-container {
+            padding-inline: 3rem;
+        }
+    }
+
     .site-section {
         position: relative;
-        padding-block: 5rem;
+        padding-block: 6rem;
     }
 
     @media (min-width: 1024px) {
         .site-section {
-            padding-block: 7rem;
+            padding-block: 9rem;
         }
+    }
+
+    .site-canvas {
+        background-color: var(--background);
+    }
+
+    .ui-grid-bg {
+        background-image: linear-gradient(
+            to right,
+            var(--grid-line) 1px,
+            transparent 1px
+        );
+        background-size: calc(100% / 12) 100%;
+    }
+
+    .ui-band {
+        border-block: 1px solid var(--border);
     }
 
     /* ── Type ──────────────────────────────────────────── */
 
+    /* Condensed poster type. The text keeps its case in the DOM. */
     .ui-display {
-        font-family: var(--font-display);
-        font-weight: 700;
-        letter-spacing: -0.04em;
-        line-height: 1.04;
+        font-family: var(--font-condensed);
+        font-weight: 400;
+        text-transform: uppercase;
+        letter-spacing: -0.005em;
+        line-height: 0.92;
         text-wrap: balance;
     }
 
     .ui-h1 {
-        font-size: clamp(2.5rem, 6vw, 4.75rem);
+        font-size: clamp(3.75rem, 13.5vw, 13rem);
     }
 
     .ui-h2 {
-        font-size: clamp(2rem, 4vw, 3.25rem);
+        font-size: clamp(3rem, 8.5vw, 8rem);
     }
 
     .ui-h3 {
-        font-size: clamp(1.25rem, 2vw, 1.5rem);
-        font-weight: 650;
-        letter-spacing: -0.02em;
-        line-height: 1.25;
+        font-family: var(--font-sans);
+        font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
     }
 
-    .text-gradient {
+    /* Small mono labels: "(01) — SERVICES". */
+    .ui-label {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    /* The accent on a word: coloured on the studio, a marker on the founder. */
+    .text-gradient,
+    .ui-accent {
+        color: var(--accent-text);
+    }
+
+    [data-site='founder'] :is(.text-gradient, .ui-accent) {
         background: linear-gradient(
-            100deg,
-            var(--grad-from) 10%,
-            var(--grad-to) 90%
+            transparent 12%,
+            var(--accent-fill) 12%,
+            var(--accent-fill) 88%,
+            transparent 88%
         );
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
+        color: var(--accent-ink);
+        -webkit-box-decoration-break: clone;
+        box-decoration-break: clone;
+        padding-inline: 0.06em;
+    }
+
+    .dark [data-site='founder'] :is(.text-gradient, .ui-accent) {
+        background: none;
+        color: var(--accent-text);
+        padding-inline: 0;
     }
 
     .ui-eyebrow {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        border: 1px solid color-mix(in oklab, var(--brand) 18%, transparent);
-        border-radius: 9999px;
-        background: var(--brand-subtle);
-        padding: 0.3rem 0.8rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: var(--brand);
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--foreground);
+    }
+
+    .ui-eyebrow::before {
+        content: '';
+        width: 0.55rem;
+        height: 0.55rem;
+        flex: none;
+        background: var(--accent-fill);
+    }
+
+    .ui-eyebrow:has(> .ui-pulse-dot)::before,
+    .ui-eyebrow:has(> span:first-child[class*='rounded-full'])::before {
+        display: none;
+    }
+
+    .ui-index {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        color: var(--muted-foreground);
     }
 
     /* ── Surfaces ──────────────────────────────────────── */
@@ -350,39 +488,33 @@
     .ui-card {
         position: relative;
         border: 1px solid var(--border);
-        border-radius: 1.5rem;
+        border-radius: 0.25rem;
         background: var(--card);
-        box-shadow: var(--shadow-soft);
     }
 
     .ui-card-hover {
-        transition:
-            transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-            box-shadow 0.5s ease,
-            border-color 0.3s ease;
+        transition: border-color 0.25s ease;
     }
 
     .ui-card-hover:hover {
-        transform: translateY(-4px);
-        border-color: color-mix(in oklab, var(--brand) 30%, var(--border));
-        box-shadow: var(--shadow-lift);
+        border-color: var(--foreground);
     }
 
     .ui-glass {
-        border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
-        background: color-mix(in oklab, var(--card) 72%, transparent);
-        -webkit-backdrop-filter: saturate(180%) blur(16px);
-        backdrop-filter: saturate(180%) blur(16px);
+        border: 1px solid var(--border);
+        background: color-mix(in oklab, var(--background) 85%, transparent);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
     }
 
     .ui-icon-tile {
         display: grid;
         place-items: center;
-        width: 2.75rem;
-        height: 2.75rem;
-        border-radius: 0.875rem;
-        background: var(--brand-subtle);
-        color: var(--brand);
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.25rem;
+        background: var(--accent-fill);
+        color: var(--accent-ink);
     }
 
     .ui-pill {
@@ -391,30 +523,21 @@
         gap: 0.375rem;
         border: 1px solid var(--border);
         border-radius: 9999px;
-        background: var(--card);
-        padding: 0.25rem 0.7rem;
-        font-size: 0.75rem;
+        padding: 0.2rem 0.65rem;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
         font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
         color: var(--muted-foreground);
     }
 
-    /* Soft dotted backdrop for hero and band sections. */
     .ui-dots {
         background-image: radial-gradient(
-            color-mix(in oklab, var(--foreground) 9%, transparent) 1px,
+            var(--grid-line) 1px,
             transparent 1px
         );
-        background-size: 22px 22px;
-        -webkit-mask-image: radial-gradient(
-            ellipse at center,
-            black 30%,
-            transparent 75%
-        );
-        mask-image: radial-gradient(
-            ellipse at center,
-            black 30%,
-            transparent 75%
-        );
+        background-size: 18px 18px;
     }
 
     /* ── Buttons ───────────────────────────────────────── */
@@ -424,19 +547,21 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
+        gap: 0.6rem;
+        overflow: hidden;
         border-radius: 9999px;
-        padding: 0.8rem 1.4rem;
-        font-size: 0.9rem;
+        padding: 1rem 1.6rem;
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
         font-weight: 600;
+        letter-spacing: 0.06em;
         line-height: 1;
+        text-transform: uppercase;
         white-space: nowrap;
         transition:
-            transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-            box-shadow 0.3s ease,
-            background-color 0.2s ease,
-            border-color 0.2s ease,
-            color 0.2s ease;
+            background-color 0.25s ease,
+            border-color 0.25s ease,
+            color 0.25s ease;
     }
 
     .ui-btn:focus-visible {
@@ -444,43 +569,48 @@
         outline-offset: 3px;
     }
 
-    .ui-btn:hover {
-        transform: translateY(-1px);
-    }
-
     .ui-btn:disabled {
         pointer-events: none;
-        opacity: 0.6;
+        opacity: 0.5;
     }
 
     .ui-btn-primary {
-        background: linear-gradient(135deg, var(--signal), var(--grad-to));
-        color: var(--signal-foreground);
-        box-shadow:
-            0 1px 0 rgb(255 255 255 / 0.25) inset,
-            0 10px 24px -10px var(--brand-glow);
+        background: var(--accent-fill);
+        color: var(--accent-ink);
     }
 
     .ui-btn-primary:hover {
-        box-shadow:
-            0 1px 0 rgb(255 255 255 / 0.25) inset,
-            0 16px 32px -12px var(--brand-glow);
+        background: var(--foreground);
+        color: var(--background);
     }
 
     .ui-btn-secondary {
-        border: 1px solid var(--border);
-        background: var(--card);
+        border: 1px solid var(--foreground);
         color: var(--foreground);
-        box-shadow: var(--shadow-soft);
     }
 
     .ui-btn-secondary:hover {
-        border-color: color-mix(in oklab, var(--foreground) 25%, var(--border));
+        background: var(--foreground);
+        color: var(--background);
     }
 
     .ui-btn-sm {
-        padding: 0.6rem 1rem;
-        font-size: 0.82rem;
+        padding: 0.7rem 1.1rem;
+        font-size: 0.72rem;
+    }
+
+    /* The arrow inside a button nudges forward on hover. */
+    .ui-btn svg {
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .ui-btn:hover svg {
+        transform: translateX(3px);
+    }
+
+    /* Up-right arrows turn to point straight ahead. */
+    .ui-btn:hover svg.lucide-arrow-up-right {
+        transform: rotate(45deg);
     }
 
     .ui-link {
@@ -488,7 +618,7 @@
         background-size: 0% 1px;
         background-position: 0 100%;
         background-repeat: no-repeat;
-        transition: background-size 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: background-size 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .ui-link:hover,
@@ -497,54 +627,15 @@
         background-size: 100% 1px;
     }
 
-    /* ── Motion graphics ───────────────────────────────── */
+    /* ── Motion ────────────────────────────────────────── */
 
-    /* Soft colour fields drifting behind heroes and bands. */
-    .ui-blob {
-        pointer-events: none;
-        position: absolute;
-        border-radius: 9999px;
-        filter: blur(60px);
-        opacity: 0.55;
-        animation: ui-blob 18s ease-in-out infinite;
-        will-change: transform;
-    }
-
-    .dark .ui-blob {
-        opacity: 0.3;
-    }
-
-    .ui-blob-a {
-        background: radial-gradient(circle, var(--scene-1), transparent 65%);
-    }
-
-    .ui-blob-b {
-        background: radial-gradient(circle, var(--scene-2), transparent 65%);
-        animation-delay: -6s;
-        animation-duration: 22s;
-    }
-
-    .ui-blob-c {
-        background: radial-gradient(circle, var(--scene-3), transparent 65%);
-        animation-delay: -12s;
-        animation-duration: 26s;
-    }
-
-    @keyframes ui-blob {
-        0%,
-        100% {
-            transform: translate3d(0, 0, 0) scale(1);
-        }
-        33% {
-            transform: translate3d(6%, -8%, 0) scale(1.08);
-        }
-        66% {
-            transform: translate3d(-5%, 6%, 0) scale(0.95);
-        }
+    .ui-blob,
+    .ui-scanline {
+        display: none;
     }
 
     .ui-float {
-        animation: ui-float 6s ease-in-out infinite;
+        animation: ui-float 7s ease-in-out infinite;
     }
 
     @keyframes ui-float {
@@ -553,7 +644,7 @@
             transform: translateY(0);
         }
         50% {
-            transform: translateY(-10px);
+            transform: translateY(-6px);
         }
     }
 
@@ -567,67 +658,23 @@
         animation-play-state: paused;
     }
 
-    .ui-marquee-mask {
-        -webkit-mask-image: linear-gradient(
-            to right,
-            transparent,
-            black 10%,
-            black 90%,
-            transparent
-        );
-        mask-image: linear-gradient(
-            to right,
-            transparent,
-            black 10%,
-            black 90%,
-            transparent
-        );
-    }
-
     @keyframes ui-marquee {
         to {
             transform: translateX(-50%);
         }
     }
 
-    /* A slowly rotating conic border, for the one card that should glow. */
+    /* Giant running type band (EditorialMarquee). */
+    .ui-marquee-xl {
+        font-family: var(--font-condensed);
+        font-size: clamp(3rem, 9vw, 8rem);
+        line-height: 1;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
     .ui-glow-border {
         position: relative;
-        isolation: isolate;
-    }
-
-    .ui-glow-border::before {
-        content: '';
-        position: absolute;
-        inset: -1px;
-        z-index: -1;
-        border-radius: inherit;
-        padding: 1px;
-        background: conic-gradient(
-            from var(--glow-angle, 0deg),
-            var(--grad-from),
-            var(--grad-to),
-            transparent 40%,
-            var(--grad-from)
-        );
-        -webkit-mask:
-            linear-gradient(#000 0 0) content-box,
-            linear-gradient(#000 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        animation: ui-glow-spin 6s linear infinite;
-    }
-
-    @property --glow-angle {
-        syntax: '<angle>';
-        inherits: false;
-        initial-value: 0deg;
-    }
-
-    @keyframes ui-glow-spin {
-        to {
-            --glow-angle: 360deg;
-        }
     }
 
     .ui-pulse-dot {
@@ -636,7 +683,7 @@
         width: 0.5rem;
         height: 0.5rem;
         border-radius: 9999px;
-        background: #22c55e;
+        background: var(--status, #15803d);
     }
 
     .ui-pulse-dot::after {
@@ -645,7 +692,7 @@
         inset: 0;
         border-radius: inherit;
         background: inherit;
-        animation: ui-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+        animation: ui-ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
     }
 
     @keyframes ui-ping {
@@ -656,19 +703,53 @@
         }
     }
 
+    /* Headline lines rising out of a mask (HeroHeadline). */
+    .ui-word {
+        display: inline-block;
+        overflow: hidden;
+        vertical-align: top;
+        padding-block: 0.04em;
+        margin-block: -0.04em;
+    }
+
+    .ui-word > span {
+        display: inline-block;
+        animation: ui-word-rise 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+        animation-delay: calc(var(--i, 0) * 90ms + var(--base, 0ms));
+    }
+
+    @keyframes ui-word-rise {
+        from {
+            transform: translateY(110%) skewY(6deg);
+        }
+    }
+
+    /* Images wiping in from the bottom as they enter (Reveal adds .is-in). */
+    .ui-reveal-img {
+        clip-path: inset(100% 0 0 0);
+        transition: clip-path 1.2s cubic-bezier(0.77, 0, 0.18, 1);
+    }
+
+    .ui-reveal-img.is-in {
+        clip-path: inset(0 0 0 0);
+    }
+
     /* ── Reduced motion ────────────────────────────────── */
 
     @media (prefers-reduced-motion: reduce) {
-        .ui-blob,
         .ui-float,
         .ui-marquee,
-        .ui-glow-border::before,
-        .ui-pulse-dot::after {
+        .ui-pulse-dot::after,
+        .ui-word > span {
             animation: none;
         }
 
-        .ui-card-hover:hover,
-        .ui-btn:hover {
+        .ui-reveal-img {
+            clip-path: none;
+            transition: none;
+        }
+
+        .ui-btn:hover svg {
             transform: none;
         }
     }
@@ -815,5 +896,150 @@
             stroke-dashoffset: 0;
             opacity: 1;
         }
+    }
+}
+
+/* Builder blocks on the public faces: square editorial corners, no shadow. */
+:is([data-site='studio'], [data-site='founder']) .card-3d {
+    border-radius: 0.25rem;
+    box-shadow: none;
+}
+
+:is([data-site='studio'], [data-site='founder']) .landing-section-title {
+    font-family: var(--font-condensed);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    line-height: 0.9;
+}
+
+/* ── Toasts ────────────────────────────────────────────────
+   Every toast (public site, admin, sign-in) is a solid, colourful card:
+   green for success, red for errors, orange for warnings, blue for info
+   and ink for neutral messages. White text sits on every colour at 4.5:1
+   or better. A soft glow lifts the card, and a light sweeps across it once
+   as it arrives. The selectors double [data-sonner-toast] and start at
+   html so they outrank vue-sonner's rich-colour rules without !important. */
+
+html
+    [data-sonner-toaster]
+    [data-sonner-toast][data-sonner-toast][data-styled='true'] {
+    --toast-from: #171717;
+    --toast-to: #2b2b2b;
+    --toast-glow: rgb(0 0 0 / 0.35);
+
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 0.14);
+    border-radius: 0.9rem;
+    background: linear-gradient(135deg, var(--toast-from), var(--toast-to));
+    color: #ffffff;
+    box-shadow:
+        0 1px 0 rgb(255 255 255 / 0.18) inset,
+        0 18px 40px -14px var(--toast-glow);
+    font-family: var(--font-sans);
+}
+
+html
+    [data-sonner-toaster]
+    [data-sonner-toast][data-sonner-toast][data-styled='true'][data-type='success'] {
+    --toast-from: #059669;
+    --toast-to: #047857;
+    --toast-glow: rgb(5 150 105 / 0.55);
+}
+
+html
+    [data-sonner-toaster]
+    [data-sonner-toast][data-sonner-toast][data-styled='true'][data-type='error'] {
+    --toast-from: #e11d48;
+    --toast-to: #be123c;
+    --toast-glow: rgb(225 29 72 / 0.55);
+}
+
+html
+    [data-sonner-toaster]
+    [data-sonner-toast][data-sonner-toast][data-styled='true'][data-type='warning'] {
+    --toast-from: #c2410c;
+    --toast-to: #b45309;
+    --toast-glow: rgb(194 65 12 / 0.55);
+}
+
+html
+    [data-sonner-toaster]
+    [data-sonner-toast][data-sonner-toast][data-styled='true'][data-type='info'] {
+    --toast-from: #2563eb;
+    --toast-to: #4f46e5;
+    --toast-glow: rgb(37 99 235 / 0.55);
+}
+
+html
+    [data-sonner-toaster]
+    [data-sonner-toast][data-sonner-toast][data-styled='true']
+    [data-title] {
+    font-weight: 600;
+    color: #ffffff;
+}
+
+html
+    [data-sonner-toaster]
+    [data-sonner-toast][data-sonner-toast][data-styled='true']
+    [data-description] {
+    color: rgb(255 255 255 / 0.88);
+}
+
+html
+    [data-sonner-toaster]
+    [data-sonner-toast][data-sonner-toast][data-styled='true']
+    [data-icon]
+    svg {
+    color: #ffffff;
+}
+
+html
+    [data-sonner-toaster]
+    [data-sonner-toast][data-sonner-toast][data-styled='true']
+    [data-close-button] {
+    border-color: rgb(255 255 255 / 0.3);
+    background: rgb(0 0 0 / 0.25);
+    color: #ffffff;
+}
+
+html
+    [data-sonner-toaster]
+    [data-sonner-toast][data-sonner-toast][data-styled='true']
+    [data-button] {
+    background: #ffffff;
+    color: #0b0b0b;
+}
+
+/* A light sweeps across the card once as it arrives. */
+html
+    [data-sonner-toaster]
+    [data-sonner-toast][data-sonner-toast][data-styled='true']::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        110deg,
+        transparent 30%,
+        rgb(255 255 255 / 0.28) 50%,
+        transparent 70%
+    );
+    transform: translateX(-120%);
+    animation: toast-sweep 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+    pointer-events: none;
+}
+
+@keyframes toast-sweep {
+    to {
+        transform: translateX(120%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html
+        [data-sonner-toaster]
+        [data-sonner-toast][data-sonner-toast][data-styled='true']::after {
+        animation: none;
+        display: none;
     }
 }

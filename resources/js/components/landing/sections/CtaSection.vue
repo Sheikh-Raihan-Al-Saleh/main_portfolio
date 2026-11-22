@@ -24,7 +24,7 @@ const isInternal = computed(() => data.value.url.startsWith('/'));
             initial="hidden"
             while-in-view="visible"
             :in-view-options="{ once: true, margin: '0px 0px -80px 0px' }"
-            class="relative overflow-hidden rounded-[24px] border border-line bg-foreground px-6 py-14 text-center shadow-2xl sm:px-10 sm:py-16"
+            class="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#0a0a0a] px-6 py-16 text-center text-white shadow-none sm:px-10 sm:py-20"
         >
             <!-- glow -->
             <div
@@ -32,28 +32,28 @@ const isInternal = computed(() => data.value.url.startsWith('/'));
                 aria-hidden="true"
             >
                 <div
-                    class="absolute -top-24 right-0 size-[420px] rounded-full bg-signal/20 blur-3xl"
+                    class="absolute -top-24 right-0 size-[420px] rounded-full bg-white opacity-[0.07] blur-3xl"
                 />
                 <div
-                    class="absolute -bottom-24 left-0 size-[380px] rounded-full bg-signal/10 blur-3xl"
+                    class="absolute -bottom-24 left-0 size-[380px] rounded-full bg-white opacity-[0.05] blur-3xl"
                 />
             </div>
             <div class="relative">
                 <p
                     v-if="section.eyebrow"
-                    class="mb-3 inline-flex items-center gap-1.5 rounded-full bg-background/10 px-3 py-1 text-xs font-semibold tracking-widest text-background/80 uppercase"
+                    class="mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 font-mono text-[11px] font-semibold tracking-[0.14em] text-white uppercase"
                 >
                     <Sparkles class="size-3.5" /> {{ section.eyebrow }}
                 </p>
                 <h2
                     v-if="section.heading"
-                    class="mx-auto max-w-2xl text-3xl font-extrabold tracking-tight text-background sm:text-4xl"
+                    class="ui-display mx-auto max-w-3xl text-[clamp(2.25rem,5vw,4rem)] text-white"
                 >
                     {{ section.heading }}
                 </h2>
                 <p
                     v-if="section.subheading"
-                    class="mx-auto mt-3 max-w-xl text-base text-muted-foreground"
+                    class="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-white/80"
                 >
                     {{ section.subheading }}
                 </p>
@@ -61,7 +61,7 @@ const isInternal = computed(() => data.value.url.startsWith('/'));
                     <Button
                         as-child
                         size="lg"
-                        class="h-11 rounded-full bg-card px-8 font-semibold text-foreground shadow-lg hover:bg-muted"
+                        class="h-12 rounded-full bg-white px-8 font-semibold text-[#0a0a0a] shadow-[0_16px_40px_-12px_rgb(255_255_255/0.45)] hover:bg-white/90"
                     >
                         <Link v-if="isInternal" :href="data.url">
                             {{ data.label }} <ArrowRight class="size-4" />
@@ -76,7 +76,7 @@ const isInternal = computed(() => data.value.url.startsWith('/'));
                         </a>
                     </Button>
                 </div>
-                <p v-if="data.note" class="mt-3 text-sm text-muted-foreground">
+                <p v-if="data.note" class="mt-4 text-sm text-white/70">
                     {{ data.note }}
                 </p>
             </div>

@@ -218,3 +218,20 @@ test('an admin can delete a message', function () {
 
     expect(ContactMessage::count())->toBe(0);
 });
+
+test('the founding year is stored as a number', function () {
+    $this->actingAs($this->admin)
+        ->post('/admin/company', ['name' => 'Sheikh Nabil', 'founded_year' => '2019'])
+        ->assertSessionHasNoErrors();
+
+    expect(Company::current()->founded_year)->toBe(2019);
+});
+
+test('a founding year in the future is rejected', function () {
+    $this->actingAs($this->admin)
+        ->post('/admin/company', [
+            'name' => 'Sheikh Nabil',
+            'founded_year' => (string) (now()->year + 1),
+        ])
+        ->assertSessionHasErrors('founded_year');
+});

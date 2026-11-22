@@ -24,6 +24,31 @@
     RewriteRule ^ index.php [L]
 </IfModule>
 
+# Upload limits for hosts that run PHP inside the web server (mod_php,
+# LiteSpeed, mod_lsapi). PHP-FPM / CGI hosts read public/.user.ini instead.
+# Each block only applies when its module is loaded, so this never causes a
+# 500 on hosts where php_value is not allowed. Keep in sync with .user.ini.
+<IfModule mod_php.c>
+    php_value upload_max_filesize 64M
+    php_value post_max_size 128M
+    php_value max_file_uploads 30
+</IfModule>
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 64M
+    php_value post_max_size 128M
+    php_value max_file_uploads 30
+</IfModule>
+<IfModule lsapi_module>
+    php_value upload_max_filesize 64M
+    php_value post_max_size 128M
+    php_value max_file_uploads 30
+</IfModule>
+<IfModule Litespeed>
+    php_value upload_max_filesize 64M
+    php_value post_max_size 128M
+    php_value max_file_uploads 30
+</IfModule>
+
 # Compress text responses (HTML, JSON, JS, CSS, SVG).
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json image/svg+xml

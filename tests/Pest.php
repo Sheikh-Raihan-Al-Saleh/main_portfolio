@@ -44,7 +44,41 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Whether an Inertia SSR renderer is reachable: the Vite dev server's SSR
+ * endpoint while `npm run dev` runs, otherwise the standalone SSR server.
+ */
+function ssrIsAvailable(): bool
 {
-    // ..
+    static $available = null;
+
+    if ($available !== null) {
+        return $available;
+    }
+
+    $hot = public_path('hot');
+    $url = is_file($hot)
+        ? trim((string) file_get_contents($hot))
+        : (string) config('inertia.ssr.url', 'http://127.0.0.1:13714');
+
+    $parts = parse_url($url) ?: [];
+    $socket = @fsockopen($parts['host'] ?? '127.0.0.1', $parts['port'] ?? 80, $errno, $error, 0.5);
+
+    if ($socket !== false) {
+        fclose($socket);
+    }
+
+    return $available = $socket !== false;
+}
+
+/**
+ * Skip a test that asserts on server-rendered markup when no SSR renderer is
+ * running. The same behaviour is covered at the props level in the feature
+ * suite and in a real browser by the Playwright suite (tests/e2e).
+ */
+function requiresSsr(): void
+{
+    if (! ssrIsAvailable()) {
+        test()->markTestSkipped('Needs an Inertia SSR renderer: run `npm run dev` or `php artisan inertia:start-ssr`.');
+    }
 }

@@ -32,7 +32,7 @@ const props = withDefaults(defineProps<Props>(), {
 <template>
     <span
         v-if="props.logoUrl"
-        class="inline-flex items-center rounded-lg bg-white px-2.5 py-1 shadow-sm ring-1 ring-black/5"
+        class="inline-flex items-center rounded-xl bg-white px-3 py-1.5 shadow-sm ring-1 ring-black/5"
     >
         <!-- Width caps are generous so a wide logo scales by height, not shrinks. -->
         <img
@@ -41,7 +41,7 @@ const props = withDefaults(defineProps<Props>(), {
             decoding="async"
             :class="
                 cn(
-                    'w-auto max-w-56 object-contain sm:max-w-72',
+                    'w-auto max-w-60 object-contain sm:max-w-80',
                     props.imageClass,
                 )
             "

@@ -41,6 +41,7 @@ const visible = computed(() =>
     <section id="projects" class="site-section scroll-mt-24 bg-card/60">
         <div class="site-container">
             <SectionHeader
+                index="03"
                 :eyebrow="copy.eyebrow"
                 :title="copy.title"
                 :highlight="copy.highlight"

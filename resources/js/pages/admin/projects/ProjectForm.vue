@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Form } from '@inertiajs/vue3';
+import { Form, usePage } from '@inertiajs/vue3';
 import { CalendarRange, FileText, ImageIcon, Rocket, Type } from '@lucide/vue';
+import { ref } from 'vue';
 import FileField from '@/components/admin/FileField.vue';
 import FormSection from '@/components/admin/form/FormSection.vue';
 import FormTabs from '@/components/admin/form/FormTabs.vue';
@@ -18,6 +19,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { oversizedFileMessage } from '@/lib/media';
 import projects from '@/routes/admin/projects';
 import type { Project } from '@/types';
 
@@ -28,9 +30,31 @@ type Props = {
     submitLabel: string;
     /** `ProjectContext::options()`, for the context select. */
     contexts: { value: string; label: string }[];
+    /** Stored gallery images (edit only); ticking one removes it on save. */
+    galleryItems?: { path: string; url: string }[];
 };
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    project: undefined,
+    galleryItems: () => [],
+});
+
+const page = usePage();
+const gallerySizeError = ref<string | null>(null);
+
+/** Reject gallery picks the server would drop, so they never submit. */
+function checkGallerySize(event: Event) {
+    const input = event.target as HTMLInputElement;
+
+    gallerySizeError.value = oversizedFileMessage(
+        input.files,
+        page.props.uploadLimits,
+    );
+
+    if (gallerySizeError.value) {
+        input.value = '';
+    }
+}
 
 function dateValue(value: string | null | undefined): string {
     return value ? value.slice(0, 10) : '';
@@ -64,7 +88,12 @@ const tabs: FormTab[] = [
         label: 'Media',
         description: 'Cover and gallery',
         icon: ImageIcon,
-        fields: ['cover_image', 'remove_cover_image', 'gallery'],
+        fields: [
+            'cover_image',
+            'remove_cover_image',
+            'gallery',
+            'remove_gallery',
+        ],
     },
     {
         id: 'publish',
@@ -303,26 +332,47 @@ const tabs: FormTab[] = [
                             accept="image/*"
                             multiple
                             class="file:mr-3 file:text-sm file:text-foreground"
+                            @change="checkGallerySize"
                         />
+                        <p
+                            v-if="gallerySizeError"
+                            class="text-xs text-destructive"
+                        >
+                            {{ gallerySizeError }}
+                        </p>
                         <div
-                            v-if="project?.gallery_urls.length"
+                            v-if="galleryItems.length"
                             class="mt-2 flex flex-wrap gap-2"
                         >
-                            <img
-                                v-for="url in project.gallery_urls"
-                                :key="url"
-                                :src="url"
-                                alt=""
-                                class="h-16 w-24 rounded-lg border border-border object-cover"
-                            />
+                            <label
+                                v-for="item in galleryItems"
+                                :key="item.path"
+                                class="group relative cursor-pointer"
+                                :title="`Remove ${item.path.split('/').pop()}`"
+                            >
+                                <img
+                                    :src="item.url"
+                                    alt=""
+                                    class="h-16 w-24 rounded-lg border border-border object-cover transition group-has-[:checked]:opacity-30"
+                                />
+                                <input
+                                    type="checkbox"
+                                    name="remove_gallery[]"
+                                    :value="item.path"
+                                    class="absolute top-1 right-1 size-4 accent-destructive"
+                                    :aria-label="`Remove gallery image ${item.path.split('/').pop()}`"
+                                />
+                            </label>
                         </div>
                         <p
-                            v-if="project?.gallery_urls.length"
+                            v-if="galleryItems.length"
                             class="text-xs text-muted-foreground"
                         >
-                            {{ project.gallery_urls.length }} image(s) already
-                            attached. New uploads are appended.
+                            {{ galleryItems.length }} image(s) attached. Tick an
+                            image to remove it on save; new uploads are
+                            appended.
                         </p>
+                        <InputError :message="errors.remove_gallery" />
                         <InputError :message="errors.gallery" />
                     </div>
                 </FormSection>

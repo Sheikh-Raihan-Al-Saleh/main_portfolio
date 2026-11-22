@@ -29,7 +29,7 @@ class CompanyRequest extends FormRequest
             'website' => ['nullable', 'url', 'max:255'],
             // The hero turns this into a "years in business" figure, so a year
             // is the only thing that can be stored here.
-            'founded_year' => ['nullable', 'string', 'max:20', 'regex:/^\d{4}$/'],
+            'founded_year' => ['nullable', 'regex:/^\d{4}$/', 'integer', 'min:1900', 'max:'.((int) now()->year)],
             'hero_eyebrow' => ['nullable', 'string', 'max:80'],
             'hero_title' => ['nullable', 'string', 'max:255'],
             'hero_statement' => ['nullable', 'string', 'max:255'],
@@ -73,6 +73,8 @@ class CompanyRequest extends FormRequest
     {
         return [
             'founded_year.regex' => 'Enter a four digit year, for example 2019.',
+            'founded_year.min' => 'Enter a year from 1900 onwards.',
+            'founded_year.max' => 'The founding year cannot be in the future.',
         ];
     }
 

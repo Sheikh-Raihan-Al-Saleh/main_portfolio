@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { usePage } from '@inertiajs/vue3';
 import { Upload, X } from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { oversizedFileMessage } from '@/lib/media';
 
 type Props = {
     name: string;
@@ -19,12 +21,28 @@ type Props = {
 
 const props = defineProps<Props>();
 
+const page = usePage();
 const previewUrl = ref<string | null>(props.currentUrl ?? null);
 const removed = ref(false);
+const sizeError = ref<string | null>(null);
 const inputRef = ref<HTMLInputElement | null>(null);
 
 function handleChange(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    sizeError.value = oversizedFileMessage(
+        input.files,
+        page.props.uploadLimits,
+    );
+
+    // Drop a file the server would reject, so the form never submits it.
+    if (sizeError.value) {
+        input.value = '';
+        previewUrl.value = removed.value ? null : (props.currentUrl ?? null);
+
+        return;
+    }
 
     if (!file) {
         return;
@@ -85,6 +103,9 @@ function clear() {
         <p v-if="hint" class="text-xs text-muted-foreground">
             <Upload class="mr-1 inline size-3" />
             {{ hint }}
+        </p>
+        <p v-if="sizeError" class="text-xs text-destructive">
+            {{ sizeError }}
         </p>
 
         <input

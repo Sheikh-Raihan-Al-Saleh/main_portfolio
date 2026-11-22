@@ -58,29 +58,32 @@ class LandingPageController extends Controller
             $request->file('hero_media'), 'landing/hero', $landingPage->hero_media_path,
         );
 
-        // Handle multiple hero media paths (new feature)
-        if ($request->hasAny(['hero_media_paths.0', 'hero_media_paths.1', 'hero_media_paths.2'])) {
-            $paths = [];
+        // The three device slots (desktop, tablet, phone) are positional: the
+        // admin preview and the hero frames read them by index, so an empty
+        // slot stays as null instead of letting later slots shift down.
+        $removeSlots = (array) $request->input('remove_hero_media_slots', []);
+        $slotsTouched = $request->hasAny(['hero_media_paths.0', 'hero_media_paths.1', 'hero_media_paths.2'])
+            || in_array(true, array_map(boolval(...), $removeSlots), true);
+
+        if ($slotsTouched) {
             $existingPaths = $landingPage->hero_media_paths ?? [];
+            $paths = [];
 
             foreach ([0, 1, 2] as $index) {
+                $existing = $existingPaths[$index] ?? null;
                 $file = $request->file("hero_media_paths.{$index}");
 
-                if ($file) {
-                    // Delete old file at this index if it exists
-                    if (isset($existingPaths[$index])) {
-                        $this->deleteMedia($existingPaths[$index]);
-                    }
-                    // Store new file
-                    $paths[$index] = $this->putMedia($file, 'landing/hero');
-                } elseif (isset($existingPaths[$index])) {
-                    // Keep existing file if not replaced
-                    $paths[$index] = $existingPaths[$index];
+                if ($file !== null) {
+                    $paths[$index] = $this->storeMedia($file, 'landing/hero', $existing);
+                } elseif (filter_var($removeSlots[$index] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+                    $this->deleteMedia($existing);
+                    $paths[$index] = null;
+                } else {
+                    $paths[$index] = $existing;
                 }
             }
 
-            // Only save if we have any paths
-            $landingPage->hero_media_paths = ! empty($paths) ? array_values($paths) : null;
+            $landingPage->hero_media_paths = array_filter($paths) === [] ? null : $paths;
 
             // The slots supersede the legacy single hero, whose path was copied
             // into slot 0 by migration. Replacing that slot deletes the shared
@@ -112,17 +115,7 @@ class LandingPageController extends Controller
         $landingPage = $project->landingPage()->with('sections')->first();
 
         if ($landingPage instanceof ProjectLandingPage) {
-            foreach ($landingPage->sections as $section) {
-                $this->deleteMediaMany($section->mediaPaths());
-            }
-
-            // Delete legacy single hero media
-            $this->deleteMedia($landingPage->hero_media_path);
-
-            // Delete multiple hero media paths
-            $this->deleteMediaMany($landingPage->hero_media_paths);
-
-            $this->deleteMedia($landingPage->og_image_path);
+            $this->deleteMediaMany($landingPage->mediaPaths());
 
             $landingPage->delete();
         }

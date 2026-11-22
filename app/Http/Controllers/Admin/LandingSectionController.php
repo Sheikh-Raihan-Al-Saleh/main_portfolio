@@ -11,7 +11,9 @@ use App\Models\ProjectLandingPage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class LandingSectionController extends Controller
@@ -77,9 +79,25 @@ class LandingSectionController extends Controller
             'ids.*' => ['integer', 'exists:landing_sections,id'],
         ]);
 
-        foreach ($validated['ids'] as $position => $id) {
-            LandingSection::query()->whereKey($id)->update(['sort_order' => $position]);
+        // A reorder is for one page's sections. Mixing sections from different
+        // pages would silently interleave their sort orders.
+        $parents = LandingSection::query()
+            ->whereKey($validated['ids'])
+            ->get(['landing_page_id', 'company_id'])
+            ->map(fn (LandingSection $section): string => $section->landing_page_id.'|'.$section->company_id)
+            ->unique();
+
+        if ($parents->count() > 1) {
+            throw ValidationException::withMessages([
+                'ids' => __('All sections must belong to the same page.'),
+            ]);
         }
+
+        DB::transaction(function () use ($validated): void {
+            foreach ($validated['ids'] as $position => $id) {
+                LandingSection::query()->whereKey($id)->update(['sort_order' => $position]);
+            }
+        });
 
         return back();
     }

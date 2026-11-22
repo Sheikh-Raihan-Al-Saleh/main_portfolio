@@ -40,6 +40,8 @@
         <x-inertia::head>
             <title>{{ config('app.name', 'Laravel') }}</title>
         </x-inertia::head>
+        {{-- The boot screen needs JavaScript to leave; without it, never show it. --}}
+        <noscript><style>.site-loader { display: none !important; }</style></noscript>
     </head>
     <body class="font-sans antialiased">
         <x-inertia::app />

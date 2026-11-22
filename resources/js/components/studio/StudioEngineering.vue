@@ -15,6 +15,8 @@ import type { Company } from '@/types';
  */
 type Props = {
     company: Company;
+    /** Chapter number for the section header, e.g. "01". */
+    index?: string;
 };
 
 const props = defineProps<Props>();
@@ -62,6 +64,7 @@ const panel = {
     <section id="engineering" class="site-section scroll-mt-24 bg-card/60">
         <div class="site-container">
             <SectionHeader
+                :index="index"
                 :eyebrow="content.eyebrow"
                 :title="content.title"
                 :highlight="content.highlight"
@@ -110,7 +113,7 @@ const panel = {
                                 cn(
                                     'relative grid size-14 place-items-center rounded-2xl border transition-all duration-500',
                                     i <= active
-                                        ? 'border-transparent bg-gradient-to-br from-[var(--grad-from)] to-[var(--grad-to)] text-white shadow-[0_12px_28px_-12px_var(--brand-glow)]'
+                                        ? 'border-transparent bg-foreground text-background'
                                         : 'border-border bg-card text-muted-foreground group-hover:text-foreground',
                                 )
                             "

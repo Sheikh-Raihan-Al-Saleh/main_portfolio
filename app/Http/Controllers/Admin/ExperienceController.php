@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\ExperienceRequest;
 use App\Models\Experience;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -80,9 +81,11 @@ class ExperienceController extends Controller
             'ids.*' => ['integer', 'exists:experiences,id'],
         ]);
 
-        foreach ($validated['ids'] as $position => $id) {
-            Experience::query()->whereKey($id)->update(['sort_order' => $position]);
-        }
+        DB::transaction(function () use ($validated): void {
+            foreach ($validated['ids'] as $position => $id) {
+                Experience::query()->whereKey($id)->update(['sort_order' => $position]);
+            }
+        });
 
         return back();
     }

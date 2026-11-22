@@ -18,6 +18,8 @@ class DashboardController extends Controller
     public function index(): Response
     {
         $company = Company::current();
+        $profile = Profile::current();
+        $unread = ContactMessage::query()->unread()->count();
 
         return inertia('admin/Dashboard', [
             'stats' => [
@@ -28,7 +30,7 @@ class DashboardController extends Controller
                 'experiences' => Experience::query()->count(),
                 'educations' => Education::query()->count(),
                 'messages' => ContactMessage::query()->count(),
-                'unreadMessages' => ContactMessage::query()->unread()->count(),
+                'unreadMessages' => $unread,
                 'homeBlocks' => LandingSection::query()->whereNotNull('company_id')->count(),
             ],
 
@@ -38,7 +40,7 @@ class DashboardController extends Controller
 
             // How complete the public profiles are, so the dashboard can nudge
             // the admin toward the empty modules instead of just counting them.
-            'completeness' => $this->completeness($company, Profile::current()),
+            'completeness' => $this->completeness($company, $profile),
 
             'recentMessages' => ContactMessage::query()
                 ->latest()
@@ -49,12 +51,14 @@ class DashboardController extends Controller
                 ->take(5)
                 ->get(['id', 'title', 'slug', 'is_published', 'is_featured', 'updated_at']),
 
-            // Top-of-funnel: where enquiries are coming from, derived from the
-            // referrer captured with each message.
+            // Recent vs older enquiries, for the dashboard's donut chart. Messages
+            // store no referrer, so this is a time split, not a traffic source.
             'messageSources' => $this->messageSources(),
 
-            'profile' => Profile::current(),
+            'profile' => $profile,
             'company' => $company,
+            // Overrides the shared sidebar badge so it is not counted twice.
+            'unreadMessages' => $unread,
         ]);
     }
 

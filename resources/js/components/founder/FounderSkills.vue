@@ -57,6 +57,7 @@ function bar(level: number, index: number) {
     <section id="skills" class="site-section scroll-mt-24">
         <div class="site-container">
             <SectionHeader
+                index="02"
                 :eyebrow="copy.eyebrow"
                 :title="copy.title"
                 :highlight="copy.highlight"

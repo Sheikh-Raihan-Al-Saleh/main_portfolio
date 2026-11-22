@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\EducationRequest;
 use App\Models\Education;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -66,9 +67,11 @@ class EducationController extends Controller
             'ids.*' => ['integer', 'exists:educations,id'],
         ]);
 
-        foreach ($validated['ids'] as $position => $id) {
-            Education::query()->whereKey($id)->update(['sort_order' => $position]);
-        }
+        DB::transaction(function () use ($validated): void {
+            foreach ($validated['ids'] as $position => $id) {
+                Education::query()->whereKey($id)->update(['sort_order' => $position]);
+            }
+        });
 
         return back();
     }

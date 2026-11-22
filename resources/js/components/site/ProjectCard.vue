@@ -2,13 +2,15 @@
 import { Link } from '@inertiajs/vue3';
 import { ArrowUpRight } from '@lucide/vue';
 import { computed } from 'vue';
+import LiquidImage from '@/components/site/LiquidImage.vue';
 import { cn } from '@/lib/utils';
 import type { Project } from '@/types';
 
 /**
- * A project card for either face: the cover in a rounded frame that zooms
- * gently on hover, then the title, summary and stack. The whole card is one
- * link to the project page.
+ * A project card in the editorial style: the cover as a liquid image that
+ * ripples under the cursor, then the role and year, the title in condensed
+ * type with an arrow that turns, the summary and the stack on a hairline.
+ * The whole card is one link to the project page.
  */
 type Props = {
     project: Project;
@@ -28,65 +30,64 @@ const year = computed(
 <template>
     <Link
         :href="`/projects/${project.slug}`"
-        :class="
-            cn(
-                'group ui-card ui-card-hover flex flex-col overflow-hidden p-2',
-                props.class,
-            )
-        "
+        :class="cn('group flex flex-col', props.class)"
+        data-cursor="view"
     >
-        <div
-            class="relative aspect-[16/10] overflow-hidden rounded-[1.1rem] bg-muted"
-        >
-            <img
+        <div class="relative aspect-[4/3] overflow-hidden rounded-sm bg-muted">
+            <LiquidImage
                 v-if="project.cover_image_url"
                 :src="project.cover_image_url"
                 :alt="project.title"
-                loading="lazy"
-                class="size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
+                class="size-full"
             />
             <div
                 v-else
-                class="grid size-full place-items-center bg-gradient-to-br from-[var(--brand-subtle)] to-muted"
+                class="ui-dots grid size-full place-items-center bg-muted"
             >
-                <span class="ui-display text-gradient text-5xl">{{
+                <span class="ui-display text-8xl text-foreground/15">{{
                     project.title.slice(0, 1)
                 }}</span>
             </div>
+
             <span
                 v-if="project.is_featured"
-                class="ui-glass absolute top-3 left-3 rounded-full px-2.5 py-1 text-xs font-semibold"
+                class="ui-label absolute top-3 left-3 bg-[var(--accent-fill)] px-2 py-1 text-[var(--accent-ink)]"
                 >Featured</span
             >
         </div>
 
-        <div class="flex flex-1 flex-col gap-3 p-4">
-            <div class="flex items-start justify-between gap-3">
-                <h3 class="ui-h3">{{ project.title }}</h3>
+        <div class="flex flex-1 flex-col gap-3 border-b border-border py-5">
+            <div class="ui-label flex items-center justify-between gap-3">
                 <span
-                    class="grid size-8 shrink-0 place-items-center rounded-full border border-border transition-colors group-hover:border-transparent group-hover:bg-signal group-hover:text-signal-foreground"
-                    aria-hidden="true"
+                    v-if="project.role"
+                    class="truncate text-muted-foreground"
+                    >{{ project.role }}</span
                 >
-                    <ArrowUpRight class="size-4" />
-                </span>
+                <span v-if="year" class="ml-auto text-muted-foreground">{{
+                    year
+                }}</span>
             </div>
+            <h3
+                class="ui-display flex items-start justify-between gap-4 text-4xl sm:text-5xl"
+            >
+                <span>{{ project.title }}</span>
+                <ArrowUpRight
+                    class="mt-1 size-7 shrink-0 transition-transform duration-500 group-hover:rotate-45"
+                    aria-hidden="true"
+                />
+            </h3>
             <p
                 v-if="project.summary"
-                class="line-clamp-2 text-sm leading-relaxed text-muted-foreground"
+                class="line-clamp-2 leading-relaxed text-muted-foreground"
             >
                 {{ project.summary }}
             </p>
-            <div class="mt-auto flex flex-wrap items-center gap-1.5 pt-2">
+            <div class="mt-auto flex flex-wrap items-center gap-1.5 pt-1">
                 <span
-                    v-for="tech in (project.tech_stack ?? []).slice(0, 3)"
+                    v-for="tech in (project.tech_stack ?? []).slice(0, 4)"
                     :key="tech"
                     class="ui-pill"
                     >{{ tech }}</span
-                >
-                <span
-                    v-if="year"
-                    class="ml-auto text-xs text-muted-foreground"
-                    >{{ year }}</span
                 >
             </div>
         </div>

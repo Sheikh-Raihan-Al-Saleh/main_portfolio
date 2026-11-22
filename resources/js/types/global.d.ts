@@ -1,3 +1,4 @@
+import type { UploadLimits } from '@/lib/media';
 import type { Auth } from '@/types/auth';
 
 // Extend ImportMeta interface for Vite...
@@ -19,6 +20,8 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             sidebarOpen: boolean;
+            /** PHP upload limits in bytes (null = unlimited); null for guests. */
+            uploadLimits?: UploadLimits | null;
             [key: string]: unknown;
         };
     }

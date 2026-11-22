@@ -26,34 +26,45 @@ const phrases = computed(() =>
 </script>
 
 <template>
-    <section
-        id="clients"
-        class="relative scroll-mt-24 border-y border-border bg-card/60 py-10"
-    >
+    <section id="clients" class="ui-band relative scroll-mt-24 py-12">
         <div v-if="clients.length" class="site-container">
-            <p class="text-center text-sm font-medium text-muted-foreground">
+            <p
+                class="text-center font-mono text-xs tracking-[0.2em] text-muted-foreground uppercase"
+            >
                 {{ content.eyebrow || 'Trusted by teams who ship' }}
             </p>
             <div class="ui-marquee-mask mt-6 overflow-hidden">
                 <ul
-                    class="ui-marquee items-center gap-14 [--marquee-duration:45s]"
+                    class="ui-marquee items-center gap-8 [--marquee-duration:45s]"
                 >
                     <template v-for="copy in 2" :key="copy">
                         <li
                             v-for="client in clients"
                             :key="`${copy}-${client.id}`"
                             :aria-hidden="copy === 2 ? 'true' : undefined"
-                            class="flex shrink-0 items-center gap-3 opacity-70 grayscale transition hover:opacity-100 hover:grayscale-0"
+                            class="group flex shrink-0 items-center"
                         >
-                            <img
-                                v-if="client.logo_url"
-                                :src="client.logo_url"
-                                :alt="copy === 1 ? client.name : ''"
-                                loading="lazy"
-                                class="h-9 w-auto max-w-36 object-contain dark:brightness-0 dark:invert"
-                            />
+                            <!--
+                                Uploaded logos are usually dark-on-light
+                                wordmarks, so they sit on a light chip in
+                                both themes instead of being inverted, and the
+                                name is only printed when there is no logo.
+                            -->
                             <span
-                                class="text-lg font-semibold tracking-tight whitespace-nowrap"
+                                v-if="client.logo_url"
+                                class="inline-flex items-center rounded-xl bg-white px-4 py-2.5 ring-1 ring-black/5"
+                            >
+                                <img
+                                    :src="client.logo_url"
+                                    :alt="copy === 1 ? client.name : ''"
+                                    loading="lazy"
+                                    decoding="async"
+                                    class="h-8 w-auto max-w-44 object-contain opacity-80 grayscale transition duration-300 group-hover:opacity-100 group-hover:grayscale-0"
+                                />
+                            </span>
+                            <span
+                                v-else
+                                class="text-xl font-bold tracking-tight whitespace-nowrap"
                                 >{{ client.name }}</span
                             >
                         </li>

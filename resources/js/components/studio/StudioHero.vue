@@ -1,30 +1,32 @@
 <script setup lang="ts">
-import { ArrowRight, Play } from '@lucide/vue';
+import { ArrowUpRight } from '@lucide/vue';
 import { motion } from 'motion-v';
 import { computed } from 'vue';
 import AnimatedCounter from '@/components/portfolio/AnimatedCounter.vue';
-import CircuitBackground from '@/components/site/CircuitBackground.vue';
-import CodeTerminal from '@/components/site/CodeTerminal.vue';
-import UptimeChip from '@/components/site/UptimeChip.vue';
-import { useLazyScene } from '@/composables/useLazyScene';
+import EditorialMarquee from '@/components/site/EditorialMarquee.vue';
+import HeroHeadline from '@/components/site/HeroHeadline.vue';
+import LiquidBlob from '@/components/site/LiquidBlob.vue';
 import { EASE_OUT } from '@/lib/motion';
 import type { Company, CompanyStats } from '@/types';
 
 /**
- * The studio hero: the company's promise on the left, a glossy WebGL
- * composition on the right, and the live figures underneath. The scene is
- * optional — it loads after mount — and a soft gradient field stands in for
- * it until then (or for good, without WebGL). Every figure is
- * server-rendered with its real value.
+ * The studio hero as a poster: a mono masthead (studio, founding year,
+ * location, status), the title set in giant condensed type over a flowing
+ * liquid shape in the studio's blue, then the promise, the buttons and the
+ * live figures on one line, and a blue band of the ticker phrases running
+ * underneath.
+ *
+ * Everything is admin-driven (Company, its stats and ticker). The liquid
+ * shape loads when the browser is idle and has a CSS stand-in until then.
  */
 type Props = {
     company: Company;
     stats: CompanyStats;
+    /** Phrases for the running band under the hero. */
+    ticker?: string[];
 };
 
-const props = defineProps<Props>();
-
-const { scene: Scene, ready, fail } = useLazyScene();
+const props = withDefaults(defineProps<Props>(), { ticker: () => [] });
 
 const title = computed(() =>
     (props.company.hero_title ?? '{{name}} builds software that ships.')
@@ -32,24 +34,13 @@ const title = computed(() =>
         .trim(),
 );
 
-/** The title split so its last two words carry the gradient. */
-const titleParts = computed(() => {
-    const words = title.value.split(/\s+/).filter(Boolean);
-    const cut = Math.max(0, words.length - 2);
-
-    return {
-        lead: words.slice(0, cut).join(' '),
-        mark: words.slice(cut).join(' '),
-    };
-});
-
 const primaryCta = computed(() => ({
     label: props.company.primary_cta_label ?? 'Start a project',
     url: props.company.primary_cta_url ?? '#contact',
 }));
 
 const secondaryCta = computed(() => ({
-    label: props.company.secondary_cta_label ?? 'Explore our work',
+    label: props.company.secondary_cta_label ?? 'See our work',
     url: props.company.secondary_cta_url ?? '#work',
 }));
 
@@ -59,29 +50,39 @@ type Figure = { value: number; suffix: string; label: string };
 const figures = computed<Figure[]>(() =>
     [
         { value: props.stats.projects, suffix: '+', label: 'Products shipped' },
-        { value: props.stats.clients, suffix: '', label: 'Clients served' },
+        { value: props.stats.clients, suffix: '', label: 'Clients' },
         {
             value: props.stats.yearsInBusiness,
             suffix: '+',
-            label: 'Years in business',
+            label: 'Years',
         },
     ].filter((figure): figure is Figure =>
         Number.isFinite(figure.value as number),
     ),
 );
 
-/** The deploy the floating terminal replays — what shipping looks like here. */
-const deployLog = [
-    { text: 'git push origin main', kind: 'cmd' as const },
-    { text: 'Running tests…', kind: 'dim' as const },
-    { text: '✓ All checks passed', kind: 'ok' as const },
-    { text: 'Building & deploying…', kind: 'dim' as const },
-    { text: '✓ Live in production', kind: 'ok' as const },
-];
+/** The masthead line: only the facts the admin has filled in. */
+const masthead = computed(() =>
+    [
+        props.company.name,
+        props.company.founded_year
+            ? `Est. ${props.company.founded_year}`
+            : null,
+        props.company.location,
+    ].filter((item): item is string => Boolean(item)),
+);
+
+const status = computed(
+    () =>
+        props.company.status_text ??
+        (props.company.accepting_projects
+            ? 'Booking new projects'
+            : 'Fully booked'),
+);
 
 function rise(delay: number) {
     return {
-        hidden: { opacity: 0, y: 28 },
+        hidden: { opacity: 0, y: 20 },
         visible: {
             opacity: 1,
             y: 0,
@@ -92,27 +93,21 @@ function rise(delay: number) {
 </script>
 
 <template>
-    <section class="relative overflow-hidden pt-32 pb-16 lg:pt-40 lg:pb-24">
-        <!-- Ambient field -->
-        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-            <CircuitBackground />
-            <div
-                class="ui-blob ui-blob-a -top-24 right-[8%] size-[34rem] opacity-35"
-            />
-            <div
-                class="ui-blob ui-blob-b top-[30%] right-[30%] size-[22rem] opacity-30"
-            />
-        </div>
-
+    <section class="relative flex min-h-[100svh] flex-col overflow-hidden">
         <div
-            class="site-container relative grid items-center gap-12 lg:grid-cols-12 lg:gap-8"
+            class="site-container relative flex flex-1 flex-col pt-28 pb-10 sm:pt-32 lg:pb-14"
         >
+            <!-- Masthead -->
             <motion.div
+                :variants="rise(0)"
                 initial="hidden"
                 animate="visible"
-                class="flex flex-col items-start gap-7 lg:col-span-6"
+                class="ui-label flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-b border-border pb-4"
             >
-                <motion.span :variants="rise(0)" class="ui-eyebrow">
+                <span class="flex flex-wrap gap-x-6 gap-y-1">
+                    <span v-for="item in masthead" :key="item">{{ item }}</span>
+                </span>
+                <span class="inline-flex items-center gap-2">
                     <span
                         :class="
                             company.accepting_projects
@@ -120,52 +115,64 @@ function rise(delay: number) {
                                 : 'size-2 rounded-full bg-muted-foreground'
                         "
                     />
-                    {{
-                        company.status_text ??
-                        (company.accepting_projects
-                            ? 'Booking new projects'
-                            : 'Fully booked')
-                    }}
-                </motion.span>
+                    {{ status }}
+                </span>
+            </motion.div>
 
-                <motion.h1 :variants="rise(0.08)" class="ui-display ui-h1">
-                    {{ titleParts.lead }}
-                    <span class="text-gradient">{{ titleParts.mark }}</span>
-                </motion.h1>
+            <!-- Title over the liquid shape -->
+            <div class="relative flex flex-1 items-center py-10 lg:py-6">
+                <LiquidBlob
+                    class="absolute top-1/2 right-[-10%] h-[85%] w-[75%] -translate-y-1/2 sm:right-[-4%] lg:w-[58%]"
+                />
+                <HeroHeadline
+                    :text="title"
+                    :highlight="1"
+                    :delay="150"
+                    class="ui-h1 relative max-w-[16ch]"
+                />
+            </div>
 
+            <!-- Promise, buttons and figures -->
+            <motion.div
+                initial="hidden"
+                animate="visible"
+                class="grid gap-8 border-t border-border pt-6 lg:grid-cols-12 lg:items-end"
+            >
                 <motion.p
                     v-if="company.hero_statement"
-                    :variants="rise(0.16)"
-                    class="max-w-xl text-lg leading-relaxed text-pretty text-muted-foreground sm:text-xl"
+                    :variants="rise(0.5)"
+                    class="max-w-md text-lg leading-relaxed text-pretty lg:col-span-4"
                 >
                     {{ company.hero_statement }}
                 </motion.p>
 
-                <motion.div :variants="rise(0.24)" class="flex flex-wrap gap-3">
+                <motion.div
+                    :variants="rise(0.6)"
+                    class="flex flex-wrap gap-3 lg:col-span-4"
+                >
                     <a :href="primaryCta.url" class="ui-btn ui-btn-primary">
                         {{ primaryCta.label }}
-                        <ArrowRight class="size-4" />
+                        <ArrowUpRight class="size-4" />
                     </a>
                     <a :href="secondaryCta.url" class="ui-btn ui-btn-secondary">
-                        <Play class="size-3.5 fill-current" />
                         {{ secondaryCta.label }}
                     </a>
                 </motion.div>
 
                 <motion.dl
                     v-if="figures.length"
-                    :variants="rise(0.32)"
-                    class="mt-2 grid w-full max-w-lg grid-cols-3 gap-3"
+                    :variants="rise(0.7)"
+                    class="flex gap-8 lg:col-span-4 lg:justify-end"
                 >
                     <div
                         v-for="figure in figures"
                         :key="figure.label"
-                        class="ui-card flex flex-col-reverse gap-1 rounded-2xl p-4"
+                        class="flex flex-col-reverse"
                     >
-                        <dt class="text-xs text-muted-foreground">
+                        <dt class="ui-label text-muted-foreground">
                             {{ figure.label }}
                         </dt>
-                        <dd class="ui-display text-2xl sm:text-3xl">
+                        <dd class="ui-display text-5xl sm:text-6xl">
                             <AnimatedCounter
                                 :value="figure.value"
                                 :suffix="figure.suffix"
@@ -174,38 +181,8 @@ function rise(delay: number) {
                     </div>
                 </motion.dl>
             </motion.div>
-
-            <!-- The WebGL composition -->
-            <div class="relative aspect-square w-full lg:col-span-6">
-                <div
-                    class="absolute inset-[12%] rounded-full bg-gradient-to-br from-[var(--scene-1)] via-[var(--scene-2)] to-[var(--scene-3)] blur-3xl transition-opacity duration-1000"
-                    :class="ready ? 'opacity-25' : 'opacity-40'"
-                    aria-hidden="true"
-                />
-                <div
-                    class="absolute inset-0 transition-opacity duration-1000"
-                    :class="ready ? 'opacity-100' : 'opacity-0'"
-                >
-                    <component
-                        :is="Scene"
-                        v-if="Scene"
-                        variant="studio"
-                        @ready="ready = true"
-                        @failed="fail"
-                    />
-                </div>
-                <!-- Floating widgets: a deploy log and a health check -->
-                <div
-                    class="ui-float absolute top-[2%] -left-[2%] hidden w-64 sm:block"
-                >
-                    <CodeTerminal title="deploy — zsh" :lines="deployLog" />
-                </div>
-                <UptimeChip
-                    class="ui-float absolute right-[0%] bottom-[4%] hidden [animation-delay:-3s] sm:block"
-                    label="API latency"
-                    value="healthy"
-                />
-            </div>
         </div>
+
+        <EditorialMarquee :items="ticker" />
     </section>
 </template>

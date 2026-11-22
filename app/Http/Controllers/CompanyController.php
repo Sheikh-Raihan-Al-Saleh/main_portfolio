@@ -54,7 +54,7 @@ class CompanyController extends Controller
             'personalProjects' => $personalProjects,
             'totalPersonalProjects' => Project::query()->published()->personalWork()->count(),
             'clients' => $clients,
-            'stats' => $this->publicStats($company, $clients->count()),
+            'stats' => $this->publicStats($company, $clients->count(), $totalProjects),
         ]);
     }
 
@@ -81,9 +81,10 @@ class CompanyController extends Controller
      *
      * @return array{projects: int|null, clients: int|null, foundedYear: int|null, yearsInBusiness: int|null}
      */
-    private function publicStats(Company $company, int $visibleClientCount): array
+    private function publicStats(Company $company, int $visibleClientCount, ?int $publishedProjects = null): array
     {
-        $projects = Project::query()->published()->companyWork()->count();
+        // The home page has already counted these; the About page has not.
+        $projects = $publishedProjects ?? Project::query()->published()->companyWork()->count();
 
         return [
             'projects' => $projects > 0 ? $projects : null,

@@ -12,6 +12,8 @@ type Props = {
     project: Project;
     /** `ProjectContext::options()`, for the context select. */
     contexts: { value: string; label: string }[];
+    /** Stored gallery paths with their URLs, for per-image removal. */
+    galleryItems: { path: string; url: string }[];
 };
 
 defineProps<Props>();
@@ -51,6 +53,7 @@ defineOptions({
             :project="project"
             :action="ProjectController.update.form(project.slug)"
             :contexts="contexts"
+            :gallery-items="galleryItems"
             submit-label="Save changes"
         />
     </div>

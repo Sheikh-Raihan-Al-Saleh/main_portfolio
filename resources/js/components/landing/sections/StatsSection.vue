@@ -22,7 +22,12 @@ const items = computed(() => props.section.data.items ?? []);
         :anchor="props.anchor"
         muted
     >
-        <motion.dl
+        <!--
+            A list rather than <dl>: each figure sits inside 3D tilt wrappers,
+            and <dl> only allows <dt>/<dd> directly or one <div> deep.
+        -->
+        <motion.div
+            role="list"
             :variants="stagger(0.08)"
             initial="hidden"
             while-in-view="visible"
@@ -33,28 +38,29 @@ const items = computed(() => props.section.data.items ?? []);
                 v-for="(item, index) in items"
                 :key="index"
                 :variants="perspectiveCard"
+                role="listitem"
                 class="[transform-style:preserve-3d]"
             >
                 <div class="card-3d relative overflow-hidden p-7 text-center">
                     <div
                         class="pointer-events-none absolute -top-10 -right-10 size-24 rounded-full bg-gradient-to-br from-signal/15 to-transparent blur-2xl"
                     />
-                    <dd
+                    <p
                         class="bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-4xl font-extrabold text-transparent tabular-nums sm:text-5xl"
                     >
                         <AnimatedCounter
                             :value="item.value"
                             :suffix="item.suffix ?? ''"
                         />
-                    </dd>
-                    <dt class="mt-2 text-sm font-medium text-muted-foreground">
+                    </p>
+                    <p class="mt-2 text-sm font-medium text-muted-foreground">
                         {{ item.label }}
-                    </dt>
+                    </p>
                     <div
                         class="mx-auto mt-3 h-1 w-8 rounded-full bg-gradient-to-r from-signal to-signal opacity-90"
                     />
                 </div>
             </motion.div>
-        </motion.dl>
+        </motion.div>
     </SectionShell>
 </template>

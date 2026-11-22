@@ -254,3 +254,45 @@ test('clients belong to the company singleton', function () {
 
     expect($client->company->is($this->company))->toBeTrue();
 });
+
+test('svg logos that slip past a pattern blacklist are refused', function (string $body) {
+    Storage::fake('uploads');
+
+    $svg = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 10 10">'.$body.'</svg>';
+
+    $this->actingAs($this->admin)
+        ->post('/admin/clients', [
+            'name' => 'Sketchy Co',
+            'logo' => UploadedFile::fake()->createWithContent('logo.svg', $svg),
+        ])
+        ->assertSessionHasErrors('logo');
+
+    expect(Client::count())->toBe(0);
+})->with([
+    'entity-encoded javascript link' => ['<a href="javascript&#58;alert(1)"><rect width="10" height="10"/></a>'],
+    'animate rewriting an href' => ['<a><animate attributeName="href" values="javascript:alert(1)"/><rect/></a>'],
+    'external use reference' => ['<use xlink:href="https://evil.example/x.svg#a"/>'],
+    'embedded iframe' => ['<iframe src="https://evil.example"/>'],
+    'style element' => ['<style>@import url(https://evil.example/x.css);</style>'],
+]);
+
+test('an svg logo with gradients and internal references is accepted', function () {
+    Storage::fake('uploads');
+
+    $svg = <<<'SVG'
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32">
+        <defs><linearGradient id="g"><stop offset="0" stop-color="#000"/></linearGradient></defs>
+        <rect width="120" height="32" fill="url(#g)"/>
+        <text x="8" y="22">Acme</text>
+    </svg>
+    SVG;
+
+    $this->actingAs($this->admin)
+        ->post('/admin/clients', [
+            'name' => 'Acme',
+            'logo' => UploadedFile::fake()->createWithContent('logo.svg', $svg),
+        ])
+        ->assertSessionHasNoErrors();
+
+    expect(Client::sole()->logo_path)->not->toBeNull();
+});

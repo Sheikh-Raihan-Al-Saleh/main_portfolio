@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import SectionList from '@/components/landing/SectionList.vue';
+import ProjectMarquee from '@/components/site/ProjectMarquee.vue';
 import StudioAbout from '@/components/studio/StudioAbout.vue';
 import StudioCapabilities from '@/components/studio/StudioCapabilities.vue';
 import StudioContact from '@/components/studio/StudioContact.vue';
@@ -90,32 +91,34 @@ const tickerItems = computed(() => {
         <meta name="twitter:card" content="summary_large_image" />
     </Head>
 
-    <StudioHero :company="company" :stats="stats" />
+    <StudioHero :company="company" :stats="stats" :ticker="tickerItems" />
 
-    <StudioTrustBand
-        :clients="clients"
-        :company="company"
-        :items="tickerItems"
+    <ProjectMarquee
+        :projects="[...projects, ...personalProjects]"
+        label="Recent work"
     />
+
+    <StudioTrustBand :clients="clients" :company="company" :items="[]" />
 
     <!--
         The studio's story, in the order it has to be told: what we build,
         what we have built, how it is engineered, why us, who you are talking
         to, and finally the ask.
     -->
-    <StudioCapabilities :company="company" />
+    <StudioCapabilities :company="company" index="01" />
 
     <StudioWork
         :company="company"
         :projects="projects"
         :total-projects="totalProjects"
+        index="02"
     />
 
-    <StudioEngineering :company="company" />
+    <StudioEngineering :company="company" index="03" />
 
-    <StudioValue :company="company" />
+    <StudioValue :company="company" index="04" />
 
-    <StudioAbout :company="company" :profile="profile" />
+    <StudioAbout :company="company" :profile="profile" index="05" />
 
     <StudioFounderBridge :company="company" :profile="profile" />
 

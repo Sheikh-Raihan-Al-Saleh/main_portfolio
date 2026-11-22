@@ -56,6 +56,34 @@ class HandleInertiaRequests extends Middleware
                 ? ContactMessage::unread()->count()
                 : 0,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            // PHP's upload limits, so admin file pickers can reject an oversized
+            // file with a clear message. PHP otherwise drops it before Laravel
+            // sees it and the upload just fails to appear.
+            'uploadLimits' => fn () => $request->user()?->is_admin
+                ? $this->uploadLimits()
+                : null,
         ];
+    }
+
+    /**
+     * Per-file and per-request upload limits in bytes; null means unlimited.
+     *
+     * @return array{file: int|null, request: int|null}
+     */
+    private function uploadLimits(): array
+    {
+        $bytes = fn (string $key): ?int => ($value = ini_parse_quantity((string) ini_get($key))) > 0
+            ? $value
+            : null;
+
+        $request = $bytes('post_max_size');
+        $file = $bytes('upload_max_filesize');
+
+        // A single file can never be larger than the whole request.
+        if ($request !== null && ($file === null || $request < $file)) {
+            $file = $request;
+        }
+
+        return ['file' => $file, 'request' => $request];
     }
 }

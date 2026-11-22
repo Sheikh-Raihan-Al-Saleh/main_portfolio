@@ -40,8 +40,9 @@ test('an admin can upload the website logo and it renders site-wide', function (
     // The uploaded logo reaches the public header and footer on both faces
     // of the site, with no code change in between.
     foreach (['/', '/about', '/founder'] as $path) {
-        expect($this->get($path)->assertOk()->getContent())
-            ->toContain('uploads/'.$company->logo_path);
+        $this->get($path)->assertOk()->assertInertia(fn ($page) => $page
+            ->where('company.logo_url', fn (?string $url) => str_contains((string) $url, 'uploads/'.$company->logo_path)),
+        );
     }
 });
 
@@ -59,7 +60,10 @@ test('an admin can remove the website logo and the initials return', function ()
 
     expect(Company::current()->fresh()->logo_path)->toBeNull();
     Storage::disk('uploads')->assertMissing($path);
-    expect($this->get('/')->assertOk()->getContent())->toContain('footer-logo-icon');
+    $this->get('/')->assertOk()->assertInertia(fn ($page) => $page
+        ->where('company.logo_url', null)
+        ->where('profile.logo_url', null),
+    );
 });
 
 test('a non-admin cannot change the website logo from the profile section', function () {
@@ -90,15 +94,15 @@ test('an admin can upload the website logo from the profile section', function (
 
     // The profile logo reaches the header and footer on both faces of the site.
     foreach (['/', '/founder'] as $path) {
-        $html = $this->get($path)->assertOk()->getContent();
-
-        expect($html)
-            ->toContain('uploads/'.$profile->logo_path)
-            ->not->toContain('footer-logo-icon');
+        $this->get($path)->assertOk()->assertInertia(fn ($page) => $page
+            ->where('profile.logo_url', fn (?string $url) => str_contains((string) $url, 'uploads/'.$profile->logo_path)),
+        );
     }
 });
 
 test('the profile logo wins over the older company logo', function () {
+    requiresSsr();
+
     Storage::fake('uploads');
     $companyPath = UploadedFile::fake()->image('old.png')->store('company', 'uploads');
     $profilePath = UploadedFile::fake()->image('new.png')->store('profile', 'uploads');
@@ -134,9 +138,8 @@ test('removing the profile logo falls back to the company logo', function () {
     expect(Profile::current()->fresh()->logo_path)->toBeNull();
     Storage::disk('uploads')->assertMissing($profilePath);
 
-    $html = $this->get('/')->assertOk()->getContent();
-
-    expect($html)
-        ->toContain('uploads/'.$companyPath)
-        ->not->toContain('footer-logo-icon');
+    $this->get('/')->assertOk()->assertInertia(fn ($page) => $page
+        ->where('profile.logo_url', null)
+        ->where('company.logo_url', fn (?string $url) => str_contains((string) $url, 'uploads/'.$companyPath)),
+    );
 });

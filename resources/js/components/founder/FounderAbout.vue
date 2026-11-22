@@ -66,6 +66,7 @@ const facts = computed(() =>
         <div class="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
             <div class="flex flex-col gap-6 lg:col-span-6">
                 <SectionHeader
+                    index="01"
                     align="left"
                     :eyebrow="copy.eyebrow"
                     :title="copy.title"

@@ -1,19 +1,23 @@
 <script setup lang="ts">
-import { ArrowRight, Download, MapPin } from '@lucide/vue';
-import { AnimatePresence, motion } from 'motion-v';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { ArrowUpRight, Download } from '@lucide/vue';
+import { motion } from 'motion-v';
+import { computed } from 'vue';
 import AnimatedCounter from '@/components/portfolio/AnimatedCounter.vue';
-import CircuitBackground from '@/components/site/CircuitBackground.vue';
-import CodeTerminal from '@/components/site/CodeTerminal.vue';
-import { useLazyScene } from '@/composables/useLazyScene';
+import EditorialMarquee from '@/components/site/EditorialMarquee.vue';
+import LiquidBlob from '@/components/site/LiquidBlob.vue';
+import LiquidImage from '@/components/site/LiquidImage.vue';
 import { contentConfig } from '@/lib/content';
 import { EASE_OUT } from '@/lib/motion';
 import type { PortfolioStats, Profile } from '@/types';
 
 /**
- * The founder's hero: introduction, rotating roles and figures on the left;
- * the portrait on the right, framed by glossy WebGL shapes and floating skill
- * chips. The figures are server-rendered with their real values.
+ * The founder's hero, as a magazine cover: a mono masthead (name, role,
+ * location, availability), his introduction in giant condensed type with his
+ * name on the lime marker, his portrait as a liquid image, then the
+ * statement, buttons, figures and main tools, and a running band of roles.
+ *
+ * Everything comes from the profile. The figures are server-rendered with
+ * their real values (the SSR feature test reads that markup).
  */
 type Props = {
     profile: Profile;
@@ -25,35 +29,11 @@ const props = withDefaults(defineProps<Props>(), { highlights: () => [] });
 
 const content = computed(() => contentConfig(props.profile));
 
-const { scene: Scene, ready, fail } = useLazyScene();
-
 const roles = computed(() =>
     props.profile.roles?.length
         ? props.profile.roles
         : [props.profile.headline ?? 'Software Engineer'],
 );
-
-const roleIndex = ref(0);
-let timer: ReturnType<typeof setInterval> | null = null;
-
-onMounted(() => {
-    if (
-        roles.value.length < 2 ||
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
-        return;
-    }
-
-    timer = setInterval(() => {
-        roleIndex.value = (roleIndex.value + 1) % roles.value.length;
-    }, 3000);
-});
-
-onBeforeUnmount(() => {
-    if (timer) {
-        clearInterval(timer);
-    }
-});
 
 const firstName = computed(() => props.profile.name?.split(' ')[0] ?? '');
 
@@ -63,7 +43,7 @@ const heroTitle = computed(() =>
         .trim(),
 );
 
-/** The title with the founder's name picked out in the gradient. */
+/** The title with the founder's name picked out on the marker. */
 const titleParts = computed(() => {
     const title = heroTitle.value;
     const name = props.profile.name ?? '';
@@ -81,45 +61,61 @@ const titleParts = computed(() => {
     ];
 });
 
+/**
+ * The title as words, each flagged when it belongs to the highlighted name.
+ * Spacing is kept exactly as typed, so "Nabil." never becomes "Nabil ."
+ */
+const titleWords = computed(() => {
+    const words: { word: string; accent: boolean; space: boolean }[] = [];
+
+    for (const part of titleParts.value) {
+        for (const token of part.text.split(/(\s+)/)) {
+            if (token === '') {
+                continue;
+            }
+
+            if (/^\s+$/.test(token)) {
+                const last = words.at(-1);
+
+                if (last) {
+                    last.space = true;
+                }
+
+                continue;
+            }
+
+            words.push({ word: token, accent: part.accent, space: false });
+        }
+    }
+
+    return words;
+});
+
 const statement = computed(() =>
     (props.profile.hero_statement ?? props.profile.tagline ?? '').trim(),
 );
 
-const chips = computed(() => props.highlights.slice(0, 3));
+const tools = computed(() => props.highlights.slice(0, 6));
 
-/** The session the floating terminal replays, built from the profile. */
-const sessionLog = computed(() => [
-    { text: 'whoami', kind: 'cmd' as const },
-    { text: props.profile.name ?? 'developer', kind: 'out' as const },
-    { text: 'cat stack.txt', kind: 'cmd' as const },
-    {
-        text:
-            props.highlights.slice(0, 3).join(' · ').toLowerCase() ||
-            'laravel · vue',
-        kind: 'dim' as const,
-    },
-    {
-        text: props.profile.available_for_work
-            ? '✓ open to work'
-            : '● currently booked',
-        kind: 'ok' as const,
-    },
-]);
+/** The running band: his roles, topped up with his tools if there is one. */
+const band = computed(() =>
+    roles.value.length > 1 ? roles.value : [...roles.value, ...tools.value],
+);
 
 /** The button draws its own arrow, so drop one typed into the label. */
 const primaryLabel = computed(() =>
     content.value.hero.primary_cta_label.replace(/\s*→\s*$/, ''),
 );
 
-const chipPositions = [
-    'top-[6%] -left-[6%]',
-    'top-[38%] -right-[8%]',
-    '-bottom-[3%] right-[10%]',
-];
+const masthead = computed(() =>
+    [props.profile.name, props.profile.headline, props.profile.location].filter(
+        (item): item is string => Boolean(item),
+    ),
+);
 
 function rise(delay: number) {
     return {
-        hidden: { opacity: 0, y: 28 },
+        hidden: { opacity: 0, y: 20 },
         visible: {
             opacity: 1,
             y: 0,
@@ -130,26 +126,21 @@ function rise(delay: number) {
 </script>
 
 <template>
-    <section class="relative overflow-hidden pt-32 pb-16 lg:pt-40 lg:pb-24">
-        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-            <CircuitBackground flip />
-            <div
-                class="ui-blob ui-blob-a -top-24 right-[6%] size-[32rem] opacity-35"
-            />
-            <div
-                class="ui-blob ui-blob-b top-[40%] -left-24 size-[22rem] opacity-30"
-            />
-        </div>
-
+    <section class="relative flex min-h-[100svh] flex-col overflow-hidden">
         <div
-            class="site-container relative grid items-center gap-14 lg:grid-cols-12 lg:gap-10"
+            class="site-container relative flex flex-1 flex-col pt-28 pb-10 sm:pt-32 lg:pb-14"
         >
+            <!-- Masthead -->
             <motion.div
+                :variants="rise(0)"
                 initial="hidden"
                 animate="visible"
-                class="relative z-10 flex flex-col items-start gap-6 lg:col-span-7"
+                class="ui-label flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-b border-border pb-4"
             >
-                <motion.span :variants="rise(0)" class="ui-eyebrow">
+                <span class="flex flex-wrap gap-x-6 gap-y-1">
+                    <span v-for="item in masthead" :key="item">{{ item }}</span>
+                </span>
+                <span class="inline-flex items-center gap-2">
                     <span
                         :class="
                             profile.available_for_work
@@ -162,54 +153,86 @@ function rise(delay: number) {
                             ? content.about.available_open
                             : content.about.available_closed
                     }}
-                </motion.span>
+                </span>
+            </motion.div>
 
-                <motion.h1 :variants="rise(0.08)" class="ui-display ui-h1">
-                    <template v-for="(part, i) in titleParts" :key="i">
-                        <span v-if="part.accent" class="text-gradient">{{
-                            part.text
-                        }}</span>
-                        <template v-else>{{ part.text }}</template>
+            <!-- Name and portrait -->
+            <div
+                class="grid flex-1 items-center gap-10 py-10 lg:grid-cols-12 lg:gap-8"
+            >
+                <h1
+                    class="ui-display text-[clamp(3.75rem,10.5vw,11rem)] lg:col-span-8"
+                    :aria-label="heroTitle"
+                >
+                    <template v-for="(item, i) in titleWords" :key="i">
+                        <span class="ui-word" aria-hidden="true"
+                            ><span
+                                :class="item.accent ? 'ui-accent' : undefined"
+                                :style="{ '--i': i, '--base': '120ms' }"
+                                >{{ item.word }}</span
+                            ></span
+                        >{{ item.space ? ' ' : '' }}
                     </template>
-                </motion.h1>
+                </h1>
 
-                <motion.p
-                    :variants="rise(0.14)"
-                    class="flex h-9 items-center gap-3 overflow-hidden text-xl font-semibold sm:text-2xl"
+                <motion.div
+                    :initial="{ opacity: 0, y: 40 }"
+                    :animate="{ opacity: 1, y: 0 }"
+                    :transition="{ duration: 1.1, ease: EASE_OUT, delay: 0.3 }"
+                    class="relative mx-auto w-full max-w-sm lg:col-span-4 lg:max-w-none"
                 >
-                    <span
-                        class="h-px w-8 bg-gradient-to-r from-[var(--grad-from)] to-[var(--grad-to)]"
-                        aria-hidden="true"
+                    <LiquidImage
+                        v-if="profile.avatar_url"
+                        :src="profile.avatar_url"
+                        :alt="profile.name"
+                        eager
+                        class="aspect-[4/5] w-full rounded-sm bg-muted"
                     />
-                    <AnimatePresence mode="wait">
-                        <motion.span
-                            :key="roleIndex"
-                            :initial="{ opacity: 0, y: 16 }"
-                            :animate="{ opacity: 1, y: 0 }"
-                            :exit="{ opacity: 0, y: -16 }"
-                            :transition="{ duration: 0.4 }"
-                            class="text-muted-foreground"
-                        >
-                            {{ roles[roleIndex] }}
-                        </motion.span>
-                    </AnimatePresence>
-                </motion.p>
+                    <LiquidBlob v-else class="aspect-[4/5] w-full" />
+                    <span
+                        class="ui-label absolute -bottom-3 left-4 bg-[var(--accent-fill)] px-2 py-1 text-[var(--accent-ink)]"
+                        >{{ roles[0] }}</span
+                    >
+                </motion.div>
+            </div>
 
-                <motion.p
-                    v-if="statement"
-                    :variants="rise(0.2)"
-                    class="max-w-xl text-lg leading-relaxed text-pretty text-muted-foreground"
+            <!-- Statement, buttons, figures -->
+            <motion.div
+                initial="hidden"
+                animate="visible"
+                class="grid gap-8 border-t border-border pt-6 lg:grid-cols-12 lg:items-end"
+            >
+                <motion.div
+                    :variants="rise(0.5)"
+                    class="flex flex-col gap-5 lg:col-span-5"
                 >
-                    {{ statement }}
-                </motion.p>
+                    <p
+                        v-if="statement"
+                        class="max-w-md text-lg leading-relaxed text-pretty"
+                    >
+                        {{ statement }}
+                    </p>
+                    <ul
+                        v-if="tools.length"
+                        class="flex flex-wrap gap-1.5"
+                        aria-label="Main tools"
+                    >
+                        <li v-for="tool in tools" :key="tool" class="ui-pill">
+                            {{ tool }}
+                        </li>
+                    </ul>
+                </motion.div>
 
-                <motion.div :variants="rise(0.26)" class="flex flex-wrap gap-3">
+                <motion.div
+                    :variants="rise(0.6)"
+                    class="flex flex-wrap gap-3 lg:col-span-3"
+                >
                     <a
                         :href="content.hero.primary_cta_url || '#projects'"
                         class="ui-btn ui-btn-primary"
                     >
                         {{ primaryLabel }}
-                        <ArrowRight class="size-4" />
+                        <ArrowUpRight class="size-4" />
                     </a>
                     <a
                         :href="content.hero.secondary_cta_url || '#contact'"
@@ -229,135 +252,47 @@ function rise(delay: number) {
                     </a>
                 </motion.div>
 
+                <!--
+                    Figures: the span structure (tabular-nums value, then its
+                    label) is asserted by the SSR feature test; keep it.
+                -->
                 <motion.div
-                    :variants="rise(0.32)"
-                    class="mt-2 grid w-full max-w-lg grid-cols-3 gap-3"
+                    :variants="rise(0.7)"
+                    class="grid grid-cols-3 gap-6 lg:col-span-4"
                 >
-                    <div class="ui-card flex flex-col gap-1 rounded-2xl p-4">
+                    <div class="flex flex-col">
                         <span
-                            class="ui-display text-2xl tabular-nums sm:text-3xl"
+                            class="ui-display text-5xl tabular-nums sm:text-6xl"
                             ><AnimatedCounter
                                 :value="stats.yearsExperience"
                                 suffix="+"
                         /></span>
-                        <span class="text-xs text-muted-foreground">{{
+                        <span class="ui-label text-muted-foreground">{{
                             content.hero.years_label
                         }}</span>
                     </div>
-                    <div class="ui-card flex flex-col gap-1 rounded-2xl p-4">
+                    <div class="flex flex-col">
                         <span
-                            class="ui-display text-2xl tabular-nums sm:text-3xl"
+                            class="ui-display text-5xl tabular-nums sm:text-6xl"
                             ><AnimatedCounter :value="stats.projects"
                         /></span>
-                        <span class="text-xs text-muted-foreground">{{
+                        <span class="ui-label text-muted-foreground">{{
                             content.hero.projects_label
                         }}</span>
                     </div>
-                    <div class="ui-card flex flex-col gap-1 rounded-2xl p-4">
+                    <div class="flex flex-col">
                         <span
-                            class="ui-display text-2xl tabular-nums sm:text-3xl"
+                            class="ui-display text-5xl tabular-nums sm:text-6xl"
                             ><AnimatedCounter :value="stats.skills"
                         /></span>
-                        <span class="text-xs text-muted-foreground">{{
+                        <span class="ui-label text-muted-foreground">{{
                             content.hero.skills_label
                         }}</span>
                     </div>
                 </motion.div>
             </motion.div>
-
-            <!-- Portrait in its 3D field -->
-            <div
-                class="relative mx-auto w-full max-w-md lg:col-span-5 lg:max-w-none"
-            >
-                <div
-                    class="absolute -inset-x-[28%] -inset-y-[22%] transition-opacity duration-1000"
-                    :class="ready ? 'opacity-100' : 'opacity-0'"
-                >
-                    <component
-                        :is="Scene"
-                        v-if="Scene"
-                        variant="founder"
-                        @ready="ready = true"
-                        @failed="fail"
-                    />
-                </div>
-
-                <motion.div
-                    :initial="{ opacity: 0, scale: 0.94, y: 24 }"
-                    :animate="{ opacity: 1, scale: 1, y: 0 }"
-                    :transition="{ duration: 1, ease: EASE_OUT, delay: 0.15 }"
-                    class="relative"
-                >
-                    <div
-                        class="ui-card relative overflow-hidden rounded-[2rem] p-2 shadow-[var(--shadow-lift)]"
-                    >
-                        <div
-                            class="relative aspect-[4/5] overflow-hidden rounded-[1.6rem] bg-muted"
-                        >
-                            <img
-                                v-if="profile.avatar_url"
-                                :src="profile.avatar_url"
-                                :alt="profile.name"
-                                class="size-full object-cover"
-                            />
-                            <span
-                                v-else
-                                class="ui-display text-gradient grid size-full place-items-center text-[8rem]"
-                            >
-                                {{ firstName.charAt(0) }}
-                            </span>
-                            <div
-                                class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent"
-                                aria-hidden="true"
-                            />
-                            <div
-                                class="absolute right-4 bottom-4 left-4 flex items-end justify-between gap-3 text-white"
-                            >
-                                <div>
-                                    <p class="text-lg font-semibold">
-                                        {{ profile.name }}
-                                    </p>
-                                    <p
-                                        v-if="profile.headline"
-                                        class="text-sm text-white/80"
-                                    >
-                                        {{ profile.headline }}
-                                    </p>
-                                </div>
-                                <span
-                                    v-if="profile.location"
-                                    class="inline-flex items-center gap-1 text-xs text-white/80"
-                                >
-                                    <MapPin class="size-3.5" />
-                                    {{ profile.location }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <span
-                        v-for="(chip, i) in chips"
-                        :key="chip"
-                        :class="[
-                            chipPositions[i],
-                            'ui-glass ui-float absolute hidden rounded-full px-3.5 py-2 text-sm font-semibold shadow-[var(--shadow-soft)] sm:inline-flex',
-                        ]"
-                        :style="{ animationDelay: `${i * -1.5}s` }"
-                    >
-                        <span
-                            class="mr-2 inline-block size-2 self-center rounded-full bg-gradient-to-br from-[var(--grad-from)] to-[var(--grad-to)]"
-                        />
-                        {{ chip }}
-                    </span>
-
-                    <!-- A terminal session answering "who is this?" -->
-                    <div
-                        class="ui-float absolute top-[36%] -left-[18%] hidden w-56 [animation-delay:-2s] lg:block"
-                    >
-                        <CodeTerminal title="~/portfolio" :lines="sessionLog" />
-                    </div>
-                </motion.div>
-            </div>
         </div>
+
+        <EditorialMarquee :items="band" />
     </section>
 </template>

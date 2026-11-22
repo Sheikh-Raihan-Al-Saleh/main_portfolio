@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\ResolvesMediaUrls;
+use App\Concerns\ResolvesSingleton;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -50,7 +51,7 @@ use Illuminate\Support\Carbon;
 #[Appends(['avatar_url', 'logo_url', 'resume_url', 'og_image_url'])]
 class Profile extends Model
 {
-    use ResolvesMediaUrls;
+    use ResolvesMediaUrls, ResolvesSingleton;
 
     protected function getAvatarUrlAttribute(): ?string
     {
@@ -78,7 +79,7 @@ class Profile extends Model
      */
     public static function current(): self
     {
-        return static::query()->firstOrCreate([], [
+        return static::resolveSingleton([
             'name' => 'Your Name',
             ...static::heroDefaults(),
             'footer' => static::footerDefaults(),

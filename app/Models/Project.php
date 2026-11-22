@@ -7,6 +7,7 @@ use App\Enums\ProjectContext;
 use Database\Factories\ProjectFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\RouteKey;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,6 +49,7 @@ use Illuminate\Support\Str;
     'sort_order', 'started_at', 'completed_at',
 ])]
 #[Appends(['cover_image_url', 'gallery_urls', 'landing_url'])]
+#[Hidden(['landingPage'])]
 #[RouteKey('slug')]
 class Project extends Model
 {
@@ -62,6 +64,16 @@ class Project extends Model
      *
      * @var array<string, mixed>
      */
+    /**
+     * landing_url is appended to every serialized project and needs the
+     * landing page's publish flag, so it is always loaded with the project
+     * (one query per list, not one per project), slimmed to the columns the
+     * accessor reads, and kept out of the JSON by #[Hidden].
+     *
+     * @var list<string>
+     */
+    protected $with = ['landingPage:id,project_id,is_published'];
+
     protected $attributes = [
         'has_landing_page' => false,
         'context' => ProjectContext::Personal->value,

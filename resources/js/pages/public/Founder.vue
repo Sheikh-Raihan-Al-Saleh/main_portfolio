@@ -7,6 +7,7 @@ import FounderExperience from '@/components/founder/FounderExperience.vue';
 import FounderHero from '@/components/founder/FounderHero.vue';
 import FounderProjects from '@/components/founder/FounderProjects.vue';
 import FounderSkills from '@/components/founder/FounderSkills.vue';
+import ProjectMarquee from '@/components/site/ProjectMarquee.vue';
 import type {
     Education,
     Experience,
@@ -67,6 +68,8 @@ const heroHighlights = computed(() =>
         :stats="stats"
         :highlights="heroHighlights"
     />
+    <ProjectMarquee :projects="projects" label="Projects" />
+
     <FounderAbout :profile="profile" />
     <FounderSkills :skill-groups="skillGroups" />
     <FounderProjects :projects="projects" />

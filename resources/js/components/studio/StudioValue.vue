@@ -13,6 +13,8 @@ import type { Company } from '@/types';
  */
 type Props = {
     company: Company;
+    /** Chapter number for the section header, e.g. "01". */
+    index?: string;
 };
 
 const props = defineProps<Props>();
@@ -29,6 +31,7 @@ function wide(index: number): boolean {
     <section id="why" class="site-section scroll-mt-24">
         <div class="site-container">
             <SectionHeader
+                :index="index"
                 :eyebrow="content.eyebrow"
                 :title="content.title"
                 :highlight="content.highlight"

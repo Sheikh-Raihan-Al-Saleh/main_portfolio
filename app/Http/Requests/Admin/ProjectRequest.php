@@ -34,6 +34,8 @@ class ProjectRequest extends FormRequest
             'remove_cover_image' => ['boolean'],
             'gallery' => ['nullable', 'array', 'max:12'],
             'gallery.*' => ['image', 'max:4096'],
+            'remove_gallery' => ['nullable', 'array'],
+            'remove_gallery.*' => ['string', 'max:2048'],
             'tech_stack' => ['nullable', 'array', 'max:30'],
             'tech_stack.*' => ['string', 'max:40'],
             'repo_url' => ['nullable', 'url', 'max:255'],

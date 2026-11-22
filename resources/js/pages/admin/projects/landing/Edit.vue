@@ -124,7 +124,7 @@ const tabs: FormTab[] = [
         label: 'Hero images',
         description: 'Device mockups',
         icon: ImageIcon,
-        fields: ['hero_media_paths'],
+        fields: ['hero_media_paths', 'remove_hero_media_slots'],
     },
     {
         id: 'buttons',
@@ -295,10 +295,11 @@ function heroPreview(index: number): string | null {
                                 <div class="grid gap-2">
                                     <FileField
                                         name="hero_media_paths[0]"
+                                        remove-name="remove_hero_media_slots[0]"
                                         label="Desktop · 1920×1080"
                                         :current-url="heroPreview(0)"
                                         accept="image/*"
-                                        hint="Uploading replaces the current image."
+                                        hint="Uploading replaces the current image; Remove clears the slot."
                                         preview
                                     />
                                     <InputError
@@ -308,10 +309,11 @@ function heroPreview(index: number): string | null {
                                 <div class="grid gap-2">
                                     <FileField
                                         name="hero_media_paths[1]"
+                                        remove-name="remove_hero_media_slots[1]"
                                         label="Tablet · 768×576"
                                         :current-url="heroPreview(1)"
                                         accept="image/*"
-                                        hint="Uploading replaces the current image."
+                                        hint="Uploading replaces the current image; Remove clears the slot."
                                         preview
                                     />
                                     <InputError
@@ -321,10 +323,11 @@ function heroPreview(index: number): string | null {
                                 <div class="grid gap-2">
                                     <FileField
                                         name="hero_media_paths[2]"
+                                        remove-name="remove_hero_media_slots[2]"
                                         label="Phone · 375×667"
                                         :current-url="heroPreview(2)"
                                         accept="image/*"
-                                        hint="Uploading replaces the current image."
+                                        hint="Uploading replaces the current image; Remove clears the slot."
                                         preview
                                     />
                                     <InputError

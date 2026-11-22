@@ -1,7 +1,10 @@
 <?php
 
+use App\Enums\LandingSectionType;
 use App\Enums\ProjectContext;
+use App\Models\LandingSection;
 use App\Models\Project;
+use App\Models\ProjectLandingPage;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -157,4 +160,97 @@ test('reordering persists the new sort order', function () {
 
     expect($second->fresh()->sort_order)->toBe(0)
         ->and($first->fresh()->sort_order)->toBe(1);
+});
+
+test('deleting a project also deletes its landing page media', function () {
+    Storage::fake('uploads');
+    foreach (['hero/legacy.png', 'hero/a.png', 'og/og.png', 'steps/one.png'] as $file) {
+        Storage::disk('uploads')->put("landing/{$file}", 'x');
+    }
+
+    $project = Project::factory()->create();
+    $landingPage = ProjectLandingPage::factory()->for($project)->create([
+        'hero_media_path' => 'landing/hero/legacy.png',
+        'hero_media_paths' => ['landing/hero/a.png', null, null],
+        'og_image_path' => 'landing/og/og.png',
+    ]);
+    LandingSection::factory()->for($landingPage, 'landingPage')
+        ->ofType(LandingSectionType::DemoWalkthrough)
+        ->create(['data' => [
+            'frame' => 'browser',
+            'steps' => [['image_path' => 'landing/steps/one.png', 'title' => 'One', 'caption' => null]],
+        ]]);
+
+    $this->actingAs($this->admin)
+        ->delete("/admin/projects/{$project->slug}")
+        ->assertRedirect();
+
+    expect(ProjectLandingPage::count())->toBe(0)
+        ->and(LandingSection::count())->toBe(0);
+    foreach (['hero/legacy.png', 'hero/a.png', 'og/og.png', 'steps/one.png'] as $file) {
+        Storage::disk('uploads')->assertMissing("landing/{$file}");
+    }
+});
+
+test('ticked gallery images are removed and the rest kept', function () {
+    Storage::fake('uploads');
+    Storage::disk('uploads')->put('projects/gallery/keep.png', 'x');
+    Storage::disk('uploads')->put('projects/gallery/drop.png', 'x');
+
+    $project = Project::factory()->create([
+        'gallery' => ['projects/gallery/keep.png', 'projects/gallery/drop.png'],
+    ]);
+
+    $this->actingAs($this->admin)
+        ->put("/admin/projects/{$project->slug}", [
+            'title' => $project->title,
+            'context' => $project->context->value,
+            'remove_gallery' => ['projects/gallery/drop.png'],
+        ])
+        ->assertRedirect();
+
+    expect($project->fresh()->gallery)->toBe(['projects/gallery/keep.png']);
+    Storage::disk('uploads')->assertExists('projects/gallery/keep.png');
+    Storage::disk('uploads')->assertMissing('projects/gallery/drop.png');
+});
+
+test('gallery removal cannot delete files outside the project gallery', function () {
+    Storage::fake('uploads');
+    Storage::disk('uploads')->put('profile/avatar.png', 'x');
+
+    $project = Project::factory()->create(['gallery' => []]);
+
+    $this->actingAs($this->admin)
+        ->put("/admin/projects/{$project->slug}", [
+            'title' => $project->title,
+            'context' => $project->context->value,
+            'remove_gallery' => ['profile/avatar.png', '../.env'],
+        ])
+        ->assertRedirect();
+
+    Storage::disk('uploads')->assertExists('profile/avatar.png');
+});
+
+test('the edit page lists gallery images by path for removal', function () {
+    $project = Project::factory()->create(['gallery' => ['projects/gallery/a.png']]);
+
+    $this->actingAs($this->admin)
+        ->get("/admin/projects/{$project->slug}/edit")
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('galleryItems', 1)
+            ->where('galleryItems.0.path', 'projects/gallery/a.png'),
+        );
+});
+
+test('project search treats LIKE wildcards literally', function () {
+    Project::factory()->create(['title' => '100% uptime', 'summary' => null]);
+    Project::factory()->create(['title' => '1000 users', 'summary' => null]);
+
+    $this->actingAs($this->admin)
+        ->get('/admin/projects?search=100%25')
+        ->assertInertia(fn ($page) => $page
+            ->has('projects', 1)
+            ->where('projects.0.title', '100% uptime'),
+        );
 });

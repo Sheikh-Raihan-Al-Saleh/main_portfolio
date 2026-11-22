@@ -64,6 +64,12 @@ export function useFooterContent(): FooterContent {
     const isAboutRoute = computed(() => page.url.startsWith('/about'));
     const isFounderRoute = computed(() => page.url.startsWith('/founder'));
     const footer = computed(() => owner.value?.footer);
+    // The résumé always belongs to the founder profile, whichever face is shown.
+    const hasResume = computed(
+        () =>
+            !!(page.props.profile as { resume_url?: string | null } | undefined)
+                ?.resume_url,
+    );
     const year = new Date().getFullYear();
 
     function whatsappUrl(): string | null {
@@ -121,6 +127,11 @@ export function useFooterContent(): FooterContent {
         const url = normalizeHref(resolve(link.url ?? '').trim());
 
         if (!label && !url) {
+            return null;
+        }
+
+        // /resume 404s until a résumé is uploaded, so hide the link until then.
+        if (url === '/resume' && !hasResume.value) {
             return null;
         }
 

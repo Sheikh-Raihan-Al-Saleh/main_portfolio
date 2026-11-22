@@ -32,11 +32,30 @@ function scrollToTop(): void {
 </script>
 
 <template>
-    <footer class="relative overflow-hidden border-t border-border bg-card">
-        <div
-            class="ui-blob ui-blob-a -bottom-40 left-1/4 size-[28rem] opacity-25"
-            aria-hidden="true"
-        />
+    <footer class="relative overflow-hidden border-t border-border">
+        <!-- The sign-off: one giant line that leads to the contact form -->
+        <div class="site-container border-b border-border py-14 sm:py-20">
+            <p class="ui-label text-muted-foreground">
+                Have a project in mind?
+            </p>
+            <a
+                :href="
+                    nav.isCompanySite.value ? '/#contact' : '/founder#contact'
+                "
+                class="group mt-4 flex items-end justify-between gap-6"
+            >
+                <span
+                    class="ui-display text-[clamp(4rem,15vw,15rem)] transition-colors duration-500 group-hover:text-[var(--accent-text)]"
+                    >Let's talk</span
+                >
+                <span
+                    class="mb-[2vw] grid size-16 shrink-0 place-items-center rounded-full bg-[var(--accent-fill)] text-[var(--accent-ink)] transition-transform duration-500 group-hover:rotate-45 sm:size-24"
+                    aria-hidden="true"
+                >
+                    <ArrowUpRight class="size-7 sm:size-10" />
+                </span>
+            </a>
+        </div>
 
         <div
             class="site-container relative grid gap-12 py-16 lg:grid-cols-12 lg:py-20"
@@ -51,8 +70,8 @@ function scrollToTop(): void {
                         :logo-url="nav.brandLogoUrl.value"
                         :name="nav.owner.value?.name"
                         :initials="nav.initials.value"
-                        initials-class="footer-logo-icon rounded-xl bg-gradient-to-br from-[var(--grad-from)] to-[var(--grad-to)] text-white"
-                        image-class="h-14 sm:h-16"
+                        initials-class="footer-logo-icon size-14 rounded-2xl bg-foreground text-lg text-background"
+                        image-class="h-16 sm:h-20"
                     />
                 </Link>
                 <p

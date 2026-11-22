@@ -7,8 +7,10 @@ use App\Models\Education;
 use App\Models\Experience;
 use App\Models\Profile;
 use App\Models\Project;
+use App\Models\ProjectLandingPage;
 use App\Models\Skill;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 test('the company home page renders with the company and its work', function () {
@@ -87,6 +89,8 @@ test('the founder portfolio page renders his personal work', function () {
 });
 
 test('the founder portfolio renders its real figures in the html, not placeholders', function () {
+    requiresSsr();
+
     Project::factory()->count(2)->personalWork()->create();
     Skill::factory()->count(3)->create();
     Experience::factory()->create(['start_date' => now()->subYears(6)]);
@@ -102,6 +106,8 @@ test('the founder portfolio renders its real figures in the html, not placeholde
 });
 
 test('the public header and footer render the uploaded company logo', function () {
+    requiresSsr();
+
     Storage::fake('uploads');
     Storage::disk('uploads')->put('logos/brand.png', UploadedFile::fake()->image('brand.png')->getContent());
     Company::current()->update(['logo_path' => 'logos/brand.png']);
@@ -116,6 +122,8 @@ test('the public header and footer render the uploaded company logo', function (
 });
 
 test('the public header and footer fall back to the initials mark without a logo', function () {
+    requiresSsr();
+
     Company::current()->update(['logo_path' => null]);
 
     $html = $this->get('/')->assertOk()->getContent();
@@ -300,4 +308,81 @@ test('a media path whose file is gone resolves to no url instead of a broken ima
 
     expect($project->cover_image_url)->toBeNull()
         ->and($project->gallery_urls)->toBe([url('uploads/projects/kept.png')]);
+});
+
+test('the founder page sends its real figures as props', function () {
+    Project::factory()->count(2)->personalWork()->create();
+    Skill::factory()->count(3)->create();
+    Experience::factory()->create(['start_date' => now()->subYears(6)]);
+
+    $this->get('/founder')->assertOk()->assertInertia(fn ($page) => $page
+        ->where('stats.projects', 2)
+        ->where('stats.skills', 3)
+        ->where('stats.yearsExperience', 6),
+    );
+});
+
+test('the uploaded company logo reaches every public page as a prop', function () {
+    Storage::fake('uploads');
+    Storage::disk('uploads')->put('logos/brand.png', UploadedFile::fake()->image('brand.png')->getContent());
+    Company::current()->update(['logo_path' => 'logos/brand.png']);
+
+    foreach (['/', '/about', '/founder'] as $path) {
+        $this->get($path)->assertOk()->assertInertia(fn ($page) => $page
+            ->where('company.logo_url', fn (?string $url) => str_ends_with((string) $url, 'uploads/logos/brand.png')),
+        );
+    }
+});
+
+test('project lists load landing pages in one query, not one per project', function () {
+    $projects = Project::factory()->count(5)->companyWork()->create();
+    foreach ($projects as $project) {
+        ProjectLandingPage::factory()->for($project)->create(['is_published' => true]);
+    }
+
+    DB::enableQueryLog();
+    $this->get('/projects')->assertOk();
+    $landingQueries = collect(DB::getQueryLog())
+        ->filter(fn (array $query): bool => str_contains($query['query'], 'project_landing_pages'));
+    DB::disableQueryLog();
+
+    expect($landingQueries)->toHaveCount(1);
+});
+
+test('the eager-loaded landing page stays out of the project payload', function () {
+    $project = Project::factory()->companyWork()->create();
+    ProjectLandingPage::factory()->for($project)->create(['is_published' => true]);
+
+    $this->get('/projects')->assertOk()->assertInertia(fn ($page) => $page
+        ->where('projects.0.landing_url', "/p/{$project->slug}")
+        ->missing('projects.0.landing_page'),
+    );
+});
+
+test('the home page counts company projects once', function () {
+    Project::factory()->count(2)->companyWork()->create();
+
+    DB::enableQueryLog();
+    $this->get('/')->assertOk()->assertInertia(fn ($page) => $page
+        ->where('totalProjects', 2)
+        ->where('stats.projects', 2),
+    );
+    $counts = collect(DB::getQueryLog())
+        ->filter(fn (array $query): bool => str_contains($query['query'], 'count(*)')
+            && str_contains($query['query'], 'projects')
+            && in_array('company', $query['bindings'], true));
+    DB::disableQueryLog();
+
+    expect($counts)->toHaveCount(1);
+});
+
+test('the singleton records are created once and reused', function () {
+    $first = Profile::current();
+    $again = Profile::current();
+    $company = Company::current();
+
+    expect($again->id)->toBe($first->id)
+        ->and(Profile::count())->toBe(1)
+        ->and(Company::current()->id)->toBe($company->id)
+        ->and(Company::count())->toBe(1);
 });

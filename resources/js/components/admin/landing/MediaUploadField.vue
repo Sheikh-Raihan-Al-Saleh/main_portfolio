@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { usePage } from '@inertiajs/vue3';
 import { Loader2, Upload, X } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { uploadUrl } from '@/lib/media';
+import { oversizedFileMessage, uploadUrl } from '@/lib/media';
 
 type Props = {
     modelValue: string | null;
@@ -23,6 +24,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{ 'update:modelValue': [string | null] }>();
 
+const page = usePage();
 const uploading = ref(false);
 const error = ref<string | null>(null);
 const inputRef = ref<HTMLInputElement | null>(null);
@@ -45,9 +47,19 @@ const accept = computed(() =>
  * path, which is what goes into `data`.
  */
 async function handleChange(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
 
     if (!file) {
+        return;
+    }
+
+    const sizeError = oversizedFileMessage([file], page.props.uploadLimits);
+
+    if (sizeError) {
+        error.value = sizeError;
+        input.value = '';
+
         return;
     }
 
@@ -71,16 +83,28 @@ async function handleChange(event: Event) {
             credentials: 'same-origin',
         });
 
+        if (response.status === 413) {
+            throw new Error(
+                'The file is larger than the server accepts. Pick a smaller file or raise upload_max_filesize / post_max_size in PHP.',
+            );
+        }
+
         if (!response.ok) {
-            throw new Error(`Upload failed with status ${response.status}`);
+            throw new Error(
+                'Upload failed. Check the file type and size, then try again.',
+            );
         }
 
         const payload = (await response.json()) as { path: string };
 
         emit('update:modelValue', payload.path);
-    } catch {
+    } catch (failure) {
+        // fetch() itself throws a TypeError on network failure; only the
+        // errors raised above carry a message meant for the editor.
         error.value =
-            'Upload failed. Check the file type and size, then try again.';
+            failure instanceof Error && !(failure instanceof TypeError)
+                ? failure.message
+                : 'Upload failed. Check your connection, then try again.';
     } finally {
         uploading.value = false;
 

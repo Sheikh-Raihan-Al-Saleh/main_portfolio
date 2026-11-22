@@ -27,3 +27,10 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Admin-uploaded media is content, not source; only the listing guard is tracked.
+/public/uploads/*
+!/public/uploads/index.html
+/portfolio.zip
+/playwright-report
+/test-results

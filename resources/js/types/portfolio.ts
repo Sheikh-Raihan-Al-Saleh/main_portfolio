@@ -119,7 +119,7 @@ export type Company = {
     public_email: string | null;
     phone: string | null;
     website: string | null;
-    founded_year: string | null;
+    founded_year: number | null;
     logo_path: string | null;
     og_image_path: string | null;
     hero_eyebrow: string | null;

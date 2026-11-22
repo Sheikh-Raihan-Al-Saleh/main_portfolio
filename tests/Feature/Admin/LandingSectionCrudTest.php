@@ -294,3 +294,17 @@ test('the company home page only shows visible company sections in order', funct
             ->where('sections.1.heading', 'Second'),
         );
 });
+
+test('reordering refuses sections from different pages', function () {
+    $mine = LandingSection::factory()->for($this->landingPage, 'landingPage')->create(['sort_order' => 0]);
+    $other = LandingSection::factory()
+        ->for(ProjectLandingPage::factory()->for(Project::factory()), 'landingPage')
+        ->create(['sort_order' => 0]);
+
+    $this->actingAs($this->admin)
+        ->post('/admin/landing-sections/reorder', ['ids' => [$other->id, $mine->id]])
+        ->assertSessionHasErrors('ids');
+
+    expect($mine->fresh()->sort_order)->toBe(0)
+        ->and($other->fresh()->sort_order)->toBe(0);
+});

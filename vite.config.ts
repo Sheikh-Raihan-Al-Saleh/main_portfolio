@@ -21,6 +21,10 @@ export default defineConfig({
                 bunny('Plus Jakarta Sans', {
                     weights: [500, 600, 700, 800],
                 }),
+                // Condensed display face for the public site's headlines.
+                bunny('Anton', {
+                    weights: [400],
+                }),
             ],
         }),
         inertia(),

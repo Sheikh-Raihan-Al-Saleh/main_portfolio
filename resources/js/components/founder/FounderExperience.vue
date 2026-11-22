@@ -44,6 +44,7 @@ function formatDate(value: string | null | undefined): string {
     <section id="experience" class="site-section scroll-mt-24">
         <div class="site-container">
             <SectionHeader
+                index="04"
                 :eyebrow="copy.eyebrow"
                 :title="copy.title"
                 :highlight="copy.highlight"
@@ -62,11 +63,7 @@ function formatDate(value: string | null | undefined): string {
                 >
                     <span
                         class="absolute top-6 left-5 grid size-3 -translate-x-1/2 place-items-center rounded-full ring-4 ring-background sm:left-6"
-                        :class="
-                            !job.end_date
-                                ? 'bg-gradient-to-br from-[var(--grad-from)] to-[var(--grad-to)]'
-                                : 'bg-border'
-                        "
+                        :class="!job.end_date ? 'bg-foreground' : 'bg-border'"
                         aria-hidden="true"
                     />
                     <Reveal :delay="i * 0.05">

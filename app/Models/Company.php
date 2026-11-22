@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\ResolvesMediaUrls;
+use App\Concerns\ResolvesSingleton;
 use App\Support\StudioContent;
 use Database\Factories\CompanyFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
@@ -61,7 +62,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Company extends Model
 {
     /** @use HasFactory<CompanyFactory> */
-    use HasFactory, ResolvesMediaUrls;
+    use HasFactory, ResolvesMediaUrls, ResolvesSingleton;
 
     /**
      * Get the single company row, creating it on first access so the public
@@ -69,7 +70,7 @@ class Company extends Model
      */
     public static function current(): self
     {
-        return static::query()->firstOrCreate([], [
+        return static::resolveSingleton([
             'name' => 'Your Company',
             ...static::heroDefaults(),
             'footer' => static::footerDefaults(),
@@ -201,6 +202,7 @@ class Company extends Model
     {
         return [
             'accepting_projects' => 'boolean',
+            'founded_year' => 'integer',
             'socials' => 'array',
             'footer' => 'array',
             'content' => 'array',

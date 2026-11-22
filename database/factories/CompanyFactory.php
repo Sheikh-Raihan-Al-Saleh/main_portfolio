@@ -28,7 +28,7 @@ class CompanyFactory extends Factory
             'public_email' => fake()->unique()->companyEmail(),
             'phone' => '+8801'.fake()->numerify('#########'),
             'website' => 'https://'.fake()->domainName(),
-            'founded_year' => (string) fake()->numberBetween(2012, 2024),
+            'founded_year' => fake()->numberBetween(2012, 2024),
             'hero_eyebrow' => 'Product studio',
             'hero_title' => '{{name}} builds software that ships.',
             'hero_statement' => fake()->sentence(8),

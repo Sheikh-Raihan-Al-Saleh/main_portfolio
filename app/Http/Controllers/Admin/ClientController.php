@@ -9,6 +9,7 @@ use App\Models\Client;
 use App\Models\Company;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -97,9 +98,11 @@ class ClientController extends Controller
             'ids.*' => ['integer', 'exists:clients,id'],
         ]);
 
-        foreach ($validated['ids'] as $position => $id) {
-            Client::query()->whereKey($id)->update(['sort_order' => $position]);
-        }
+        DB::transaction(function () use ($validated): void {
+            foreach ($validated['ids'] as $position => $id) {
+                Client::query()->whereKey($id)->update(['sort_order' => $position]);
+            }
+        });
 
         return back();
     }

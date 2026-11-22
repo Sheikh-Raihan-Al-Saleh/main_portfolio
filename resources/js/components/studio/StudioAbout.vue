@@ -14,6 +14,8 @@ import type { Company, Profile } from '@/types';
  */
 type Props = {
     company: Company;
+    /** Chapter number for the section header, e.g. "01". */
+    index?: string;
     profile: Profile;
 };
 
@@ -36,6 +38,7 @@ const paragraphs = computed(() =>
         >
             <div class="flex flex-col gap-6 lg:col-span-6">
                 <SectionHeader
+                    :index="index"
                     align="left"
                     :eyebrow="content.eyebrow"
                     :title="content.title"

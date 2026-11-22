@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
+use function Illuminate\Support\defer;
+
 class ContactController extends Controller
 {
     public function store(ContactMessageRequest $request): RedirectResponse
@@ -21,7 +23,9 @@ class ContactController extends Controller
             'user_agent' => str($request->userAgent())->limit(250)->value(),
         ]);
 
-        $this->notifyOwner($message);
+        // Sent after the response is flushed, so a slow mail server never
+        // holds up the visitor, and no queue worker has to be running.
+        defer(fn () => $this->notifyOwner($message));
 
         Inertia::flash('toast', [
             'type' => 'success',
