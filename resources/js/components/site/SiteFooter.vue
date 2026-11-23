@@ -91,7 +91,7 @@ const isInternal = (url: string) =>
 </script>
 
 <template>
-    <footer class="relative mt-10 border-t border-ink bg-paper">
+    <footer class="relative mt-10 border-t border-line bg-paper">
         <div class="container-site pt-16 pb-10 sm:pt-24">
             <div class="grid gap-14 lg:grid-cols-12">
                 <div class="lg:col-span-5">
@@ -166,7 +166,7 @@ const isInternal = (url: string) =>
                 class="display mt-20 overflow-hidden text-[clamp(3.5rem,15vw,15rem)] leading-[0.8] tracking-tight text-ink"
                 aria-hidden="true"
             >
-                {{ brand.short_name }}<em>.</em>
+                {{ brand.short_name }}<span class="text-[var(--pop)]">.</span>
             </p>
 
             <div

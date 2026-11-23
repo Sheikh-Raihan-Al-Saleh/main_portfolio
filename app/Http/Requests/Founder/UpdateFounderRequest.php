@@ -12,6 +12,9 @@ class UpdateFounderRequest extends FormRequest
 {
     use SiteFormRules;
 
+    /**
+     * Only an admin may send this form.
+     */
     public function authorize(): bool
     {
         return $this->user()?->is_admin === true;
@@ -73,6 +76,9 @@ class UpdateFounderRequest extends FormRequest
         ];
     }
 
+    /**
+     * Turn checkbox values ("on", "1", missing) into real booleans before validation.
+     */
     protected function prepareForValidation(): void
     {
         $this->merge([

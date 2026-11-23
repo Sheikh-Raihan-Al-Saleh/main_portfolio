@@ -1,26 +1,8 @@
 import type { InertiaLinkProps } from '@inertiajs/vue3';
 import { usePage } from '@inertiajs/vue3';
-import type { ComputedRef, DeepReadonly } from 'vue';
 import { computed, readonly } from 'vue';
 import { toUrl } from '@/lib/utils';
-
-export type UseCurrentUrlReturn = {
-    currentUrl: DeepReadonly<ComputedRef<string>>;
-    isCurrentUrl: (
-        urlToCheck: NonNullable<InertiaLinkProps['href']>,
-        currentUrl?: string,
-        startsWith?: boolean,
-    ) => boolean;
-    isCurrentOrParentUrl: (
-        urlToCheck: NonNullable<InertiaLinkProps['href']>,
-        currentUrl?: string,
-    ) => boolean;
-    whenCurrentUrl: <T, F = null>(
-        urlToCheck: NonNullable<InertiaLinkProps['href']>,
-        ifTrue: T,
-        ifFalse?: F,
-    ) => T | F;
-};
+import type { UseCurrentUrlReturn } from '@/types';
 
 const page = usePage();
 const currentUrlReactive = computed(

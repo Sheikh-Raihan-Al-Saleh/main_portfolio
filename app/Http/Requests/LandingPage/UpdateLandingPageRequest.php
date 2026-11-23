@@ -4,8 +4,14 @@ namespace App\Http\Requests\LandingPage;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validates the landing page builder's page settings form.
+ */
 class UpdateLandingPageRequest extends FormRequest
 {
+    /**
+     * Only an admin may send this form.
+     */
     public function authorize(): bool
     {
         return $this->user()?->is_admin === true;
@@ -43,6 +49,9 @@ class UpdateLandingPageRequest extends FormRequest
         ];
     }
 
+    /**
+     * Turn checkbox values ("on", "1", missing) into real booleans before validation.
+     */
     protected function prepareForValidation(): void
     {
         $this->merge([

@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'motion-v';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import SmartImage from '@/components/media/SmartImage.vue';
 import AnimatedCounter from '@/components/site/AnimatedCounter.vue';
-import LiquidBlob from '@/components/site/LiquidBlob.vue';
 import { usePrefersReducedMotion } from '@/composables/usePrefersReducedMotion';
 import { useSite } from '@/composables/useSite';
 import { EASE_OUT } from '@/lib/motion';
@@ -67,10 +66,6 @@ const reveal = (delay: number) => ({
 
 <template>
     <section class="relative overflow-hidden" aria-labelledby="founder-title">
-        <LiquidBlob
-            class="pointer-events-none absolute -bottom-40 -left-40 size-[34rem] opacity-80"
-        />
-
         <div
             class="container-site relative grid gap-14 pt-10 pb-20 sm:pt-16 lg:grid-cols-12 lg:items-center"
         >
@@ -95,7 +90,7 @@ const reveal = (delay: number) => ({
                     <AnimatePresence mode="wait">
                         <motion.p
                             :key="roleIndex"
-                            class="display text-4xl text-brand italic sm:text-5xl"
+                            class="display text-4xl text-brand-text sm:text-5xl"
                             :initial="{ y: '100%', opacity: 0 }"
                             :animate="{ y: 0, opacity: 1 }"
                             :exit="{ y: '-100%', opacity: 0 }"

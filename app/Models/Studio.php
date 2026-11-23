@@ -2,10 +2,7 @@
 
 namespace App\Models;
 
-use App\Services\Media\MediaService;
-use App\Support\Defaults\StudioContent;
 use Database\Factories\StudioFactory;
-use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -51,11 +48,6 @@ use Illuminate\Support\Carbon;
  * @property string|null $og_image_path
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read string|null $logo_url
- * @property-read string|null $logo_dark_url
- * @property-read string|null $logo_mark_url
- * @property-read string|null $og_image_url
- * @property-read array<string, mixed> $studio_content
  */
 #[Fillable([
     'name', 'short_name', 'legal_name', 'slug', 'logo_path', 'logo_dark_path', 'logo_mark_path',
@@ -65,31 +57,46 @@ use Illuminate\Support\Carbon;
     'primary_cta_label', 'primary_cta_url', 'secondary_cta_label', 'secondary_cta_url',
     'footer', 'content', 'meta_title', 'meta_description', 'og_image_path',
 ])]
-#[Appends(['logo_url', 'logo_dark_url', 'logo_mark_url', 'og_image_url'])]
 class Studio extends Model
 {
     /** @use HasFactory<StudioFactory> */
     use HasFactory;
 
-    /** @return HasOne<Founder, $this> */
+    /**
+     * The person who runs the studio (one-to-one).
+     *
+     * @return HasOne<Founder, $this>
+     */
     public function founder(): HasOne
     {
         return $this->hasOne(Founder::class);
     }
 
-    /** @return HasMany<Client, $this> */
+    /**
+     * The studio's clients and partners (one-to-many).
+     *
+     * @return HasMany<Client, $this>
+     */
     public function clients(): HasMany
     {
         return $this->hasMany(Client::class);
     }
 
-    /** @return MorphMany<Project, $this> */
+    /**
+     * The studio's client and product work (polymorphic one-to-many).
+     *
+     * @return MorphMany<Project, $this>
+     */
     public function projects(): MorphMany
     {
         return $this->morphMany(Project::class, 'owner');
     }
 
-    /** @return MorphMany<SocialLink, $this> */
+    /**
+     * The studio's social profile links, in display order (polymorphic one-to-many).
+     *
+     * @return MorphMany<SocialLink, $this>
+     */
     public function socialLinks(): MorphMany
     {
         return $this->morphMany(SocialLink::class, 'owner')->orderBy('sort_order');
@@ -105,40 +112,14 @@ class Studio extends Model
         return $this->morphMany(LandingSection::class, 'sectionable');
     }
 
-    /** @return MorphMany<ContactMessage, $this> */
+    /**
+     * Enquiries sent from the studio contact form (polymorphic one-to-many).
+     *
+     * @return MorphMany<ContactMessage, $this>
+     */
     public function messages(): MorphMany
     {
         return $this->morphMany(ContactMessage::class, 'recipient');
-    }
-
-    /**
-     * The home page's fixed-section copy: stored edits merged over defaults.
-     *
-     * @return array<string, mixed>
-     */
-    public function getStudioContentAttribute(): array
-    {
-        return StudioContent::merge($this->content);
-    }
-
-    protected function getLogoUrlAttribute(): ?string
-    {
-        return MediaService::url($this->logo_path);
-    }
-
-    protected function getLogoDarkUrlAttribute(): ?string
-    {
-        return MediaService::url($this->logo_dark_path);
-    }
-
-    protected function getLogoMarkUrlAttribute(): ?string
-    {
-        return MediaService::url($this->logo_mark_path);
-    }
-
-    protected function getOgImageUrlAttribute(): ?string
-    {
-        return MediaService::url($this->og_image_path);
     }
 
     /**

@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
+/**
+ * Application services: the public path on shared hosting, local upload limits and per-request services.
+ */
 class AppServiceProvider extends ServiceProvider
 {
     /**

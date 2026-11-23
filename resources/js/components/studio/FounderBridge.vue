@@ -90,7 +90,7 @@ const { studio, founder } = useSite();
                         }}
                     </p>
                     <span
-                        class="mt-auto inline-flex items-center gap-2 pt-10 font-medium text-brand"
+                        class="mt-auto inline-flex items-center gap-2 pt-10 font-medium text-brand-text"
                     >
                         <span class="link-underline">{{
                             content.founder_link

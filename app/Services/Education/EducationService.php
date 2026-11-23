@@ -27,7 +27,10 @@ class EducationService
      */
     public function list(): Collection
     {
-        return $this->founderService->current()->educations()->ordered()->get();
+        return $this->founderService->current()->educations()
+            ->orderBy('sort_order')
+            ->orderByDesc('start_date')
+            ->get();
     }
 
     /**
@@ -55,16 +58,19 @@ class EducationService
         return $education;
     }
 
+    /**
+     * Delete an education entry.
+     */
     public function delete(Education $education): void
     {
         $education->delete();
     }
 
     /**
-     * @param  array<int, int>  $ids
+     * @param  array<int, int>  $orderedIds
      */
-    public function reorder(array $ids): void
+    public function reorder(array $orderedIds): void
     {
-        SortOrder::apply($this->founderService->current()->educations(), $ids);
+        SortOrder::apply($this->founderService->current()->educations(), $orderedIds);
     }
 }

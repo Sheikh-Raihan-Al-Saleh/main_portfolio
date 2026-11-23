@@ -5,6 +5,7 @@ import { motion } from 'motion-v';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import { Button } from '@/components/ui/button';
 import { fadeUp } from '@/lib/motion';
+import { formatDate } from '@/lib/text';
 import messageRoutes from '@/routes/admin/messages';
 import type { AdminMessagesIndexProps } from '@/types';
 
@@ -19,14 +20,6 @@ defineOptions({
 /** Laravel ships pagination labels containing `&laquo;` / `&raquo;` entities. */
 function paginationLabel(label: string): string {
     return label.replace('&laquo;', '‹').replace('&raquo;', '›').trim();
-}
-
-function formatDate(value: string): string {
-    return new Date(value).toLocaleDateString(undefined, {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-    });
 }
 </script>
 

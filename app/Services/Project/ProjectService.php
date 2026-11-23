@@ -53,14 +53,17 @@ class ProjectService
      */
     public function publishedFor(Model $owner, ?int $limit = null): Collection
     {
-        return $this->cards()->published()->ownedBy($owner)->ordered()
+        return $this->inDisplayOrder($this->cards()->where('is_published', true)->whereMorphedTo('owner', $owner))
             ->when($limit, fn (Builder $query) => $query->limit($limit))
             ->get();
     }
 
+    /**
+     * How many published projects one owner (studio or founder) has.
+     */
     public function countPublishedFor(Model $owner): int
     {
-        return Project::query()->published()->ownedBy($owner)->count();
+        return Project::query()->where('is_published', true)->whereMorphedTo('owner', $owner)->count();
     }
 
     /**
@@ -70,7 +73,7 @@ class ProjectService
      */
     public function publishedArchive(): Collection
     {
-        return $this->cards()->published()->ordered()->get();
+        return $this->inDisplayOrder($this->cards()->where('is_published', true))->get();
     }
 
     /**
@@ -80,7 +83,7 @@ class ProjectService
     {
         return $project
             ->load(['images', 'technologies:id,name,slug'])
-            ->loadExists(['landingPage as has_landing_page' => fn ($query) => $query->published()]);
+            ->loadExists(['landingPage as has_landing_page' => fn (Builder $query) => $query->where('is_published', true)]);
     }
 
     /**
@@ -90,29 +93,27 @@ class ProjectService
      */
     public function related(Project $project): Collection
     {
-        return $this->cards()->published()
+        $relatedQuery = $this->cards()
+            ->where('is_published', true)
             ->where('owner_type', $project->owner_type)
             ->where('owner_id', $project->owner_id)
-            ->whereKeyNot($project->id)
-            ->ordered()
-            ->limit(3)
-            ->get();
+            ->whereKeyNot($project->id);
+
+        return $this->inDisplayOrder($relatedQuery)->limit(3)->get();
     }
 
     /**
-     * Published covers for the login page's 3D scene (cached for 10 minutes).
+     * Published covers for the sign-in pages, in display order
+     * (cached for 10 minutes).
      *
      * @return array<int, array{title: string, cover: string}>
      */
     public function loginShowcase(): array
     {
-        return Cache::remember(self::SHOWCASE_CACHE_KEY, now()->addMinutes(10), fn (): array => Project::query()
-            ->published()
-            ->whereNotNull('cover_image_path')
-            ->ordered()
+        return Cache::remember(self::SHOWCASE_CACHE_KEY, now()->addMinutes(10), fn (): array => $this->inDisplayOrder(Project::query()->where('is_published', true)->whereNotNull('cover_image_path'))
             ->limit(6)
             ->get(['id', 'title', 'cover_image_path'])
-            ->map(fn (Project $project): array => ['title' => $project->title, 'cover' => (string) $project->cover_image_url])
+            ->map(fn (Project $project): array => ['title' => $project->title, 'cover' => (string) MediaService::url($project->cover_image_path)])
             ->all());
     }
 
@@ -125,16 +126,16 @@ class ProjectService
      */
     public function list(?string $search = null): Collection
     {
-        return Project::query()
+        $projectQuery = Project::query()
             ->select(self::CARD_COLUMNS)
             ->with('technologies:id,name')
             ->withCount('images')
             ->withExists('landingPage as has_landing_page')
             ->when($search, fn (Builder $query) => $query->where(
-                fn (Builder $inner) => $inner->whereLike('title', "%{$search}%")->orWhereLike('summary', "%{$search}%"),
-            ))
-            ->ordered()
-            ->get();
+                fn (Builder $searchQuery) => $searchQuery->whereLike('title', "%{$search}%")->orWhereLike('summary', "%{$search}%"),
+            ));
+
+        return $this->inDisplayOrder($projectQuery)->get();
     }
 
     /**
@@ -240,11 +241,11 @@ class ProjectService
     }
 
     /**
-     * @param  array<int, int>  $ids
+     * @param  array<int, int>  $orderedIds
      */
-    public function reorder(array $ids): void
+    public function reorder(array $orderedIds): void
     {
-        SortOrder::apply(Project::query(), $ids);
+        SortOrder::apply(Project::query(), $orderedIds);
     }
 
     /**
@@ -275,9 +276,24 @@ class ProjectService
         return Project::query()
             ->select(self::CARD_COLUMNS)
             ->with('technologies:id,name,slug')
-            ->withExists(['landingPage as has_landing_page' => fn ($query) => $query->published()]);
+            ->withExists(['landingPage as has_landing_page' => fn (Builder $query) => $query->where('is_published', true)]);
     }
 
+    /**
+     * Display order of every project list: the manual sort order first,
+     * then the newest project first when two share a position.
+     *
+     * @param  Builder<Project>  $query
+     * @return Builder<Project>
+     */
+    public function inDisplayOrder(Builder $query): Builder
+    {
+        return $query->orderBy('sort_order')->orderByDesc('id');
+    }
+
+    /**
+     * The owner record for the form value: "founder" or "studio".
+     */
     private function owner(string $key): Model
     {
         return $key === 'founder' ? $this->founderService->current() : $this->studioService->current();

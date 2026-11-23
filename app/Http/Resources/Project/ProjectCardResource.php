@@ -4,6 +4,7 @@ namespace App\Http\Resources\Project;
 
 use App\Models\Project;
 use App\Models\Technology;
+use App\Services\Media\MediaService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -27,7 +28,7 @@ class ProjectCardResource extends JsonResource
             'summary' => $this->summary,
             'owner' => $this->owner_type,
             'role' => $this->role,
-            'cover_image_url' => $this->cover_image_url,
+            'cover_image_url' => MediaService::url($this->cover_image_path),
             'is_featured' => $this->is_featured,
             'year' => ($this->completed_at ?? $this->started_at)?->year,
             'technologies' => $this->technologies->map(fn (Technology $technology): array => [

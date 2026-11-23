@@ -12,6 +12,9 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Fortify\Features;
 
+/**
+ * Account: the signed-in user's password and two-factor settings.
+ */
 class SecurityController extends Controller
 {
     public function __construct(

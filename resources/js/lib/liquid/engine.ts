@@ -230,12 +230,18 @@ function wake() {
 
 function sizeSurface(item: Item) {
     const rect = item.host.getBoundingClientRect();
-    const w = Math.max(1, Math.round(rect.width * item.resolution));
-    const h = Math.max(1, Math.round(rect.height * item.resolution));
+    const surfaceWidth = Math.max(1, Math.round(rect.width * item.resolution));
+    const surfaceHeight = Math.max(
+        1,
+        Math.round(rect.height * item.resolution),
+    );
 
-    if (item.surface.width !== w || item.surface.height !== h) {
-        item.surface.width = w;
-        item.surface.height = h;
+    if (
+        item.surface.width !== surfaceWidth ||
+        item.surface.height !== surfaceHeight
+    ) {
+        item.surface.width = surfaceWidth;
+        item.surface.height = surfaceHeight;
         item.dirty = true;
         updateCover(item);
 
@@ -286,10 +292,10 @@ function readColor(host: HTMLElement, name: string, fallback: string) {
 }
 
 function tintBlob(item: Item) {
-    const u = item.material.uniforms;
-    u.uColorA.value = readColor(item.host, '--scene-1', '#2b4bff');
-    u.uColorB.value = readColor(item.host, '--scene-2', '#6d83ff');
-    u.uColorC.value = readColor(item.host, '--scene-3', '#0b0b0b');
+    const uniforms = item.material.uniforms;
+    uniforms.uColorA.value = readColor(item.host, '--scene-1', '#2b4bff');
+    uniforms.uColorB.value = readColor(item.host, '--scene-2', '#6d83ff');
+    uniforms.uColorC.value = readColor(item.host, '--scene-3', '#0b0b0b');
 }
 
 function draw(item: Item, time: number) {
@@ -297,31 +303,31 @@ function draw(item: Item, time: number) {
         return;
     }
 
-    const { width: w, height: h } = item.surface;
+    const { width: surfaceWidth, height: surfaceHeight } = item.surface;
 
-    if (w > glWidth || h > glHeight) {
-        glWidth = Math.max(glWidth, w);
-        glHeight = Math.max(glHeight, h);
+    if (surfaceWidth > glWidth || surfaceHeight > glHeight) {
+        glWidth = Math.max(glWidth, surfaceWidth);
+        glHeight = Math.max(glHeight, surfaceHeight);
         renderer.setSize(glWidth, glHeight, false);
     }
 
     item.material.uniforms.uTime.value = time;
     mesh.material = item.material;
-    renderer.setViewport(0, 0, w, h);
+    renderer.setViewport(0, 0, surfaceWidth, surfaceHeight);
     renderer.render(scene, camera);
 
     // The viewport sits at the bottom-left of the GL canvas.
-    item.context.clearRect(0, 0, w, h);
+    item.context.clearRect(0, 0, surfaceWidth, surfaceHeight);
     item.context.drawImage(
         renderer.domElement,
         0,
-        glHeight - h,
-        w,
-        h,
+        glHeight - surfaceHeight,
+        surfaceWidth,
+        surfaceHeight,
         0,
         0,
-        w,
-        h,
+        surfaceWidth,
+        surfaceHeight,
     );
 }
 
@@ -350,7 +356,7 @@ function tick() {
 
         sizeSurface(item);
 
-        const u = item.material.uniforms;
+        const uniforms = item.material.uniforms;
         item.hover += (item.hoverTarget - item.hover) * 0.08;
         item.mouse.lerp(item.mouseTarget, 0.12);
 
@@ -359,15 +365,15 @@ function tick() {
             item.hover > 0.002;
 
         if (item.kind === 'blob' || settling || moving || item.dirty) {
-            if (u.uHover) {
-                u.uHover.value = item.hover;
+            if (uniforms.uHover) {
+                uniforms.uHover.value = item.hover;
             }
 
-            if (u.uVelocity) {
-                u.uVelocity.value = velocity;
+            if (uniforms.uVelocity) {
+                uniforms.uVelocity.value = velocity;
             }
 
-            u.uMouse.value.copy(item.mouse);
+            uniforms.uMouse.value.copy(item.mouse);
             draw(item, time);
             item.dirty = false;
             busy = true;
@@ -412,7 +418,7 @@ function register(item: Item): LiquidHandle {
 
     return {
         destroy() {
-            item.cleanup.forEach((fn) => fn());
+            item.cleanup.forEach((cleanupTask) => cleanupTask());
             intersection?.unobserve(item.host);
             items.delete(item);
             item.texture?.dispose();

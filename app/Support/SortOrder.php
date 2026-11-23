@@ -19,12 +19,12 @@ class SortOrder
      * @template TModel of Model
      *
      * @param  Builder<TModel>|Relation<TModel, *, *>  $query
-     * @param  array<int, int>  $ids  IDs in their new order, first to last.
+     * @param  array<int, int>  $orderedIds  IDs in their new order, first to last.
      */
-    public static function apply(Builder|Relation $query, array $ids): void
+    public static function apply(Builder|Relation $query, array $orderedIds): void
     {
-        DB::transaction(function () use ($query, $ids): void {
-            foreach (array_values($ids) as $position => $id) {
+        DB::transaction(function () use ($query, $orderedIds): void {
+            foreach (array_values($orderedIds) as $position => $id) {
                 (clone $query)->whereKey($id)->update(['sort_order' => $position]);
             }
         });

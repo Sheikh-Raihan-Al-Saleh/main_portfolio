@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import {
     ExternalLink,
     FolderKanban,
@@ -9,7 +9,6 @@ import {
     Sparkles,
 } from '@lucide/vue';
 import { motion } from 'motion-v';
-import { ref, watch } from 'vue';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
 import ReorderButtons from '@/components/admin/ReorderButtons.vue';
@@ -24,6 +23,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 import { useReorder } from '@/composables/useReorder';
 import { fadeUp } from '@/lib/motion';
 import projectRoutes from '@/routes/admin/projects';
@@ -43,24 +43,10 @@ const { items, move, saving } = useReorder<Project>(
     projectRoutes.reorder().url,
 );
 
-const search = ref(props.filters.search ?? '');
-
-// Debounce so typing doesn't fire a request per keystroke.
-let searchTimer: ReturnType<typeof setTimeout> | null = null;
-
-watch(search, (value) => {
-    if (searchTimer) {
-        clearTimeout(searchTimer);
-    }
-
-    searchTimer = setTimeout(() => {
-        router.get(projectRoutes.index().url, value ? { search: value } : {}, {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-        });
-    }, 300);
-});
+const { search } = useDebouncedSearch(
+    projectRoutes.index().url,
+    props.filters.search,
+);
 </script>
 
 <template>

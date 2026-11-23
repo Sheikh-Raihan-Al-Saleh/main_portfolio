@@ -14,6 +14,9 @@ use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 
+/**
+ * Fortify setup: the password reset action, the auth page views and the login rate limits.
+ */
 class FortifyServiceProvider extends ServiceProvider
 {
     /**
@@ -43,7 +46,8 @@ class FortifyServiceProvider extends ServiceProvider
     }
 
     /**
-     * A few published project covers for the 3D scene on the sign-in pages.
+     * Published project covers for the sign-in pages; the first one is shown
+     * as the "featured work" card beside the founder photo.
      *
      * @return array<int, array{title: string, cover: string}>
      */

@@ -4,6 +4,7 @@ import { ArrowUpRight, Menu, X } from '@lucide/vue';
 import { AnimatePresence, motion } from 'motion-v';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import BrandLogo from '@/components/brand/BrandLogo.vue';
+import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { useSite } from '@/composables/useSite';
 import { about, founder as founderRoute, home } from '@/routes';
 import projects from '@/routes/projects';
@@ -81,8 +82,25 @@ watch(open, (value) => {
     document.documentElement.style.overflow = value ? 'hidden' : '';
 });
 
+// Never leave the page locked if the header unmounts with the menu open.
+onBeforeUnmount(() => {
+    document.documentElement.style.overflow = '';
+});
+
 /** In-page anchors scroll; everything else is an Inertia visit. */
 const isAnchor = (href: string) => href.startsWith('#');
+
+const { isCurrentOrParentUrl } = useCurrentUrl();
+
+/**
+ * Marks the link to the page being shown. Links to a section of a page
+ * (with a #fragment) are never marked, since the whole page is not theirs.
+ */
+function currentPageAttribute(href: string): 'page' | undefined {
+    return !href.includes('#') && isCurrentOrParentUrl(href)
+        ? 'page'
+        : undefined;
+}
 </script>
 
 <template>
@@ -99,19 +117,20 @@ const isAnchor = (href: string) => href.startsWith('#');
             </Link>
 
             <nav aria-label="Main" class="hidden lg:block">
-                <ul class="flex items-center gap-1">
+                <ul class="nav-pill">
                     <li v-for="link in links" :key="link.label">
                         <a
                             v-if="isAnchor(link.href)"
                             :href="link.href"
-                            class="rounded-full px-4 py-2 text-[0.95rem] text-ink-soft transition-colors hover:bg-paper-deep hover:text-ink"
+                            class="nav-pill-link"
                         >
                             {{ link.label }}
                         </a>
                         <Link
                             v-else
                             :href="link.href"
-                            class="rounded-full px-4 py-2 text-[0.95rem] text-ink-soft transition-colors hover:bg-paper-deep hover:text-ink"
+                            class="nav-pill-link"
+                            :aria-current="currentPageAttribute(link.href)"
                         >
                             {{ link.label }}
                         </Link>
@@ -132,7 +151,7 @@ const isAnchor = (href: string) => href.startsWith('#');
 
                 <button
                     type="button"
-                    class="relative z-50 grid size-11 place-items-center rounded-full border border-line bg-paper lg:hidden"
+                    class="relative z-50 grid size-11 place-items-center rounded-full border border-line bg-card shadow-[var(--shadow-soft)] lg:hidden"
                     :aria-expanded="open"
                     aria-controls="mobile-menu"
                     :aria-label="open ? 'Close menu' : 'Open menu'"
@@ -157,13 +176,13 @@ const isAnchor = (href: string) => href.startsWith('#');
                 <nav aria-label="Mobile">
                     <ul class="grid">
                         <motion.li
-                            v-for="(link, i) in links"
+                            v-for="(link, linkIndex) in links"
                             :key="link.label"
                             class="rule"
                             :initial="{ opacity: 0, y: 16 }"
                             :animate="{ opacity: 1, y: 0 }"
                             :transition="{
-                                delay: 0.05 + i * 0.05,
+                                delay: 0.05 + linkIndex * 0.05,
                                 duration: 0.5,
                             }"
                         >
@@ -173,10 +192,13 @@ const isAnchor = (href: string) => href.startsWith('#');
                                 class="flex items-baseline justify-between py-5"
                                 @click="open = false"
                             >
-                                <span class="display text-5xl">{{
+                                <span class="display text-4xl">{{
                                     link.label
                                 }}</span>
-                                <span class="meta">0{{ i + 1 }}</span>
+                                <ArrowUpRight
+                                    class="size-5 text-stone"
+                                    aria-hidden="true"
+                                />
                             </component>
                         </motion.li>
                     </ul>

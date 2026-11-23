@@ -22,7 +22,7 @@ class TechnologyService
      */
     public function list(): Collection
     {
-        return Technology::query()->withCount('projects')->alphabetical()->get();
+        return Technology::query()->withCount('projects')->orderBy('name')->get();
     }
 
     /**
@@ -32,7 +32,7 @@ class TechnologyService
      */
     public function names(): array
     {
-        return Technology::query()->alphabetical()->pluck('name')->all();
+        return Technology::query()->orderBy('name')->pluck('name')->all();
     }
 
     /**
@@ -44,17 +44,17 @@ class TechnologyService
      */
     public function idsFor(array $names): array
     {
-        $ids = [];
+        $technologyIds = [];
 
         foreach ($names as $name) {
             $name = trim($name);
 
             if ($name !== '' && Str::slug($name) !== '') {
-                $ids[] = Technology::query()->firstOrCreate(['slug' => Str::slug($name)], ['name' => $name])->id;
+                $technologyIds[] = Technology::query()->firstOrCreate(['slug' => Str::slug($name)], ['name' => $name])->id;
             }
         }
 
-        return array_values(array_unique($ids));
+        return array_values(array_unique($technologyIds));
     }
 
     /**

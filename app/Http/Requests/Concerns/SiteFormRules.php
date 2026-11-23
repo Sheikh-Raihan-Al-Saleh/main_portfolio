@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Concerns;
 
-use App\Models\SocialLink;
+use App\Services\SocialLink\SocialLinkService;
 
 /**
  * Rules shared by the Studio and Founder admin forms.
@@ -18,7 +18,7 @@ trait SiteFormRules
     {
         $rules = ['socials' => ['nullable', 'array']];
 
-        foreach (SocialLink::PLATFORMS as $platform) {
+        foreach (SocialLinkService::PLATFORMS as $platform) {
             // WhatsApp links are often wa.me/... and still valid URLs.
             $rules["socials.{$platform}"] = ['nullable', 'url', 'max:255'];
         }

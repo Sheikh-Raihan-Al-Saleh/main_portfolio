@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { ArrowLeft } from '@lucide/vue';
-import { AnimatePresence, motion } from 'motion-v';
+import { ArrowLeft, ShieldCheck } from '@lucide/vue';
+import { motion } from 'motion-v';
 import { computed, ref, watch } from 'vue';
-import LoginScene from '@/components/auth/LoginScene.vue';
 import BrandLogo from '@/components/brand/BrandLogo.vue';
+import SmartImage from '@/components/media/SmartImage.vue';
 import { Toaster } from '@/components/ui/sonner';
-import { useBrand } from '@/composables/useSite';
+import { useSite } from '@/composables/useSite';
 import { useSiteScope } from '@/composables/useSiteScope';
 import { EASE_OUT } from '@/lib/motion';
 import { home } from '@/routes';
@@ -17,26 +17,39 @@ import type {
 
 /**
  * The frame for every sign-in page (log in, forgot / reset password,
- * two-factor, verify email).
+ * two-factor, verify email), in the "Founder portrait" design.
  *
- * Left: a three.js scene of the studio's published work floating in space,
- * with the brand and a "Content Studio" badge. Right: the form on paper,
- * headed by the company logo. On phones the scene becomes a banner.
+ * Left: the founder's photo, full height, with the brand on top, a featured
+ * published project as a small card, and the studio mission set over the
+ * bottom of the photo. Right: the form on a white card on the sage ground.
+ * On phones the photo becomes a banner above the form.
  *
- * The brand comes from the shared `brand` prop; the covers from the
- * `showcase` prop the Fortify views pass (FortifyServiceProvider).
+ * Everything shown is admin-editable: the photo and name come from the
+ * shared `founder` prop, the mission from `studio`, the logo from `brand`,
+ * and the project card from the `showcase` prop the Fortify views pass
+ * (FortifyServiceProvider).
  */
 defineProps<AuthEditorialLayoutProps>();
 
 useSiteScope('studio');
 
 const page = usePage();
-const brand = useBrand();
-const showcase = computed(
+const { brand, studio, founder } = useSite();
+
+/** The first published project (in display order) with a cover. */
+const latestProject = computed(
     () =>
-        (page.props.showcase as AuthEditorialLayoutShowcase | undefined) ?? [],
+        ((page.props.showcase as AuthEditorialLayoutShowcase | undefined) ??
+            [])[0] ?? null,
 );
-const hovered = ref<string | null>(null);
+
+/** The founder's role line under the quote: headline, else first role. */
+const founderRole = computed(
+    () => founder.value.headline || founder.value.roles[0] || 'Founder',
+);
+
+/** The quote over the photo: the studio mission, else its tagline. */
+const quote = computed(() => studio.value.mission || studio.value.tagline);
 
 /**
  * Shake the form when the server returns validation errors. Animated on the
@@ -53,8 +66,8 @@ watch(
 
         if (errors && Object.keys(errors).length > 0 && !reduced) {
             formBox.value?.animate(
-                [0, -10, 10, -6, 6, 0].map((x) => ({
-                    transform: `translateX(${x}px)`,
+                [0, -10, 10, -6, 6, 0].map((offset) => ({
+                    transform: `translateX(${offset}px)`,
                 })),
                 { duration: 450, easing: 'ease-out' },
             );
@@ -70,105 +83,121 @@ const year = new Date().getFullYear();
         data-site="studio"
         class="site grid min-h-dvh lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
     >
-        <!-- The scene -->
+        <!-- The founder portrait -->
         <aside
-            class="relative h-[38vh] overflow-hidden border-b border-line bg-paper lg:sticky lg:top-0 lg:h-dvh lg:border-r lg:border-b-0"
+            class="auth-portrait relative h-[44vh] min-h-80 overflow-hidden bg-ink text-white lg:sticky lg:top-0 lg:h-dvh"
         >
-            <div
-                class="bg-grid pointer-events-none absolute inset-0 opacity-70"
-                aria-hidden="true"
+            <img
+                v-if="founder.avatar_url"
+                :src="founder.avatar_url"
+                :alt="founder.name"
+                class="absolute inset-0 size-full object-cover object-[50%_30%]"
+                fetchpriority="high"
             />
-
-            <LoginScene
-                class="absolute inset-0"
-                :covers="showcase"
-                :logo-url="brand.logo_mark_url ?? brand.logo_url"
-                :brand-name="brand.name"
-                @hover="hovered = $event"
-            />
-
-            <div
-                class="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between p-5 sm:p-8"
-            >
-                <Link
-                    :href="home().url"
-                    class="pointer-events-auto"
-                    :aria-label="`${brand.name} home`"
-                >
-                    <BrandLogo size="lg" />
-                </Link>
-                <span
-                    class="rounded-full border border-ink bg-paper px-4 py-1.5 font-mono text-[0.7rem] tracking-[0.16em] uppercase"
-                >
-                    Content Studio
-                </span>
+            <!-- Until a founder photo is uploaded: a quiet dotted forest
+                 ground with the founder's initial, so the panel never
+                 looks broken. -->
+            <div v-else class="auth-portrait-empty" aria-hidden="true">
+                <span class="display">{{ founder.name.charAt(0) }}</span>
             </div>
+            <div class="auth-portrait-shade" aria-hidden="true" />
 
-            <div
-                class="pointer-events-none absolute inset-x-0 bottom-0 hidden p-8 lg:block"
+            <!-- Brand -->
+            <Link
+                :href="home().url"
+                class="absolute top-5 left-5 z-10 inline-flex items-center gap-3 sm:top-8 sm:left-10"
+                :aria-label="`${brand.name} home`"
             >
-                <p class="meta mb-3">
-                    {{
-                        hovered
-                            ? 'Published project'
-                            : 'Your work, managed in one place'
-                    }}
+                <BrandLogo variant="mark" size="md" />
+                <span class="display text-lg">{{ brand.name }}</span>
+            </Link>
+
+            <!-- Featured published project -->
+            <motion.div
+                v-if="latestProject"
+                class="absolute top-24 right-5 z-10 hidden w-56 rotate-3 rounded-2xl bg-white p-2 text-ink shadow-[var(--shadow-lift)] sm:right-9 lg:block"
+                :initial="{ opacity: 0, y: -12, rotate: 0 }"
+                :animate="{ opacity: 1, y: 0, rotate: 3 }"
+                :transition="{ duration: 0.9, ease: EASE_OUT, delay: 0.35 }"
+            >
+                <SmartImage
+                    :src="latestProject.cover"
+                    :alt="latestProject.title"
+                    ratio="16/10"
+                    class="rounded-xl"
+                />
+                <p class="display mx-1.5 mt-2 text-sm">
+                    {{ latestProject.title }}
                 </p>
-                <AnimatePresence mode="wait">
-                    <motion.p
-                        :key="hovered ?? 'brand'"
-                        class="display text-5xl leading-none xl:text-6xl"
-                        :initial="{ opacity: 0, y: 16 }"
-                        :animate="{ opacity: 1, y: 0 }"
-                        :exit="{ opacity: 0, y: -16 }"
-                        :transition="{ duration: 0.35, ease: EASE_OUT }"
-                    >
-                        {{ hovered ?? brand.name }}<em v-if="!hovered">.</em>
-                    </motion.p>
-                </AnimatePresence>
+                <p class="mx-1.5 mb-1 text-xs text-stone">Featured work</p>
+            </motion.div>
+
+            <!-- Mission over the photo -->
+            <div
+                class="absolute inset-x-5 bottom-6 z-10 sm:inset-x-10 sm:bottom-10"
+            >
+                <motion.blockquote
+                    v-if="quote"
+                    class="display max-w-[24ch] text-2xl leading-tight font-semibold sm:text-3xl xl:text-[2.1rem]"
+                    :initial="{ opacity: 0, y: 16 }"
+                    :animate="{ opacity: 1, y: 0 }"
+                    :transition="{ duration: 0.9, ease: EASE_OUT, delay: 0.2 }"
+                >
+                    {{ quote }}
+                </motion.blockquote>
+                <p class="mt-4 flex items-center gap-3 text-sm text-white/85">
+                    <span class="h-px w-7 bg-white/50" aria-hidden="true" />
+                    <span class="font-bold text-white">{{ founder.name }}</span>
+                    {{ founderRole }}
+                </p>
             </div>
         </aside>
 
         <!-- The form -->
         <main
-            class="flex flex-col bg-card px-5 py-10 sm:px-12 lg:px-16 xl:px-24"
+            class="flex flex-col bg-paper py-10"
+            :style="{
+                paddingLeft: 'max(1.25rem, env(safe-area-inset-left, 0px))',
+                paddingRight: 'max(1.25rem, env(safe-area-inset-right, 0px))',
+            }"
         >
             <div
-                class="mx-auto flex w-full max-w-md flex-1 flex-col justify-center"
+                class="mx-auto flex w-full max-w-[27rem] flex-1 flex-col justify-center"
             >
                 <motion.div
+                    class="auth-card rounded-[1.75rem] border border-line bg-card p-6 shadow-[var(--shadow-lift)] sm:p-10"
                     :initial="{ opacity: 0, y: 24 }"
                     :animate="{ opacity: 1, y: 0 }"
                     :transition="{ duration: 0.8, ease: EASE_OUT }"
                 >
-                    <BrandLogo variant="mark" size="xl" />
+                    <BrandLogo size="lg" />
 
-                    <h1 class="display mt-10 text-5xl sm:text-6xl">
+                    <h1 class="display mt-7 text-4xl">
                         {{ title }}
                     </h1>
-                    <p v-if="description" class="body-copy mt-4">
+                    <p v-if="description" class="body-copy mt-2">
                         {{ description }}
                     </p>
-                </motion.div>
 
-                <motion.div
-                    class="mt-10"
-                    :initial="{ opacity: 0, y: 24 }"
-                    :animate="{ opacity: 1, y: 0 }"
-                    :transition="{ duration: 0.8, ease: EASE_OUT, delay: 0.12 }"
-                >
-                    <div ref="formBox">
+                    <div ref="formBox" class="mt-7">
                         <slot />
                     </div>
+
+                    <p
+                        class="mt-6 flex items-center gap-2 border-t border-line pt-5 text-sm text-stone"
+                    >
+                        <ShieldCheck class="size-4" aria-hidden="true" />
+                        Admin sign in for {{ brand.name }}
+                    </p>
                 </motion.div>
             </div>
 
             <footer
-                class="mx-auto mt-12 flex w-full max-w-md items-center justify-between text-sm text-stone"
+                class="mx-auto mt-10 flex w-full max-w-[27rem] items-center justify-between text-sm text-stone"
             >
                 <Link
                     :href="home().url"
-                    class="inline-flex items-center gap-2 hover:text-ink"
+                    class="inline-flex items-center gap-2 font-medium hover:text-ink"
                 >
                     <ArrowLeft class="size-4" aria-hidden="true" /> Back to site
                 </Link>

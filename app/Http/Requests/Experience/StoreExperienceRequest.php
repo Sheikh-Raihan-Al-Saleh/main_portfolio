@@ -4,8 +4,14 @@ namespace App\Http\Requests\Experience;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validates the admin experience form (create; the update request extends it).
+ */
 class StoreExperienceRequest extends FormRequest
 {
+    /**
+     * Only an admin may send this form.
+     */
     public function authorize(): bool
     {
         return $this->user()?->is_admin === true;
@@ -32,6 +38,9 @@ class StoreExperienceRequest extends FormRequest
         ];
     }
 
+    /**
+     * Turn checkbox values ("on", "1", missing) into real booleans before validation.
+     */
     protected function prepareForValidation(): void
     {
         $this->merge(['remove_logo' => $this->boolean('remove_logo')]);

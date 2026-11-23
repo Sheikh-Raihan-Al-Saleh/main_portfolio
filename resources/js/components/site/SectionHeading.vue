@@ -6,15 +6,14 @@ import { cn } from '@/lib/utils';
 import type { SectionHeadingProps } from '@/types';
 
 /**
- * The editorial section opener: a numbered eyebrow, a serif headline with
- * one highlighted phrase, and an optional lead paragraph.
+ * The section opener: a pill label, a headline with one honey-marked phrase,
+ * and an optional lead paragraph.
  */
 
 const props = withDefaults(defineProps<SectionHeadingProps>(), {
     eyebrow: null,
     highlight: null,
     description: null,
-    index: null,
     align: 'left',
     size: 'md',
     class: undefined,
@@ -34,16 +33,13 @@ const parts = computed(() => highlightParts(props.title, props.highlight));
         "
     >
         <Reveal :class="align === 'split' ? 'lg:col-span-7' : 'max-w-4xl'">
-            <p v-if="eyebrow" class="eyebrow mb-5">
-                <span v-if="index" class="index-number">{{ index }}</span>
-                {{ eyebrow }}
-            </p>
+            <p v-if="eyebrow" class="eyebrow mb-5">{{ eyebrow }}</p>
             <h2
                 :class="
                     cn('display', size === 'lg' ? 'display-lg' : 'display-md')
                 "
             >
-                <template v-for="(part, i) in parts" :key="i">
+                <template v-for="(part, partIndex) in parts" :key="partIndex">
                     <em v-if="part.highlight">{{ part.text }}</em>
                     <template v-else>{{ part.text }}</template>
                 </template>

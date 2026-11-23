@@ -47,7 +47,6 @@ const { founder } = useSite();
 
     <WorkSection
         id="projects"
-        index="03"
         :eyebrow="content.sections.projects.eyebrow"
         :title="content.sections.projects.title"
         :highlight="content.sections.projects.highlight"

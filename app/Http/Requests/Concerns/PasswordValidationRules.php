@@ -5,6 +5,9 @@ namespace App\Http\Requests\Concerns;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rules\Password;
 
+/**
+ * Password rules shared by the password forms.
+ */
 trait PasswordValidationRules
 {
     /**

@@ -4,6 +4,8 @@ namespace App\Http\Resources\LandingPage;
 
 use App\Models\LandingPageHeroMedia;
 use App\Models\ProjectLandingPage;
+use App\Services\LandingPage\LandingPageService;
+use App\Services\Media\MediaService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -33,13 +35,13 @@ class LandingPageResource extends JsonResource
             'accent_to' => $this->accent_to,
             'seo_title' => $this->seo_title,
             'seo_description' => $this->seo_description,
-            'og_image_url' => $this->og_image_url,
+            'og_image_url' => MediaService::url($this->og_image_path),
             'is_published' => $this->is_published,
             // Positional slots (0 desktop, 1 tablet, 2 phone); empty slots are null.
-            'hero_media' => collect(array_keys(ProjectLandingPage::HERO_SLOTS))
-                ->map(fn (int $slot): ?string => $this->heroMedia
-                    ->first(fn (LandingPageHeroMedia $media): bool => $media->slot === $slot)
-                    ?->url)
+            'hero_media' => collect(array_keys(LandingPageService::HERO_SLOTS))
+                ->map(fn (int $slot): ?string => MediaService::url($this->heroMedia
+                    ->first(fn (LandingPageHeroMedia $heroMedia): bool => $heroMedia->slot === $slot)
+                    ?->path))
                 ->all(),
         ];
     }

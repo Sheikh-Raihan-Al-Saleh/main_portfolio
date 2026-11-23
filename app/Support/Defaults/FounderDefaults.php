@@ -27,6 +27,24 @@ class FounderDefaults
     }
 
     /**
+     * Skill categories created for a new founder, in display order
+     * (slug => name).
+     *
+     * @return array<string, string>
+     */
+    public static function skillCategories(): array
+    {
+        return [
+            'language' => 'Languages',
+            'framework' => 'Frameworks',
+            'frontend' => 'Frontend',
+            'database' => 'Databases',
+            'devops' => 'DevOps & Cloud',
+            'tool' => 'Tooling',
+        ];
+    }
+
+    /**
      * Stored page copy merged over the defaults.
      *
      * @param  array<string, mixed>|null  $content

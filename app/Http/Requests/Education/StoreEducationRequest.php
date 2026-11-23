@@ -4,8 +4,14 @@ namespace App\Http\Requests\Education;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validates the admin education form (create; the update request extends it).
+ */
 class StoreEducationRequest extends FormRequest
 {
+    /**
+     * Only an admin may send this form.
+     */
     public function authorize(): bool
     {
         return $this->user()?->is_admin === true;

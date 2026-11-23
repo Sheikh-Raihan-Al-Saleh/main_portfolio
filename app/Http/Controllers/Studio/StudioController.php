@@ -6,6 +6,7 @@ use App\Enums\LandingSectionType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Studio\UpdateStudioContentRequest;
 use App\Http\Requests\Studio\UpdateStudioRequest;
+use App\Http\Resources\Studio\StudioFormResource;
 use App\Services\LandingPage\LandingSectionService;
 use App\Services\SocialLink\SocialLinkService;
 use App\Services\Studio\StudioService;
@@ -24,18 +25,24 @@ class StudioController extends Controller
         private readonly LandingSectionService $sectionService,
     ) {}
 
+    /**
+     * Show the "Studio & brand" form with the home page content blocks.
+     */
     public function edit(): Response
     {
         $studio = $this->studioService->current();
 
         return Inertia::render('admin/studio/Edit', [
-            'studio' => $studio,
+            'studio' => StudioFormResource::make($studio)->resolve(),
             'socials' => $this->socialLinkService->asMap($studio),
             'sections' => $this->sectionService->allFor($studio),
             'sectionTypes' => LandingSectionType::options(),
         ]);
     }
 
+    /**
+     * Validate and save the studio details. The service does the work.
+     */
     public function update(UpdateStudioRequest $request): RedirectResponse
     {
         $this->studioService->update($request->validated());
@@ -44,16 +51,22 @@ class StudioController extends Controller
         return back();
     }
 
+    /**
+     * Show the editor of the home page copy, merged over its defaults.
+     */
     public function editContent(): Response
     {
         $studio = $this->studioService->current();
 
         return Inertia::render('admin/studio/Content', [
             'studio' => $studio->only(['id', 'name']),
-            'content' => $studio->studio_content,
+            'content' => $this->studioService->content(),
         ]);
     }
 
+    /**
+     * Validate and save the home page copy.
+     */
     public function updateContent(UpdateStudioContentRequest $request): RedirectResponse
     {
         $this->studioService->updateContent($request->validated('content'));

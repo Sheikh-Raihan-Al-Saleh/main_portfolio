@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Experience\StoreExperienceRequest;
 use App\Http\Requests\Experience\UpdateExperienceRequest;
 use App\Http\Requests\ReorderRequest;
+use App\Http\Resources\Experience\ExperienceResource;
 use App\Models\Experience;
 use App\Services\Experience\ExperienceService;
 use Illuminate\Http\RedirectResponse;
@@ -21,18 +22,27 @@ class ExperienceController extends Controller
         private readonly ExperienceService $experienceService,
     ) {}
 
+    /**
+     * Show the list of roles.
+     */
     public function index(): Response
     {
         return Inertia::render('admin/experiences/Index', [
-            'experiences' => $this->experienceService->list(),
+            'experiences' => ExperienceResource::collection($this->experienceService->list())->resolve(),
         ]);
     }
 
+    /**
+     * Show the form to create a role.
+     */
     public function create(): Response
     {
         return Inertia::render('admin/experiences/Create');
     }
 
+    /**
+     * Validate and save a new role. The service does the work.
+     */
     public function store(StoreExperienceRequest $request): RedirectResponse
     {
         $this->experienceService->create($request->validated());
@@ -41,13 +51,19 @@ class ExperienceController extends Controller
         return to_route('admin.experiences.index');
     }
 
+    /**
+     * Show the form to edit a role.
+     */
     public function edit(Experience $experience): Response
     {
         return Inertia::render('admin/experiences/Edit', [
-            'experience' => $this->experienceService->find($experience),
+            'experience' => ExperienceResource::make($this->experienceService->find($experience))->resolve(),
         ]);
     }
 
+    /**
+     * Validate and save the changes to a role. The service does the work.
+     */
     public function update(UpdateExperienceRequest $request, Experience $experience): RedirectResponse
     {
         $this->experienceService->update($experience, $request->validated());
@@ -56,6 +72,9 @@ class ExperienceController extends Controller
         return to_route('admin.experiences.index');
     }
 
+    /**
+     * Delete a role.
+     */
     public function destroy(Experience $experience): RedirectResponse
     {
         $this->experienceService->delete($experience);
@@ -64,6 +83,9 @@ class ExperienceController extends Controller
         return back();
     }
 
+    /**
+     * Save the new display order of the roles.
+     */
     public function reorder(ReorderRequest $request): RedirectResponse
     {
         $this->experienceService->reorder($request->validated('ids'));

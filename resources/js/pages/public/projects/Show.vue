@@ -175,8 +175,10 @@ const facts = computed(() =>
 
             <div class="lg:col-span-7 lg:col-start-5">
                 <p
-                    v-for="(paragraph, i) in paragraphs(project.description)"
-                    :key="i"
+                    v-for="(paragraph, paragraphIndex) in paragraphs(
+                        project.description,
+                    )"
+                    :key="paragraphIndex"
                     class="mb-6 text-lg leading-[1.8] text-ink-soft first-of-type:text-xl first-of-type:text-ink"
                 >
                     {{ paragraph }}

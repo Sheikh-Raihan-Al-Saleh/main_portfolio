@@ -218,13 +218,15 @@ const phoneSrc = computed(() => props.images[2] ?? props.images[0] ?? null);
                                                 class="mb-1 flex h-10 items-end gap-0.5"
                                             >
                                                 <span
-                                                    v-for="h in [
+                                                    v-for="barHeight in [
                                                         30, 55, 40, 70, 45, 60,
                                                         35,
                                                     ]"
-                                                    :key="h"
+                                                    :key="barHeight"
                                                     class="flex-1 rounded-sm bg-white/90"
-                                                    :style="{ height: h + '%' }"
+                                                    :style="{
+                                                        height: barHeight + '%',
+                                                    }"
                                                 />
                                             </div>
                                             <div
@@ -507,13 +509,15 @@ const phoneSrc = computed(() => props.images[2] ?? props.images[0] ?? null);
                                             class="flex h-[56px] items-end gap-1"
                                         >
                                             <span
-                                                v-for="h in [
+                                                v-for="barHeight in [
                                                     35, 62, 48, 78, 55, 88, 40,
                                                     65, 52, 70, 38,
                                                 ]"
-                                                :key="h"
+                                                :key="barHeight"
                                                 class="flex-1 rounded-t bg-white"
-                                                :style="{ height: h + '%' }"
+                                                :style="{
+                                                    height: barHeight + '%',
+                                                }"
                                             />
                                         </div>
                                     </div>
@@ -568,8 +572,8 @@ const phoneSrc = computed(() => props.images[2] ?? props.images[0] ?? null);
                                     </div>
                                     <div class="grid grid-cols-4 gap-1.5">
                                         <div
-                                            v-for="i in 4"
-                                            :key="i"
+                                            v-for="tileNumber in 4"
+                                            :key="tileNumber"
                                             class="overflow-hidden rounded-lg border border-slate-100 bg-white"
                                         >
                                             <div
@@ -584,7 +588,7 @@ const phoneSrc = computed(() => props.images[2] ?? props.images[0] ?? null);
                                                             '🥩',
                                                             '🧀',
                                                             '🍝',
-                                                        ][i - 1]
+                                                        ][tileNumber - 1]
                                                     }}
                                                 </div>
                                             </div>
@@ -714,14 +718,18 @@ const phoneSrc = computed(() => props.images[2] ?? props.images[0] ?? null);
                                 </div>
                                 <div class="mt-2 space-y-1.5">
                                     <div
-                                        v-for="i in 3"
-                                        :key="i"
+                                        v-for="rowNumber in 3"
+                                        :key="rowNumber"
                                         class="flex items-center gap-2 rounded-lg border border-slate-100 p-1.5"
                                     >
                                         <div
                                             class="grid size-6 place-items-center rounded bg-slate-50 text-[12px]"
                                         >
-                                            {{ ['🍕', '🍔', '🥗'][i - 1] }}
+                                            {{
+                                                ['🍕', '🍔', '🥗'][
+                                                    rowNumber - 1
+                                                ]
+                                            }}
                                         </div>
                                         <div class="flex-1">
                                             <div

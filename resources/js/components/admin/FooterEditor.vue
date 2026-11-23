@@ -162,17 +162,19 @@ const tokens = [
             </div>
 
             <div
-                v-for="(column, ci) in columns"
-                :key="ci"
+                v-for="(column, columnIndex) in columns"
+                :key="columnIndex"
                 class="rounded-lg border border-border p-4"
             >
                 <div class="flex items-start gap-3">
                     <div class="grid flex-1 gap-2">
-                        <Label :for="`footer-col-title-${ci}`">Title</Label>
+                        <Label :for="`footer-col-title-${columnIndex}`"
+                            >Title</Label
+                        >
                         <Input
-                            :id="`footer-col-title-${ci}`"
+                            :id="`footer-col-title-${columnIndex}`"
                             v-model="column.title"
-                            :name="`footer[columns][${ci}][title]`"
+                            :name="`footer[columns][${columnIndex}][title]`"
                             placeholder="Quick Links"
                         />
                     </div>
@@ -182,7 +184,7 @@ const tokens = [
                         size="icon"
                         class="mt-6 shrink-0 text-muted-foreground hover:text-destructive"
                         aria-label="Remove column"
-                        @click="removeColumn(ci)"
+                        @click="removeColumn(columnIndex)"
                     >
                         <Trash2 class="size-4" />
                     </Button>
@@ -190,18 +192,18 @@ const tokens = [
 
                 <div class="mt-4 flex flex-col gap-2">
                     <div
-                        v-for="(link, li) in column.links"
-                        :key="li"
+                        v-for="(link, linkIndex) in column.links"
+                        :key="linkIndex"
                         class="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1.4fr_auto]"
                     >
                         <Input
                             v-model="link.label"
-                            :name="`footer[columns][${ci}][links][${li}][label]`"
+                            :name="`footer[columns][${columnIndex}][links][${linkIndex}][label]`"
                             placeholder="Label (e.g. About)"
                         />
                         <Input
                             v-model="link.url"
-                            :name="`footer[columns][${ci}][links][${li}][url]`"
+                            :name="`footer[columns][${columnIndex}][links][${linkIndex}][url]`"
                             :placeholder="'URL (e.g. #about, /projects, {{email}})'"
                         />
                         <Button
@@ -210,7 +212,7 @@ const tokens = [
                             size="icon"
                             class="text-muted-foreground hover:text-destructive"
                             aria-label="Remove link"
-                            @click="removeLink(column, li)"
+                            @click="removeLink(column, linkIndex)"
                         >
                             <Trash2 class="size-4" />
                         </Button>

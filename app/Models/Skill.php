@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Database\Factories\SkillFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * One skill of the founder, with a proficiency from 0 to 100.
+ *
  * @property int $id
  * @property int $skill_category_id
  * @property int|null $technology_id
@@ -27,30 +27,24 @@ class Skill extends Model
     /** @use HasFactory<SkillFactory> */
     use HasFactory;
 
-    /** @return BelongsTo<SkillCategory, $this> */
+    /**
+     * The category this skill is grouped under (inverse of one-to-many).
+     *
+     * @return BelongsTo<SkillCategory, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(SkillCategory::class, 'skill_category_id');
     }
 
-    /** @return BelongsTo<Technology, $this> */
+    /**
+     * The matching technology of the shared vocabulary, if any (inverse of one-to-many).
+     *
+     * @return BelongsTo<Technology, $this>
+     */
     public function technology(): BelongsTo
     {
         return $this->belongsTo(Technology::class);
-    }
-
-    /** @param  Builder<Skill>  $query */
-    #[Scope]
-    protected function ordered(Builder $query): void
-    {
-        $query->orderBy('sort_order')->orderBy('name');
-    }
-
-    /** @param  Builder<Skill>  $query */
-    #[Scope]
-    protected function featured(Builder $query): void
-    {
-        $query->where('is_featured', true);
     }
 
     /**

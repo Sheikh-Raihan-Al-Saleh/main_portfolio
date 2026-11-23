@@ -16,6 +16,9 @@ class ContactController extends Controller
         private readonly ContactMessageService $messageService,
     ) {}
 
+    /**
+     * Save a public enquiry and email the site owner. The service does the work.
+     */
     public function store(StoreContactRequest $request): RedirectResponse
     {
         $this->messageService->receive($request->validated(), $request->ip(), $request->userAgent());

@@ -2,10 +2,7 @@
 
 namespace App\Models;
 
-use App\Services\Media\MediaService;
-use App\Support\Defaults\FounderDefaults;
 use Database\Factories\FounderFactory;
-use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -49,11 +46,6 @@ use Illuminate\Support\Carbon;
  * @property string|null $og_image_path
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read string|null $avatar_url
- * @property-read string|null $logo_url
- * @property-read string|null $resume_url
- * @property-read string|null $og_image_url
- * @property-read array<string, mixed> $founder_content
  */
 #[Fillable([
     'studio_id', 'name', 'slug', 'headline', 'tagline', 'bio', 'founder_message', 'roles',
@@ -63,88 +55,89 @@ use Illuminate\Support\Carbon;
     'primary_cta_label', 'primary_cta_url', 'secondary_cta_label', 'secondary_cta_url',
     'footer', 'content', 'meta_title', 'meta_description', 'og_image_path',
 ])]
-#[Appends(['avatar_url', 'logo_url', 'resume_url', 'og_image_url'])]
 class Founder extends Model
 {
     /** @use HasFactory<FounderFactory> */
     use HasFactory;
 
-    /** @return BelongsTo<Studio, $this> */
+    /**
+     * The studio the founder runs (inverse of one-to-one).
+     *
+     * @return BelongsTo<Studio, $this>
+     */
     public function studio(): BelongsTo
     {
         return $this->belongsTo(Studio::class);
     }
 
-    /** @return MorphMany<Project, $this> */
+    /**
+     * The founder's personal projects (polymorphic one-to-many).
+     *
+     * @return MorphMany<Project, $this>
+     */
     public function projects(): MorphMany
     {
         return $this->morphMany(Project::class, 'owner');
     }
 
-    /** @return MorphMany<SocialLink, $this> */
+    /**
+     * The founder's social profile links, in display order (polymorphic one-to-many).
+     *
+     * @return MorphMany<SocialLink, $this>
+     */
     public function socialLinks(): MorphMany
     {
         return $this->morphMany(SocialLink::class, 'owner')->orderBy('sort_order');
     }
 
-    /** @return MorphMany<ContactMessage, $this> */
+    /**
+     * Enquiries sent from the founder page contact form (polymorphic one-to-many).
+     *
+     * @return MorphMany<ContactMessage, $this>
+     */
     public function messages(): MorphMany
     {
         return $this->morphMany(ContactMessage::class, 'recipient');
     }
 
-    /** @return HasMany<SkillCategory, $this> */
+    /**
+     * The founder's skill groups (one-to-many).
+     *
+     * @return HasMany<SkillCategory, $this>
+     */
     public function skillCategories(): HasMany
     {
         return $this->hasMany(SkillCategory::class);
     }
 
-    /** @return HasManyThrough<Skill, SkillCategory, $this> */
+    /**
+     * Every skill of the founder, through the skill categories (has-many-through).
+     *
+     * @return HasManyThrough<Skill, SkillCategory, $this>
+     */
     public function skills(): HasManyThrough
     {
         return $this->hasManyThrough(Skill::class, SkillCategory::class);
     }
 
-    /** @return HasMany<Experience, $this> */
+    /**
+     * The founder's work history (one-to-many).
+     *
+     * @return HasMany<Experience, $this>
+     */
     public function experiences(): HasMany
     {
         return $this->hasMany(Experience::class);
     }
 
-    /** @return HasMany<Education, $this> */
+    /**
+     * The founder's education history (one-to-many).
+     *
+     * @return HasMany<Education, $this>
+     */
     public function educations(): HasMany
     {
         return $this->hasMany(Education::class);
-    }
-
-    /**
-     * Page copy: stored edits merged over the defaults.
-     *
-     * @return array<string, mixed>
-     */
-    public function getFounderContentAttribute(): array
-    {
-        return FounderDefaults::mergeContent($this->content);
-    }
-
-    protected function getAvatarUrlAttribute(): ?string
-    {
-        return MediaService::url($this->avatar_path);
-    }
-
-    protected function getLogoUrlAttribute(): ?string
-    {
-        return MediaService::url($this->logo_path);
-    }
-
-    protected function getResumeUrlAttribute(): ?string
-    {
-        return $this->resume_path ? route('resume', absolute: false) : null;
-    }
-
-    protected function getOgImageUrlAttribute(): ?string
-    {
-        return MediaService::url($this->og_image_path);
     }
 
     /**

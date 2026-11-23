@@ -5,12 +5,9 @@ namespace App\Models;
 use App\Enums\LandingSectionType;
 use Database\Factories\LandingSectionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 /**
@@ -37,45 +34,14 @@ class LandingSection extends Model
     /** @use HasFactory<LandingSectionFactory> */
     use HasFactory;
 
-    /** @return MorphTo<Model, $this> */
+    /**
+     * The page this block belongs to: the studio home page or a project landing page (polymorphic inverse).
+     *
+     * @return MorphTo<Model, $this>
+     */
     public function sectionable(): MorphTo
     {
         return $this->morphTo();
-    }
-
-    /**
-     * Every stored media path inside `data`, following the dot-paths the type
-     * declares. Used to delete the files when the section goes away.
-     *
-     * @return array<int, string>
-     */
-    public function mediaPaths(): array
-    {
-        $paths = [];
-
-        foreach ($this->type->mediaPaths() as $pattern) {
-            foreach (Arr::wrap(data_get($this->data ?? [], $pattern)) as $value) {
-                if (is_string($value) && $value !== '') {
-                    $paths[] = $value;
-                }
-            }
-        }
-
-        return array_values(array_unique($paths));
-    }
-
-    /** @param  Builder<LandingSection>  $query */
-    #[Scope]
-    protected function visible(Builder $query): void
-    {
-        $query->where('is_visible', true);
-    }
-
-    /** @param  Builder<LandingSection>  $query */
-    #[Scope]
-    protected function ordered(Builder $query): void
-    {
-        $query->orderBy('sort_order')->orderBy('id');
     }
 
     /**

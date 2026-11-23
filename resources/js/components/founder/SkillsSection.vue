@@ -16,7 +16,6 @@ defineProps<SkillsSectionProps>();
     <section id="skills" class="section scroll-mt-24 bg-paper-deep">
         <div class="container-site">
             <SectionHeading
-                index="02"
                 :eyebrow="copy.eyebrow"
                 :title="copy.title"
                 :highlight="copy.highlight"
@@ -28,9 +27,9 @@ defineProps<SkillsSectionProps>();
                 class="mt-16 grid gap-x-12 gap-y-14 md:grid-cols-2 lg:grid-cols-3"
             >
                 <Reveal
-                    v-for="(group, i) in groups"
+                    v-for="(group, groupIndex) in groups"
                     :key="group.id"
-                    :delay="(i % 3) * 0.08"
+                    :delay="(groupIndex % 3) * 0.08"
                 >
                     <h3
                         class="flex items-baseline justify-between border-b border-ink pb-3"

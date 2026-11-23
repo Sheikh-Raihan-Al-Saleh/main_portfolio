@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
 import { Cpu, Pencil, Plus } from '@lucide/vue';
-import { ref } from 'vue';
 import TechnologyController from '@/actions/App/Http/Controllers/Technology/TechnologyController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
@@ -19,6 +18,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useEditDialog } from '@/composables/useEditDialog';
 import technologyRoutes from '@/routes/admin/technologies';
 import type { Technology } from '@/types';
 import type { AdminTechnologiesIndexProps } from '@/types';
@@ -38,18 +38,9 @@ defineOptions({
     },
 });
 
-const dialogOpen = ref(false);
-const editing = ref<Technology | null>(null);
-
-function openCreate(): void {
-    editing.value = null;
-    dialogOpen.value = true;
-}
-
-function openEdit(technology: Technology): void {
-    editing.value = technology;
-    dialogOpen.value = true;
-}
+/** Create and edit happen in a modal, so the list stays in view. */
+const { dialogOpen, editing, openCreate, openEdit, closeDialog } =
+    useEditDialog<Technology>();
 </script>
 
 <template>
@@ -149,7 +140,7 @@ function openEdit(technology: Technology): void {
                 "
                 class="flex flex-col"
                 v-slot="{ errors, processing }"
-                @success="dialogOpen = false"
+                @success="closeDialog"
             >
                 <div class="grid gap-5 px-6 py-6">
                     <div class="grid gap-2">
@@ -178,7 +169,7 @@ function openEdit(technology: Technology): void {
                     mode="dialog"
                     :processing="processing"
                     :submit-label="editing ? 'Save changes' : 'Add technology'"
-                    @cancel="dialogOpen = false"
+                    @cancel="closeDialog"
                 />
             </Form>
         </FormDialog>

@@ -4,8 +4,14 @@ namespace App\Http\Requests\Studio;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validates the home page copy editor.
+ */
 class UpdateStudioContentRequest extends FormRequest
 {
+    /**
+     * Only an admin may send this form.
+     */
     public function authorize(): bool
     {
         return $this->user()?->is_admin === true;

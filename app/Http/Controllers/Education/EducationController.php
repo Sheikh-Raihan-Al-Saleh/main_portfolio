@@ -21,6 +21,9 @@ class EducationController extends Controller
         private readonly EducationService $educationService,
     ) {}
 
+    /**
+     * Show the list of education entries.
+     */
     public function index(): Response
     {
         return Inertia::render('admin/educations/Index', [
@@ -28,11 +31,17 @@ class EducationController extends Controller
         ]);
     }
 
+    /**
+     * Show the form to create a education entry.
+     */
     public function create(): Response
     {
         return Inertia::render('admin/educations/Create');
     }
 
+    /**
+     * Validate and save a new education entry. The service does the work.
+     */
     public function store(StoreEducationRequest $request): RedirectResponse
     {
         $this->educationService->create($request->validated());
@@ -41,11 +50,17 @@ class EducationController extends Controller
         return to_route('admin.educations.index');
     }
 
+    /**
+     * Show the form to edit a education entry.
+     */
     public function edit(Education $education): Response
     {
         return Inertia::render('admin/educations/Edit', ['education' => $education]);
     }
 
+    /**
+     * Validate and save the changes to a education entry. The service does the work.
+     */
     public function update(UpdateEducationRequest $request, Education $education): RedirectResponse
     {
         $this->educationService->update($education, $request->validated());
@@ -54,6 +69,9 @@ class EducationController extends Controller
         return to_route('admin.educations.index');
     }
 
+    /**
+     * Delete a education entry.
+     */
     public function destroy(Education $education): RedirectResponse
     {
         $this->educationService->delete($education);
@@ -62,6 +80,9 @@ class EducationController extends Controller
         return back();
     }
 
+    /**
+     * Save the new display order of the education entries.
+     */
     public function reorder(ReorderRequest $request): RedirectResponse
     {
         $this->educationService->reorder($request->validated('ids'));

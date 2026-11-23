@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Database\Factories\SkillCategoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,34 +27,23 @@ class SkillCategory extends Model
     use HasFactory;
 
     /**
-     * Categories created for a new founder, in display order.
+     * The founder this category belongs to (inverse of one-to-many).
+     *
+     * @return BelongsTo<Founder, $this>
      */
-    public const DEFAULTS = [
-        'language' => 'Languages',
-        'framework' => 'Frameworks',
-        'frontend' => 'Frontend',
-        'database' => 'Databases',
-        'devops' => 'DevOps & Cloud',
-        'tool' => 'Tooling',
-    ];
-
-    /** @return BelongsTo<Founder, $this> */
     public function founder(): BelongsTo
     {
         return $this->belongsTo(Founder::class);
     }
 
-    /** @return HasMany<Skill, $this> */
+    /**
+     * The skills in this category (one-to-many).
+     *
+     * @return HasMany<Skill, $this>
+     */
     public function skills(): HasMany
     {
         return $this->hasMany(Skill::class);
-    }
-
-    /** @param  Builder<SkillCategory>  $query */
-    #[Scope]
-    protected function ordered(Builder $query): void
-    {
-        $query->orderBy('sort_order')->orderBy('name');
     }
 
     /**

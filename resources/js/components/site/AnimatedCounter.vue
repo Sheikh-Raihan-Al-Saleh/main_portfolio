@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useInView } from 'motion-v';
-import { onMounted, ref, watch } from 'vue';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type { AnimatedCounterProps } from '@/types';
 
 const { value, duration = 1400 } = defineProps<AnimatedCounterProps>();
@@ -12,6 +12,9 @@ const inView = useInView(element);
 const displayed = ref(value);
 // useInView has no `once` option, so latch the first entry ourselves.
 let hasRun = false;
+// The pending animation frame, so it can be cancelled if the visitor leaves
+// the page (an SPA visit) while the number is still counting.
+let animationFrameId: number | null = null;
 
 function prefersReducedMotion() {
     return (
@@ -59,12 +62,16 @@ watch(inView, (visible) => {
         // Ease-out cubic so the number decelerates into place.
         displayed.value = Math.round(value * (1 - Math.pow(1 - progress, 3)));
 
-        if (progress < 1) {
-            requestAnimationFrame(tick);
-        }
+        animationFrameId = progress < 1 ? requestAnimationFrame(tick) : null;
     };
 
-    requestAnimationFrame(tick);
+    animationFrameId = requestAnimationFrame(tick);
+});
+
+onBeforeUnmount(() => {
+    if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+    }
 });
 </script>
 

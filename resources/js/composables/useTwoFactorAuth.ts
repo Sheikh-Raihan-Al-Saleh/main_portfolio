@@ -1,22 +1,7 @@
 import { useHttp } from '@inertiajs/vue3';
-import type { ComputedRef, Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { qrCode, recoveryCodes, secretKey } from '@/routes/two-factor';
-
-export type UseTwoFactorAuthReturn = {
-    qrCodeSvg: Ref<string | null>;
-    manualSetupKey: Ref<string | null>;
-    recoveryCodesList: Ref<string[]>;
-    errors: Ref<string[]>;
-    hasSetupData: ComputedRef<boolean>;
-    clearSetupData: () => void;
-    clearErrors: () => void;
-    clearTwoFactorAuthData: () => void;
-    fetchQrCode: () => Promise<void>;
-    fetchSetupKey: () => Promise<void>;
-    fetchSetupData: () => Promise<void>;
-    fetchRecoveryCodes: () => Promise<void>;
-};
+import type { UseTwoFactorAuthReturn } from '@/types';
 
 const errors = ref<string[]>([]);
 const manualSetupKey = ref<string | null>(null);

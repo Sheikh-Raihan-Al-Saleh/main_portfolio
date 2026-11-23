@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * Account: the signed-in user's profile settings (name, email, account deletion).
+ */
 class ProfileController extends Controller
 {
     public function __construct(

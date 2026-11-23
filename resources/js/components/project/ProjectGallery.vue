@@ -58,18 +58,18 @@ onBeforeUnmount(() => {
 <template>
     <div class="grid gap-4 sm:grid-cols-2">
         <button
-            v-for="(image, i) in images"
+            v-for="(image, imageIndex) in images"
             :key="image.id"
             type="button"
             class="group relative overflow-hidden rounded-2xl text-left"
-            :class="i % 3 === 0 ? 'sm:col-span-2' : ''"
-            :aria-label="`Open image ${i + 1}: ${image.alt}`"
-            @click="open(i)"
+            :class="imageIndex % 3 === 0 ? 'sm:col-span-2' : ''"
+            :aria-label="`Open image ${imageIndex + 1}: ${image.alt}`"
+            @click="open(imageIndex)"
         >
             <SmartImage
                 :src="image.url"
                 :alt="image.alt"
-                :ratio="i % 3 === 0 ? '16/9' : '4/3'"
+                :ratio="imageIndex % 3 === 0 ? '16/9' : '4/3'"
                 img-class="transition-transform duration-700 group-hover:scale-[1.03]"
             />
             <span v-if="image.caption" class="meta mt-3 block">{{

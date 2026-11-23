@@ -21,11 +21,10 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class SocialLink extends Model
 {
     /**
-     * The platforms the admin form offers, in display order.
+     * Who the link belongs to: the studio or the founder (polymorphic inverse).
+     *
+     * @return MorphTo<Model, $this>
      */
-    public const PLATFORMS = ['github', 'linkedin', 'x', 'dribbble', 'youtube', 'whatsapp', 'website'];
-
-    /** @return MorphTo<Model, $this> */
     public function owner(): MorphTo
     {
         return $this->morphTo();

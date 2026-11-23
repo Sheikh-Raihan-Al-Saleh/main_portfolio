@@ -23,6 +23,9 @@ class NewContactMessage extends Mailable
         public array $brand,
     ) {}
 
+    /**
+     * The subject line and reply-to address.
+     */
     public function envelope(): Envelope
     {
         return new Envelope(
@@ -32,6 +35,9 @@ class NewContactMessage extends Mailable
         );
     }
 
+    /**
+     * The markdown email body and the brand shown in it.
+     */
     public function content(): Content
     {
         return new Content(

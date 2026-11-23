@@ -8,6 +8,7 @@ use App\Services\Media\MediaService;
 use App\Services\SocialLink\SocialLinkService;
 use App\Services\Studio\StudioService;
 use App\Support\Defaults\FounderDefaults;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -45,11 +46,24 @@ class FounderService
     public function withPortfolio(): Founder
     {
         return $this->current()->load([
-            'skillCategories' => fn ($query) => $query->ordered()->whereHas('skills')
-                ->with(['skills' => fn ($skills) => $skills->ordered()]),
-            'experiences' => fn ($query) => $query->ordered()->with('highlights'),
-            'educations' => fn ($query) => $query->ordered(),
+            'skillCategories' => fn (Relation $query) => $query
+                ->whereHas('skills')
+                ->with(['skills' => fn (Relation $skillQuery) => $skillQuery->orderBy('sort_order')->orderBy('name')])
+                ->orderBy('sort_order')
+                ->orderBy('name'),
+            'experiences' => fn (Relation $query) => $query->with('highlights')->orderBy('sort_order')->orderByDesc('start_date'),
+            'educations' => fn (Relation $query) => $query->orderBy('sort_order')->orderByDesc('start_date'),
         ]);
+    }
+
+    /**
+     * The founder page copy: stored edits merged over the defaults.
+     *
+     * @return array<string, mixed>
+     */
+    public function content(): array
+    {
+        return FounderDefaults::mergeContent($this->current()->content);
     }
 
     /**
@@ -130,7 +144,7 @@ class FounderService
 
             $position = 0;
 
-            foreach (SkillCategory::DEFAULTS as $slug => $name) {
+            foreach (FounderDefaults::skillCategories() as $slug => $name) {
                 $founder->skillCategories()->create(['name' => $name, 'slug' => $slug, 'sort_order' => $position++]);
             }
 

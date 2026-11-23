@@ -21,6 +21,9 @@ class SkillController extends Controller
         private readonly SkillService $skillService,
     ) {}
 
+    /**
+     * Show the list of skills.
+     */
     public function index(): Response
     {
         return Inertia::render('admin/skills/Index', [
@@ -28,6 +31,9 @@ class SkillController extends Controller
         ]);
     }
 
+    /**
+     * Show the form to create a skill.
+     */
     public function create(): Response
     {
         return Inertia::render('admin/skills/Create', [
@@ -35,6 +41,9 @@ class SkillController extends Controller
         ]);
     }
 
+    /**
+     * Validate and save a new skill. The service does the work.
+     */
     public function store(StoreSkillRequest $request): RedirectResponse
     {
         $this->skillService->create($request->validated());
@@ -43,6 +52,9 @@ class SkillController extends Controller
         return to_route('admin.skills.index');
     }
 
+    /**
+     * Show the form to edit a skill.
+     */
     public function edit(Skill $skill): Response
     {
         return Inertia::render('admin/skills/Edit', [
@@ -51,6 +63,9 @@ class SkillController extends Controller
         ]);
     }
 
+    /**
+     * Validate and save the changes to a skill. The service does the work.
+     */
     public function update(UpdateSkillRequest $request, Skill $skill): RedirectResponse
     {
         $this->skillService->update($skill, $request->validated());
@@ -59,6 +74,9 @@ class SkillController extends Controller
         return to_route('admin.skills.index');
     }
 
+    /**
+     * Delete a skill.
+     */
     public function destroy(Skill $skill): RedirectResponse
     {
         $this->skillService->delete($skill);
@@ -67,6 +85,9 @@ class SkillController extends Controller
         return back();
     }
 
+    /**
+     * Save the new display order of the skills.
+     */
     public function reorder(ReorderRequest $request): RedirectResponse
     {
         $this->skillService->reorder($request->validated('ids'));

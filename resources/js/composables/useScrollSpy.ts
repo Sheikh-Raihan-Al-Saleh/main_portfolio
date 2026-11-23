@@ -29,7 +29,7 @@ export function useScrollSpy(
 
         const sections = toValue(ids)
             .map((id) => document.getElementById(id))
-            .filter((el): el is HTMLElement => el !== null);
+            .filter((element): element is HTMLElement => element !== null);
 
         if (sections.length === 0) {
             return;
@@ -41,8 +41,9 @@ export function useScrollSpy(
                 const visible = entries
                     .filter((entry) => entry.isIntersecting)
                     .sort(
-                        (a, b) =>
-                            a.boundingClientRect.top - b.boundingClientRect.top,
+                        (firstEntry, secondEntry) =>
+                            firstEntry.boundingClientRect.top -
+                            secondEntry.boundingClientRect.top,
                     );
 
                 if (visible[0]) {

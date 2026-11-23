@@ -3,7 +3,6 @@
 namespace App\Services\SocialLink;
 
 use App\Models\Founder;
-use App\Models\SocialLink;
 use App\Models\Studio;
 
 /**
@@ -12,6 +11,11 @@ use App\Models\Studio;
  */
 class SocialLinkService
 {
+    /**
+     * The platforms the admin form offers, in display order.
+     */
+    public const PLATFORMS = ['github', 'linkedin', 'x', 'dribbble', 'youtube', 'whatsapp', 'website'];
+
     /**
      * Replace the owner's links with the given map. Blank URLs are removed.
      *
@@ -23,7 +27,7 @@ class SocialLinkService
 
         $keep = [];
 
-        foreach (SocialLink::PLATFORMS as $position => $platform) {
+        foreach (self::PLATFORMS as $position => $platform) {
             $url = trim((string) ($links[$platform] ?? ''));
 
             if ($url === '') {

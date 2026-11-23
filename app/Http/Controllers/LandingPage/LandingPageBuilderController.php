@@ -37,6 +37,9 @@ class LandingPageBuilderController extends Controller
         ]);
     }
 
+    /**
+     * Validate and save the landing page. It is created on its first save.
+     */
     public function update(UpdateLandingPageRequest $request, Project $project): RedirectResponse
     {
         $this->landingPageService->save($project, $request->validated());
@@ -45,6 +48,9 @@ class LandingPageBuilderController extends Controller
         return to_route('admin.projects.landing.edit', $project);
     }
 
+    /**
+     * Delete the landing page with its blocks and files.
+     */
     public function destroy(Project $project): RedirectResponse
     {
         $this->landingPageService->delete($project);

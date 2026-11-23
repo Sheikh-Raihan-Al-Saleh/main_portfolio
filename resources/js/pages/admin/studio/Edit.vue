@@ -351,7 +351,7 @@ function editSection(section: LandingSection) {
 
                         <FormSection
                             title="Logos"
-                            description="PNG, WebP or SVG, up to 2 MB. The logo is shown large across the site, so upload a crisp, high-resolution file."
+                            description="PNG, JPG, WebP or SVG, up to 2 MB. The logo is shown large across the site, so upload a crisp, high-resolution file."
                             :columns="3"
                         >
                             <div class="grid gap-2">
@@ -360,7 +360,7 @@ function editSection(section: LandingSection) {
                                     label="Logo"
                                     remove-name="remove_logo"
                                     :current-url="studio.logo_url"
-                                    accept="image/png,image/webp,image/svg+xml"
+                                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
                                     preview
                                     hint="Full logo for light backgrounds."
                                 />
@@ -373,7 +373,7 @@ function editSection(section: LandingSection) {
                                     label="Logo on dark"
                                     remove-name="remove_logo_dark"
                                     :current-url="studio.logo_dark_url"
-                                    accept="image/png,image/webp,image/svg+xml"
+                                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
                                     preview
                                     hint="Optional version for dark backgrounds."
                                 />
@@ -386,7 +386,7 @@ function editSection(section: LandingSection) {
                                     label="Logo mark"
                                     remove-name="remove_logo_mark"
                                     :current-url="studio.logo_mark_url"
-                                    accept="image/png,image/webp,image/svg+xml"
+                                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
                                     preview
                                     hint="Square icon. Also the browser tab icon."
                                 />

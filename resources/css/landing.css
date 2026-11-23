@@ -295,45 +295,45 @@
     }
 
     /* 3D card */
+    /* A raised white card that lifts on hover. */
     .card-3d {
         background: var(--card);
         border: 1px solid var(--border);
-        border-radius: 14px;
-        box-shadow: 0 1px 0 rgba(17, 17, 17, 0.04);
-        transform-style: preserve-3d;
+        border-radius: 1.25rem;
+        box-shadow: var(--shadow-soft, 0 1px 2px rgb(17 17 17 / 0.05));
         transition:
             transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
             box-shadow 0.5s ease,
             border-color 0.3s ease;
     }
     .card-3d:hover {
-        transform: translateY(-8px) rotateX(3deg) rotateY(-2deg)
-            translateZ(12px);
-        box-shadow:
-            0 8px 24px rgba(0, 0, 0, 0.08),
-            0 24px 48px rgba(15, 23, 42, 0.12);
-        border-color: var(--ink);
+        transform: translateY(-4px);
+        box-shadow: var(
+            --shadow-lift,
+            0 8px 24px rgb(0 0 0 / 0.08),
+            0 24px 48px rgb(15 23 42 / 0.12)
+        );
     }
 
     /* Glow behind hero */
     .hero-glow {
         background: radial-gradient(
             60% 60% at 50% 30%,
-            hsl(221 83% 53% / 0.08),
+            color-mix(in srgb, var(--brand) 10%, transparent),
             transparent 60%
         );
     }
     .hero-glow-2 {
         background: radial-gradient(
             40% 40% at 80% 20%,
-            hsl(262 83% 58% / 0.06),
+            color-mix(in srgb, var(--pop, #f2b84b) 14%, transparent),
             transparent 60%
         );
     }
     .hero-glow-3 {
         background: radial-gradient(
             50% 50% at 20% 80%,
-            hsl(4 96% 53% / 0.04),
+            color-mix(in srgb, var(--brand) 6%, transparent),
             transparent 60%
         );
     }

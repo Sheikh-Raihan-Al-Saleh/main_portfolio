@@ -4,6 +4,7 @@ namespace App\Http\Resources\Studio;
 
 use App\Models\SocialLink;
 use App\Models\Studio;
+use App\Services\Media\MediaService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -37,10 +38,10 @@ class StudioResource extends JsonResource
             'public_email' => $this->public_email,
             'phone' => $this->phone,
             'website_url' => $this->website_url,
-            'logo_url' => $this->logo_url,
-            'logo_dark_url' => $this->logo_dark_url,
-            'logo_mark_url' => $this->logo_mark_url,
-            'og_image_url' => $this->og_image_url,
+            'logo_url' => MediaService::url($this->logo_path),
+            'logo_dark_url' => MediaService::url($this->logo_dark_path),
+            'logo_mark_url' => MediaService::url($this->logo_mark_path),
+            'og_image_url' => MediaService::url($this->og_image_path),
             'hero' => [
                 'eyebrow' => $this->hero_eyebrow,
                 'title' => $this->hero_title,

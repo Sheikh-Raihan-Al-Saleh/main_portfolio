@@ -2,7 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 import { Pencil, Plus, Sparkles } from '@lucide/vue';
 import { motion } from 'motion-v';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import SkillController from '@/actions/App/Http/Controllers/Skill/SkillController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
@@ -18,6 +18,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useEditDialog } from '@/composables/useEditDialog';
 import { useReorder } from '@/composables/useReorder';
 import { fadeUp } from '@/lib/motion';
 import skillRoutes from '@/routes/admin/skills';
@@ -57,18 +58,8 @@ const { items, move, saving } = useReorder<Skill>(
 );
 
 /** Create and edit happen in a modal, so the list stays in view. */
-const dialogOpen = ref(false);
-const editing = ref<Skill | null>(null);
-
-function openCreate() {
-    editing.value = null;
-    dialogOpen.value = true;
-}
-
-function openEdit(skill: Skill) {
-    editing.value = skill;
-    dialogOpen.value = true;
-}
+const { dialogOpen, editing, openCreate, openEdit, closeDialog } =
+    useEditDialog<Skill>();
 </script>
 
 <template>
@@ -249,8 +240,8 @@ function openEdit(skill: Skill) {
                         : SkillController.store.form()
                 "
                 :submit-label="editing ? 'Save changes' : 'Create skill'"
-                @saved="dialogOpen = false"
-                @cancel="dialogOpen = false"
+                @saved="closeDialog"
+                @cancel="closeDialog"
             />
         </FormDialog>
     </div>

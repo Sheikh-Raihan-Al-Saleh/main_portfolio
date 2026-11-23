@@ -4,8 +4,14 @@ namespace App\Http\Requests\Skill;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validates the admin skill form (create; the update request extends it).
+ */
 class StoreSkillRequest extends FormRequest
 {
+    /**
+     * Only an admin may send this form.
+     */
     public function authorize(): bool
     {
         return $this->user()?->is_admin === true;
@@ -28,6 +34,9 @@ class StoreSkillRequest extends FormRequest
         ];
     }
 
+    /**
+     * Turn checkbox values ("on", "1", missing) into real booleans before validation.
+     */
     protected function prepareForValidation(): void
     {
         $this->merge(['is_featured' => $this->boolean('is_featured')]);

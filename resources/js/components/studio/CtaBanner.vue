@@ -30,7 +30,10 @@ const parts = computed(() =>
                     {{ content.eyebrow }}
                 </p>
                 <h2 class="display display-lg mt-6 max-w-[16ch]">
-                    <template v-for="(part, i) in parts" :key="i">
+                    <template
+                        v-for="(part, partIndex) in parts"
+                        :key="partIndex"
+                    >
                         <em v-if="part.highlight" class="!text-paper">{{
                             part.text
                         }}</em>

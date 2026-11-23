@@ -20,19 +20,21 @@ const embedUrl = computed(() => {
     }
 
     if (data.value.provider === 'youtube') {
-        const id = youtubeId(url);
+        const videoId = youtubeId(url);
 
         // YouTube rejects embeds that arrive without a Referer (error 153),
         // so the iframe must not use referrerpolicy="no-referrer".
-        return id
-            ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&playsinline=1&rel=0`
+        return videoId
+            ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&rel=0`
             : null;
     }
 
     if (data.value.provider === 'vimeo') {
-        const id = vimeoId(url);
+        const videoId = vimeoId(url);
 
-        return id ? `https://player.vimeo.com/video/${id}?autoplay=1` : null;
+        return videoId
+            ? `https://player.vimeo.com/video/${videoId}?autoplay=1`
+            : null;
     }
 
     return null;
@@ -42,14 +44,14 @@ function youtubeId(url: string): string | null {
     try {
         const parsed = new URL(url.trim());
         const segments = parsed.pathname.split('/').filter(Boolean);
-        const id =
+        const videoId =
             parsed.hostname === 'youtu.be'
                 ? segments[0]
                 : ['shorts', 'embed', 'live', 'v'].includes(segments[0])
                   ? segments[1]
                   : parsed.searchParams.get('v');
 
-        return id && /^[\w-]{11}$/.test(id) ? id : null;
+        return videoId && /^[\w-]{11}$/.test(videoId) ? videoId : null;
     } catch {
         return null;
     }
@@ -59,7 +61,9 @@ function vimeoId(url: string): string | null {
     try {
         const segments = new URL(url.trim()).pathname.split('/');
 
-        return segments.filter((s) => /^\d+$/.test(s)).pop() ?? null;
+        return (
+            segments.filter((segment) => /^\d+$/.test(segment)).pop() ?? null
+        );
     } catch {
         return null;
     }
@@ -69,17 +73,21 @@ const facadePoster = computed(() => {
         return posterUrl.value;
     }
 
-    const id = data.value.video_url ? youtubeId(data.value.video_url) : null;
+    const videoId = data.value.video_url
+        ? youtubeId(data.value.video_url)
+        : null;
 
-    return id ? `https://i.ytimg.com/vi/${id}/maxresdefault.jpg` : null;
+    return videoId
+        ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`
+        : null;
 });
 const videoElement = ref<HTMLVideoElement | null>(null);
 const muted = ref(true);
 let observer: IntersectionObserver | null = null;
 onMounted(() => {
-    const el = videoElement.value;
+    const video = videoElement.value;
 
-    if (!el) {
+    if (!video) {
         return;
     }
 
@@ -95,29 +103,29 @@ onMounted(() => {
         (entries) => {
             for (const entry of entries) {
                 if (entry.isIntersecting) {
-                    void el.play().catch(() => undefined);
+                    void video.play().catch(() => undefined);
                 } else {
-                    el.pause();
+                    video.pause();
                 }
             }
         },
         { threshold: 0.4 },
     );
-    observer.observe(el);
+    observer.observe(video);
 });
 onBeforeUnmount(() => {
     observer?.disconnect();
     observer = null;
 });
 function toggleMute() {
-    const el = videoElement.value;
+    const video = videoElement.value;
 
-    if (!el) {
+    if (!video) {
         return;
     }
 
-    el.muted = !el.muted;
-    muted.value = el.muted;
+    video.muted = !video.muted;
+    muted.value = video.muted;
 }
 </script>
 

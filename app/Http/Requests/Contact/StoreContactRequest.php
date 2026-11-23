@@ -10,6 +10,9 @@ use Illuminate\Validation\Rule;
  */
 class StoreContactRequest extends FormRequest
 {
+    /**
+     * Anyone may send the public contact form.
+     */
     public function authorize(): bool
     {
         return true;

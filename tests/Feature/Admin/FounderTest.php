@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Resources\Founder\FounderResource;
 use App\Services\Founder\FounderService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -34,7 +35,7 @@ test('an admin can update the founder profile, avatar and resume', function () {
     expect($founder->name)->toBe('Jo Founder')
         ->and($founder->roles)->toBe(['Engineer', 'Builder'])
         ->and($founder->socialLinks)->toHaveCount(1)
-        ->and($founder->resume_url)->toBe('/resume');
+        ->and(FounderResource::resumeUrl($founder))->toBe('/resume');
 
     Storage::disk('uploads')->assertExists([$founder->avatar_path, $founder->resume_path]);
 });

@@ -19,6 +19,9 @@ class SkillCategoryController extends Controller
         private readonly SkillService $skillService,
     ) {}
 
+    /**
+     * Validate and save a new skill category. The service does the work.
+     */
     public function store(StoreSkillCategoryRequest $request): RedirectResponse
     {
         $this->skillService->createCategory($request->validated('name'));
@@ -27,6 +30,9 @@ class SkillCategoryController extends Controller
         return back();
     }
 
+    /**
+     * Validate and save the changes to a skill category. The service does the work.
+     */
     public function update(UpdateSkillCategoryRequest $request, SkillCategory $skillCategory): RedirectResponse
     {
         $this->skillService->updateCategory($skillCategory, $request->validated('name'));
@@ -35,6 +41,9 @@ class SkillCategoryController extends Controller
         return back();
     }
 
+    /**
+     * Delete a skill category.
+     */
     public function destroy(SkillCategory $skillCategory): RedirectResponse
     {
         $this->skillService->deleteCategory($skillCategory);
@@ -43,6 +52,9 @@ class SkillCategoryController extends Controller
         return back();
     }
 
+    /**
+     * Save the new display order of the skill categories.
+     */
     public function reorder(ReorderRequest $request): RedirectResponse
     {
         $this->skillService->reorderCategories($request->validated('ids'));

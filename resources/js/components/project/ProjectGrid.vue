@@ -15,22 +15,24 @@ withDefaults(defineProps<ProjectGridProps>(), {
 <template>
     <div class="grid gap-x-10 gap-y-20 md:grid-cols-2">
         <Reveal
-            v-for="(project, i) in projects"
+            v-for="(project, projectIndex) in projects"
             :key="project.id"
-            :delay="feature && i === 0 ? 0 : (i % 2) * 0.1"
+            :delay="
+                feature && projectIndex === 0 ? 0 : (projectIndex % 2) * 0.1
+            "
             :class="
-                feature && i === 0
+                feature && projectIndex === 0
                     ? 'md:col-span-2'
-                    : i % 2 === 1
+                    : projectIndex % 2 === 1
                       ? 'md:mt-24'
                       : ''
             "
         >
             <ProjectCard
                 :project="project"
-                :variant="feature && i === 0 ? 'feature' : 'default'"
-                :index="numbered ? i : undefined"
-                :eager="i < 2"
+                :variant="feature && projectIndex === 0 ? 'feature' : 'default'"
+                :index="numbered ? projectIndex : undefined"
+                :eager="projectIndex < 2"
             />
         </Reveal>
     </div>

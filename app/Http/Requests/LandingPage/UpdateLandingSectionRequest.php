@@ -19,6 +19,9 @@ class UpdateLandingSectionRequest extends StoreLandingSectionRequest
         return $this->blockRules();
     }
 
+    /**
+     * The type of the block being edited (the type never changes after creation).
+     */
     public function sectionType(): ?LandingSectionType
     {
         $section = $this->route('landingSection');

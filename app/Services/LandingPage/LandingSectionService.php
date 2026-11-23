@@ -33,7 +33,7 @@ class LandingSectionService
      */
     public function visibleFor(Studio|ProjectLandingPage $owner): Collection
     {
-        return $owner->sections()->visible()->ordered()->get();
+        return $owner->sections()->where('is_visible', true)->orderBy('sort_order')->orderBy('id')->get();
     }
 
     /**
@@ -43,7 +43,7 @@ class LandingSectionService
      */
     public function allFor(Studio|ProjectLandingPage $owner): Collection
     {
-        return $owner->sections()->ordered()->get();
+        return $owner->sections()->orderBy('sort_order')->orderBy('id')->get();
     }
 
     /**
@@ -81,11 +81,11 @@ class LandingSectionService
      */
     public function update(LandingSection $section, array $data): LandingSection
     {
-        $oldFiles = $section->mediaPaths();
+        $oldFiles = $this->mediaPaths($section);
 
         $section->update(Arr::only($data, self::FIELDS));
 
-        $this->mediaService->deleteMany(array_diff($oldFiles, $section->mediaPaths()));
+        $this->mediaService->deleteMany(array_diff($oldFiles, $this->mediaPaths($section)));
 
         return $section;
     }
@@ -95,7 +95,7 @@ class LandingSectionService
      */
     public function delete(LandingSection $section): void
     {
-        $files = $section->mediaPaths();
+        $files = $this->mediaPaths($section);
 
         $section->delete();
 
@@ -106,11 +106,11 @@ class LandingSectionService
      * Save a new block order. Only blocks of the same page as the first ID
      * are moved.
      *
-     * @param  array<int, int>  $ids
+     * @param  array<int, int>  $orderedIds
      */
-    public function reorder(array $ids): void
+    public function reorder(array $orderedIds): void
     {
-        $first = LandingSection::query()->find($ids[0] ?? null);
+        $first = LandingSection::query()->find($orderedIds[0] ?? null);
 
         if ($first === null) {
             return;
@@ -120,8 +120,29 @@ class LandingSectionService
             LandingSection::query()
                 ->where('sectionable_type', $first->sectionable_type)
                 ->where('sectionable_id', $first->sectionable_id),
-            $ids,
+            $orderedIds,
         );
+    }
+
+    /**
+     * Every stored media path inside a block's `data`, following the dot-paths
+     * its type declares. Used to delete the files when the block goes away.
+     *
+     * @return array<int, string>
+     */
+    public function mediaPaths(LandingSection $section): array
+    {
+        $paths = [];
+
+        foreach ($section->type->mediaPaths() as $pattern) {
+            foreach (Arr::wrap(data_get($section->data ?? [], $pattern)) as $value) {
+                if (is_string($value) && $value !== '') {
+                    $paths[] = $value;
+                }
+            }
+        }
+
+        return array_values(array_unique($paths));
     }
 
     /**

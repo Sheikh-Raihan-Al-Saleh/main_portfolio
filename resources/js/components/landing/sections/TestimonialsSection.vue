@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Quote } from '@lucide/vue';
+import { Quote, Star } from '@lucide/vue';
 import { motion } from 'motion-v';
 import { computed } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
@@ -13,7 +13,7 @@ function initials(name: string) {
     return name
         .split(' ')
         .slice(0, 2)
-        .map((p) => p.charAt(0).toUpperCase())
+        .map((namePart) => namePart.charAt(0).toUpperCase())
         .join('');
 }
 </script>
@@ -44,8 +44,16 @@ function initials(name: string) {
                             class="grid size-8 place-items-center rounded-full bg-foreground text-background"
                             ><Quote class="size-4"
                         /></span>
-                        <span class="flex gap-0.5 text-amber-400">
-                            <span v-for="i in 5" :key="i">★</span>
+                        <span
+                            class="flex gap-0.5 text-[var(--pop)]"
+                            aria-label="Five stars"
+                        >
+                            <Star
+                                v-for="starNumber in 5"
+                                :key="starNumber"
+                                class="size-3.5 fill-current"
+                                aria-hidden="true"
+                            />
                         </span>
                     </div>
                     <blockquote

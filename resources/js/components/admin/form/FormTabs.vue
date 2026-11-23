@@ -149,7 +149,7 @@ watch(
                 </div>
 
                 <ol class="ui-card hidden flex-col gap-1 p-2 lg:flex">
-                    <li v-for="(tab, i) in tabs" :key="tab.id">
+                    <li v-for="(tab, tabIndex) in tabs" :key="tab.id">
                         <button
                             type="button"
                             :aria-current="
@@ -181,7 +181,7 @@ watch(
                                     class="size-4"
                                 />
                                 <span v-else class="text-xs font-semibold">{{
-                                    i + 1
+                                    tabIndex + 1
                                 }}</span>
                             </span>
                             <span class="min-w-0 flex-1">

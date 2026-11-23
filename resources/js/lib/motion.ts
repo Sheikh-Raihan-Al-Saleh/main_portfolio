@@ -241,10 +241,10 @@ export const perspectiveCard = {
  * `depth` controls how much Y translation is applied (0 = static, 1 = deep).
  */
 export function depthLayer(depth: number, direction: 'up' | 'down' = 'up') {
-    const y = direction === 'up' ? -40 * depth : 40 * depth;
+    const offsetY = direction === 'up' ? -40 * depth : 40 * depth;
 
     return {
-        hidden: { opacity: 0, y: y * 0.5 },
+        hidden: { opacity: 0, y: offsetY * 0.5 },
         visible: {
             opacity: 1,
             y: 0,

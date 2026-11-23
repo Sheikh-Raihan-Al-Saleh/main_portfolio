@@ -2,14 +2,10 @@
 
 namespace App\Models;
 
-use App\Services\Media\MediaService;
 use Carbon\CarbonInterface;
 use Database\Factories\ProjectFactory;
-use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\RouteKey;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -41,7 +37,6 @@ use Illuminate\Support\Carbon;
  * @property CarbonInterface|null $published_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read string|null $cover_image_url
  * @property-read bool|null $has_landing_page Selected with withExists() by ProjectService.
  * @property-read Studio|Founder $owner
  * @property-read Collection<int, ProjectImage> $images
@@ -53,26 +48,37 @@ use Illuminate\Support\Carbon;
     'repo_url', 'live_url', 'is_featured', 'is_published', 'sort_order',
     'started_at', 'completed_at', 'published_at',
 ])]
-#[Appends(['cover_image_url'])]
 #[RouteKey('slug')]
 class Project extends Model
 {
     /** @use HasFactory<ProjectFactory> */
     use HasFactory;
 
-    /** @return MorphTo<Model, $this> */
+    /**
+     * Who the project belongs to: the studio or the founder (polymorphic inverse).
+     *
+     * @return MorphTo<Model, $this>
+     */
     public function owner(): MorphTo
     {
         return $this->morphTo();
     }
 
-    /** @return HasMany<ProjectImage, $this> */
+    /**
+     * The gallery images, in display order (one-to-many).
+     *
+     * @return HasMany<ProjectImage, $this>
+     */
     public function images(): HasMany
     {
         return $this->hasMany(ProjectImage::class)->orderBy('sort_order')->orderBy('id');
     }
 
-    /** @return BelongsToMany<Technology, $this> */
+    /**
+     * The tech stack, in display order (many-to-many through the project_technology pivot).
+     *
+     * @return BelongsToMany<Technology, $this>
+     */
     public function technologies(): BelongsToMany
     {
         return $this->belongsToMany(Technology::class)
@@ -80,48 +86,14 @@ class Project extends Model
             ->orderByPivot('sort_order');
     }
 
-    /** @return HasOne<ProjectLandingPage, $this> */
+    /**
+     * The project's case-study landing page (one-to-one).
+     *
+     * @return HasOne<ProjectLandingPage, $this>
+     */
     public function landingPage(): HasOne
     {
         return $this->hasOne(ProjectLandingPage::class);
-    }
-
-    protected function getCoverImageUrlAttribute(): ?string
-    {
-        return MediaService::url($this->cover_image_path);
-    }
-
-    /** @param  Builder<Project>  $query */
-    #[Scope]
-    protected function published(Builder $query): void
-    {
-        $query->where('is_published', true);
-    }
-
-    /** @param  Builder<Project>  $query */
-    #[Scope]
-    protected function featured(Builder $query): void
-    {
-        $query->where('is_featured', true);
-    }
-
-    /**
-     * Work owned by one studio or founder.
-     *
-     * @param  Builder<Project>  $query
-     */
-    #[Scope]
-    protected function ownedBy(Builder $query, Model $owner): void
-    {
-        $query->where('owner_type', $owner->getMorphClass())
-            ->where('owner_id', $owner->getKey());
-    }
-
-    /** @param  Builder<Project>  $query */
-    #[Scope]
-    protected function ordered(Builder $query): void
-    {
-        $query->orderBy('sort_order')->orderByDesc('id');
     }
 
     /**

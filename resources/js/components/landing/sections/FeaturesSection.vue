@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Sparkles } from '@lucide/vue';
+import { ArrowRight, Sparkles } from '@lucide/vue';
 import { motion } from 'motion-v';
 import { computed } from 'vue';
 import SectionShell from '@/components/landing/SectionShell.vue';
@@ -68,7 +68,8 @@ const gradients = [
                     <div
                         class="mt-4 flex items-center gap-1 text-xs font-medium text-brand-text opacity-0 transition group-hover:opacity-100"
                     >
-                        Learn more <span aria-hidden="true">→</span>
+                        Learn more
+                        <ArrowRight class="size-3.5" aria-hidden="true" />
                     </div>
                 </div>
             </motion.div>

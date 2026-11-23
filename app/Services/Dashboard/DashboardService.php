@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\Studio;
 use App\Services\Founder\FounderService;
 use App\Services\Studio\StudioService;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -35,13 +36,13 @@ class DashboardService
 
             return [
                 'projects' => $studio->projects_count + $founder->projects_count,
-                'publishedProjects' => Project::query()->published()->count(),
+                'publishedProjects' => Project::query()->where('is_published', true)->count(),
                 'clients' => $studio->clients_count,
                 'skills' => $founder->skills_count,
                 'experiences' => $founder->experiences_count,
                 'educations' => $founder->educations_count,
                 'messages' => ContactMessage::query()->count(),
-                'unreadMessages' => ContactMessage::query()->unread()->count(),
+                'unreadMessages' => ContactMessage::query()->whereNull('read_at')->count(),
                 'homeBlocks' => $studio->sections_count,
             ];
         });
@@ -64,7 +65,7 @@ class DashboardService
      */
     public function recentProjects(): EloquentCollection
     {
-        return Project::query()->ordered()->limit(5)->get(['id', 'title', 'slug', 'is_published', 'is_featured', 'updated_at']);
+        return Project::query()->orderBy('sort_order')->orderByDesc('id')->limit(5)->get(['id', 'title', 'slug', 'is_published', 'is_featured', 'updated_at']);
     }
 
     /**
@@ -118,7 +119,7 @@ class DashboardService
     private function countByDay(Collection $timestamps): array
     {
         return $timestamps
-            ->countBy(fn ($timestamp): string => $timestamp->format('Y-m-d'))
+            ->countBy(fn (CarbonInterface $timestamp): string => $timestamp->format('Y-m-d'))
             ->all();
     }
 

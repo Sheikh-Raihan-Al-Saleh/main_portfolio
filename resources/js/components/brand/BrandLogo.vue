@@ -25,15 +25,15 @@ const brand = useBrand();
 const failed = ref(false);
 
 const src = computed(() => {
-    const b = brand.value;
+    const currentBrand = brand.value;
 
     if (props.variant === 'mark') {
-        return b.logo_mark_url ?? b.logo_url;
+        return currentBrand.logo_mark_url ?? currentBrand.logo_url;
     }
 
     return props.tone === 'dark'
-        ? (b.logo_dark_url ?? b.logo_url)
-        : (b.logo_url ?? b.logo_mark_url);
+        ? (currentBrand.logo_dark_url ?? currentBrand.logo_url)
+        : (currentBrand.logo_url ?? currentBrand.logo_mark_url);
 });
 
 watch(src, () => (failed.value = false));

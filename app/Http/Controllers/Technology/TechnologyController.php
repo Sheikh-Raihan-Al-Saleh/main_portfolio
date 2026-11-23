@@ -20,6 +20,9 @@ class TechnologyController extends Controller
         private readonly TechnologyService $technologyService,
     ) {}
 
+    /**
+     * Show the list of technologies.
+     */
     public function index(): Response
     {
         return Inertia::render('admin/technologies/Index', [
@@ -27,6 +30,9 @@ class TechnologyController extends Controller
         ]);
     }
 
+    /**
+     * Validate and save a new technology. The service does the work.
+     */
     public function store(StoreTechnologyRequest $request): RedirectResponse
     {
         $this->technologyService->create($request->validated());
@@ -35,6 +41,9 @@ class TechnologyController extends Controller
         return back();
     }
 
+    /**
+     * Validate and save the changes to a technology. The service does the work.
+     */
     public function update(UpdateTechnologyRequest $request, Technology $technology): RedirectResponse
     {
         $this->technologyService->update($technology, $request->validated());
@@ -43,6 +52,9 @@ class TechnologyController extends Controller
         return back();
     }
 
+    /**
+     * Delete a technology.
+     */
     public function destroy(Technology $technology): RedirectResponse
     {
         $this->technologyService->delete($technology);

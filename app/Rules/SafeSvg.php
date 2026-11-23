@@ -29,6 +29,9 @@ class SafeSvg implements ValidationRule
         'fegaussianblur', 'femerge', 'femergenode', 'feoffset', 'fedropshadow',
     ];
 
+    /**
+     * Fail when an uploaded SVG holds anything beyond plain vector shapes.
+     */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (! $value instanceof UploadedFile || $value->getMimeType() !== 'image/svg+xml') {
@@ -40,6 +43,9 @@ class SafeSvg implements ValidationRule
         }
     }
 
+    /**
+     * Whether an SVG has no DOCTYPE and contains only allowed elements and attributes.
+     */
     public function isSafe(string $svg): bool
     {
         // A DOCTYPE is how entity-expansion and external-entity attacks get in;
@@ -67,16 +73,19 @@ class SafeSvg implements ValidationRule
         return true;
     }
 
+    /**
+     * Whether one element is on the allow-list and none of its attributes is an event handler or an unsafe link.
+     */
     private function isSafeElement(DOMElement $element): bool
     {
         if (! in_array(strtolower($element->localName), self::ALLOWED_ELEMENTS, true)) {
             return false;
         }
 
-        foreach ($element->attributes ?? [] as $attr) {
-            $name = strtolower($attr->localName);
+        foreach ($element->attributes ?? [] as $attribute) {
+            $name = strtolower($attribute->localName);
             // The DOM has already decoded entities, so encoded payloads show here.
-            $value = strtolower(preg_replace('/\s+/', '', $attr->value) ?? '');
+            $value = strtolower(preg_replace('/\s+/', '', $attribute->value) ?? '');
 
             if (str_starts_with($name, 'on')) {
                 return false;

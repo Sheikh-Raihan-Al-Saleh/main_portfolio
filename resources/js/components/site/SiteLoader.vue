@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { AnimatePresence, motion } from 'motion-v';
-import { onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import BrandLogo from '@/components/brand/BrandLogo.vue';
 import { usePrefersReducedMotion } from '@/composables/usePrefersReducedMotion';
 
@@ -11,6 +11,8 @@ import { usePrefersReducedMotion } from '@/composables/usePrefersReducedMotion';
  */
 const reducedMotion = usePrefersReducedMotion();
 const visible = ref(true);
+// The timer that lifts the curtain, cleared if the loader unmounts first.
+let hideTimerId: number | null = null;
 
 onMounted(() => {
     const seen = sessionStorage.getItem('site-loader-seen') === '1';
@@ -27,7 +29,13 @@ onMounted(() => {
         // Storage may be blocked; the loader still finishes.
     }
 
-    window.setTimeout(() => (visible.value = false), 1100);
+    hideTimerId = window.setTimeout(() => (visible.value = false), 1100);
+});
+
+onBeforeUnmount(() => {
+    if (hideTimerId !== null) {
+        window.clearTimeout(hideTimerId);
+    }
 });
 </script>
 

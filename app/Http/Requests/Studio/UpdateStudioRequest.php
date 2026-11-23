@@ -13,6 +13,9 @@ class UpdateStudioRequest extends FormRequest
 {
     use SiteFormRules;
 
+    /**
+     * Only an admin may send this form.
+     */
     public function authorize(): bool
     {
         return $this->user()?->is_admin === true;
@@ -25,7 +28,7 @@ class UpdateStudioRequest extends FormRequest
     {
         // Logos may be SVG. The `image` rule rejects SVG, so formats are listed
         // by extension, and SafeSvg refuses anything beyond plain shapes.
-        $logo = ['nullable', 'mimes:png,webp,svg', 'max:2048', new SafeSvg];
+        $logo = ['nullable', 'mimes:png,jpg,jpeg,webp,svg', 'max:2048', new SafeSvg];
 
         return [
             // Brand
@@ -70,6 +73,9 @@ class UpdateStudioRequest extends FormRequest
         ];
     }
 
+    /**
+     * Whether the uploaded file under this key is an SVG (checked by extension).
+     */
     private function isSvg(string $key): bool
     {
         $file = $this->file($key);
@@ -77,6 +83,9 @@ class UpdateStudioRequest extends FormRequest
         return $file !== null && strtolower($file->getClientOriginalExtension()) === 'svg';
     }
 
+    /**
+     * Turn checkbox values ("on", "1", missing) into real booleans before validation.
+     */
     protected function prepareForValidation(): void
     {
         $this->merge([

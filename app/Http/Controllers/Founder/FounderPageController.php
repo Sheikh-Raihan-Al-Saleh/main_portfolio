@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Founder;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Experience\ExperienceResource;
 use App\Http\Resources\Project\ProjectCardResource;
 use App\Services\Founder\FounderService;
 use App\Services\Project\ProjectService;
@@ -20,21 +21,27 @@ class FounderPageController extends Controller
         private readonly ProjectService $projectService,
     ) {}
 
+    /**
+     * Show the founder portfolio page (/founder).
+     */
     public function show(): Response
     {
         $founder = $this->founderService->withPortfolio();
         $projects = $this->projectService->publishedFor($founder);
 
         return Inertia::render('public/founder/Index', [
-            'content' => $founder->founder_content,
+            'content' => $this->founderService->content(),
             'skillGroups' => $founder->skillCategories,
-            'experiences' => $founder->experiences,
+            'experiences' => ExperienceResource::collection($founder->experiences)->resolve(),
             'educations' => $founder->educations,
             'projects' => ProjectCardResource::collection($projects)->resolve(),
             'stats' => $this->founderService->stats($founder, $projects->count()),
         ]);
     }
 
+    /**
+     * Download the uploaded resume, or 404 when there is none.
+     */
     public function resume(): StreamedResponse
     {
         $response = $this->founderService->resumeResponse();

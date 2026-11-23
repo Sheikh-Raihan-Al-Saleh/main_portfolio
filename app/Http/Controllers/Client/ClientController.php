@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\StoreClientRequest;
 use App\Http\Requests\Client\UpdateClientRequest;
 use App\Http\Requests\ReorderRequest;
+use App\Http\Resources\Client\ClientResource;
 use App\Models\Client;
 use App\Services\Client\ClientService;
 use Illuminate\Http\RedirectResponse;
@@ -22,16 +23,22 @@ class ClientController extends Controller
         private readonly ClientService $clientService,
     ) {}
 
+    /**
+     * Show the list of clients.
+     */
     public function index(Request $request): Response
     {
         $search = $request->string('search')->trim()->value();
 
         return Inertia::render('admin/clients/Index', [
-            'clients' => $this->clientService->list($search),
+            'clients' => ClientResource::collection($this->clientService->list($search))->resolve(),
             'filters' => ['search' => $search ?: null],
         ]);
     }
 
+    /**
+     * Validate and save a new client. The service does the work.
+     */
     public function store(StoreClientRequest $request): RedirectResponse
     {
         $this->clientService->create($request->validated());
@@ -40,6 +47,9 @@ class ClientController extends Controller
         return back();
     }
 
+    /**
+     * Validate and save the changes to a client. The service does the work.
+     */
     public function update(UpdateClientRequest $request, Client $client): RedirectResponse
     {
         $this->clientService->update($client, $request->validated());
@@ -48,6 +58,9 @@ class ClientController extends Controller
         return back();
     }
 
+    /**
+     * Delete a client.
+     */
     public function destroy(Client $client): RedirectResponse
     {
         $this->clientService->delete($client);
@@ -56,6 +69,9 @@ class ClientController extends Controller
         return back();
     }
 
+    /**
+     * Save the new display order of the clients.
+     */
     public function reorder(ReorderRequest $request): RedirectResponse
     {
         $this->clientService->reorder($request->validated('ids'));

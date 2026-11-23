@@ -6,6 +6,9 @@ use App\Http\Requests\Concerns\PasswordValidationRules;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validates the change-password form.
+ */
 class UpdatePasswordRequest extends FormRequest
 {
     use PasswordValidationRules;

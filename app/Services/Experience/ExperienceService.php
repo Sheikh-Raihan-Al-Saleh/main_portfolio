@@ -30,7 +30,11 @@ class ExperienceService
      */
     public function list(): Collection
     {
-        return $this->founderService->current()->experiences()->ordered()->with('highlights')->get();
+        return $this->founderService->current()->experiences()
+            ->with('highlights')
+            ->orderBy('sort_order')
+            ->orderByDesc('start_date')
+            ->get();
     }
 
     /**
@@ -93,11 +97,11 @@ class ExperienceService
     }
 
     /**
-     * @param  array<int, int>  $ids
+     * @param  array<int, int>  $orderedIds
      */
-    public function reorder(array $ids): void
+    public function reorder(array $orderedIds): void
     {
-        SortOrder::apply($this->founderService->current()->experiences(), $ids);
+        SortOrder::apply($this->founderService->current()->experiences(), $orderedIds);
     }
 
     /**

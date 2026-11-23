@@ -1,49 +1,104 @@
 /*
-| The public website: a light, editorial design system.
+| The public website: the "Sage Product" design system.
 |
-| Warm paper, near-black ink, a serif display face and one accent colour per
-| face of the site. The studio and the founder share every rule below; only
-| the accent changes, selected by [data-site] on the layout wrapper.
+| A soft sage ground, white surfaces, deep forest ink, one green accent and a
+| honey highlight. Bricolage Grotesque sets the headlines, DM Sans the text.
+| The studio and the founder share every rule below; only the accent changes,
+| selected by [data-site] on the layout wrapper.
+|
+| The palette is scoped to the public site (.site, and <body data-site> for
+| dialogs and toasts that render outside it), so the admin panel keeps its
+| own tokens from app.css.
 */
 
 /*
 | Everything sits in the components layer, so a Tailwind utility on the same
 | element (e.g. `eyebrow text-paper/60`) still wins.
 */
+/* Scrollbars follow the sage palette while a public page is open. */
+:root:has(.site) {
+    scrollbar-color: #a9c2b1 #eef3ee;
+}
+
 @layer components {
+    /* ── Palette and fonts ──────────────────────────────────────── */
+    .site,
+    body[data-site] {
+        --paper: #eef3ee;
+        --paper-deep: #e1eae2;
+        --ink: #14281f;
+        --ink-soft: #2f4639;
+        --stone: #566b5f;
+        --line: #d3dfd5;
+        /* The honey highlight: marked words, the secondary call to action. */
+        --pop: #f2b84b;
+        --pop-strong: #e3a12c;
+
+        --background: var(--paper);
+        --foreground: var(--ink);
+        --card: #ffffff;
+        --card-foreground: var(--ink);
+        --popover: #ffffff;
+        --popover-foreground: var(--ink);
+        --muted: var(--paper-deep);
+        --muted-foreground: var(--stone);
+        --border: var(--line);
+        --input: var(--line);
+        --ring: var(--brand);
+
+        --font-display:
+            'Bricolage Grotesque', 'Segoe UI', ui-sans-serif, system-ui,
+            sans-serif;
+        --font-body: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+
+        /* One soft, offset shadow for every raised surface. */
+        --shadow-soft:
+            0 1px 2px rgb(20 40 31 / 0.05),
+            0 18px 40px -24px rgb(20 40 31 / 0.35);
+        --shadow-lift:
+            0 2px 4px rgb(20 40 31 / 0.06),
+            0 28px 56px -28px rgb(20 40 31 / 0.45);
+    }
+
     /* ── Faces ──────────────────────────────────────────────────── */
     /* --scene-* colour the three.js liquid shapes (lib/liquid/engine.ts). */
-    :root,
-    [data-site='studio'] {
-        --brand: #e64500;
-        /* Ink on the orange keeps button text above 4.5:1 contrast. */
-        --brand-foreground: #111111;
-        /* The accent as small text: a deeper tone that passes 4.5:1 on paper. */
-        --brand-text: #b83700;
-        --brand-subtle: #ffe6da;
-        --scene-1: #ff4d00;
-        --scene-2: #ffb38f;
-        --scene-3: #ffe1d2;
-    }
-
-    [data-site='founder'] {
-        --brand: #1f4bff;
+    .site[data-site='studio'],
+    body[data-site='studio'] {
+        --brand: #1f6b4a;
         --brand-foreground: #ffffff;
-        --brand-text: #1f4bff;
-        --brand-subtle: #e2e8ff;
-        --scene-1: #1f4bff;
-        --scene-2: #9fb0ff;
-        --scene-3: #dfe5ff;
+        /* The accent as small text: passes 4.5:1 on the sage ground. */
+        --brand-text: #1f6b4a;
+        --brand-subtle: #cfe6d6;
+        --scene-1: #1f6b4a;
+        --scene-2: #8fc4a3;
+        --scene-3: #f2b84b;
     }
 
-    /* On dark bands the bright accent itself has enough contrast for text. */
+    .site[data-site='founder'],
+    body[data-site='founder'] {
+        --brand: #2c5d7c;
+        --brand-foreground: #ffffff;
+        --brand-text: #2c5d7c;
+        --brand-subtle: #d6e6ee;
+        --scene-1: #2c5d7c;
+        --scene-2: #9cc2d6;
+        --scene-3: #f2b84b;
+    }
+
+    /* On dark forest bands the honey reads as the accent. */
     [data-tone='dark'] {
-        --brand-text: var(--brand);
+        --brand-text: var(--pop);
     }
 
     /* ── Layout ─────────────────────────────────────────────────── */
     .site {
         background: var(--paper);
+        color: var(--ink);
+        font-family: var(--font-body);
+    }
+
+    .site ::selection {
+        background: var(--pop);
         color: var(--ink);
     }
 
@@ -86,55 +141,103 @@
     /* ── Type ───────────────────────────────────────────────────── */
     .display {
         font-family: var(--font-display);
-        font-weight: 400;
-        line-height: 0.92;
-        letter-spacing: -0.02em;
+        font-weight: 700;
+        font-optical-sizing: auto;
+        line-height: 1.02;
+        letter-spacing: -0.035em;
         text-wrap: balance;
     }
 
     .display-xl {
-        font-size: clamp(3.25rem, 11vw, 10rem);
+        font-size: clamp(2.75rem, 7vw, 6rem);
+        line-height: 0.98;
     }
 
     .display-lg {
-        font-size: clamp(2.75rem, 7.5vw, 6.5rem);
+        font-size: clamp(2.4rem, 5.5vw, 4.75rem);
     }
 
     .display-md {
-        font-size: clamp(2.25rem, 5vw, 4.25rem);
-        line-height: 1;
-    }
-
-    .display-sm {
-        font-size: clamp(1.75rem, 3vw, 2.5rem);
+        font-size: clamp(2rem, 4vw, 3.25rem);
         line-height: 1.05;
     }
 
-    /* The highlighted word inside a headline. */
-    .display em,
-    .em-accent {
-        font-style: italic;
-        color: var(--brand);
+    .display-sm {
+        font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+        line-height: 1.1;
+        letter-spacing: -0.025em;
     }
 
+    /* The highlighted phrase inside a headline: a honey marker stroke under
+       the lower part of the words, kept across line breaks. */
+    .display em,
+    .em-accent {
+        font-style: normal;
+        color: inherit;
+        background-image: linear-gradient(
+            transparent 62%,
+            var(--pop) 62%,
+            var(--pop) 92%,
+            transparent 92%
+        );
+        -webkit-box-decoration-break: clone;
+        box-decoration-break: clone;
+        padding-inline: 0.06em;
+    }
+
+    /* On dark bands the phrase turns honey instead of being underlined. */
+    [data-tone='dark'] .display em,
+    [data-tone='dark'] .em-accent {
+        background-image: none;
+        color: var(--pop);
+    }
+
+    /* A long quotation: the display face at a reading weight. */
+    .quote-text {
+        font-family: var(--font-display);
+        font-weight: 500;
+        line-height: 1.4;
+        letter-spacing: -0.015em;
+        color: var(--ink);
+        text-wrap: pretty;
+    }
+
+    /* A small pill label: section names, status, the hero tag line. */
     .eyebrow {
         display: inline-flex;
         align-items: center;
-        gap: 0.6rem;
-        font-family: var(--font-mono);
-        font-size: 0.72rem;
-        font-weight: 500;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--stone);
+        gap: 0.5rem;
+        width: fit-content;
+        padding: 0.35rem 0.8rem;
+        border-radius: 999px;
+        background: var(--brand-subtle);
+        color: var(--brand-text);
+        font-family: var(--font-body);
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0;
+        line-height: 1.2;
     }
 
     .eyebrow::before {
         content: '';
-        width: 0.5rem;
-        height: 0.5rem;
+        flex-shrink: 0;
+        width: 0.45rem;
+        height: 0.45rem;
         border-radius: 999px;
-        background: var(--brand);
+        background: currentColor;
+    }
+
+    [data-tone='dark'] .eyebrow {
+        background: rgb(255 255 255 / 0.1);
+        color: var(--pop);
+    }
+
+    /* A plain label: no pill, just quiet bold text. */
+    .eyebrow-plain {
+        padding: 0;
+        background: none;
+        color: var(--stone);
     }
 
     .eyebrow-plain::before {
@@ -156,15 +259,18 @@
     }
 
     .meta {
-        font-family: var(--font-mono);
-        font-size: 0.75rem;
-        letter-spacing: 0.04em;
+        font-family: var(--font-body);
+        font-size: 0.8rem;
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
         color: var(--stone);
     }
 
     .index-number {
-        font-family: var(--font-mono);
-        font-size: 0.75rem;
+        font-family: var(--font-body);
+        font-size: 0.8rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
         color: var(--brand-text);
     }
 
@@ -192,47 +298,72 @@
         border-radius: 999px;
         border: 1px solid transparent;
         font-size: 0.95rem;
-        font-weight: 500;
+        font-weight: 600;
         white-space: nowrap;
         transition:
             background-color 0.25s ease,
             color 0.25s ease,
             border-color 0.25s ease,
-            transform 0.25s ease;
+            box-shadow 0.25s ease,
+            transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
     }
 
     .btn:active {
         transform: translateY(1px);
     }
 
+    /* Primary: the green accent. */
     .btn-ink {
+        background: var(--brand);
+        color: var(--brand-foreground);
+        box-shadow: 0 10px 24px -14px var(--brand);
+    }
+
+    .btn-ink:hover {
         background: var(--ink);
         color: var(--paper);
     }
 
-    .btn-ink:hover {
-        background: var(--brand);
-        color: var(--brand-foreground);
-    }
-
+    /* Secondary: a white pill on the sage ground. */
     .btn-outline {
-        border-color: var(--ink);
+        background: var(--card);
+        border-color: var(--line);
         color: var(--ink);
     }
 
     .btn-outline:hover {
-        background: var(--ink);
+        border-color: var(--ink);
+    }
+
+    [data-tone='dark'] .btn-outline {
+        background: transparent;
+        border-color: rgb(255 255 255 / 0.3);
         color: var(--paper);
     }
 
+    [data-tone='dark'] .btn-outline:hover {
+        border-color: var(--paper);
+    }
+
+    /* The honey call to action, for the one action that matters most. */
     .btn-accent {
-        background: var(--brand);
-        color: var(--brand-foreground);
+        background: var(--pop);
+        color: var(--ink);
     }
 
     .btn-accent:hover {
-        background: var(--ink);
-        color: var(--paper);
+        background: var(--pop-strong);
+        color: var(--ink);
+    }
+
+    .btn:disabled,
+    .btn[aria-disabled='true'] {
+        opacity: 0.55;
+        pointer-events: none;
     }
 
     .btn-sm {
@@ -254,18 +385,31 @@
         display: inline-flex;
         align-items: center;
         height: 1.75rem;
-        padding: 0 0.7rem;
-        border: 1px solid var(--line);
+        padding: 0 0.75rem;
+        border: 1px solid transparent;
         border-radius: 999px;
         font-size: 0.75rem;
-        color: var(--ink-soft);
-        background: color-mix(in srgb, var(--card) 70%, transparent);
+        font-weight: 600;
+        color: var(--brand-text);
+        background: var(--brand-subtle);
         white-space: nowrap;
+        transition:
+            background-color 0.2s ease,
+            color 0.2s ease;
     }
 
-    .tag-active {
-        border-color: var(--ink);
-        background: var(--ink);
+    button.tag:hover {
+        background: color-mix(in srgb, var(--brand-subtle) 70%, var(--brand));
+    }
+
+    .tag-active,
+    button.tag-active:hover {
+        background: var(--brand);
+        color: var(--brand-foreground);
+    }
+
+    [data-tone='dark'] .tag {
+        background: rgb(255 255 255 / 0.1);
         color: var(--paper);
     }
 
@@ -306,11 +450,21 @@
         }
     }
 
-    /* A paper card with a hairline border. */
+    /* A white surface on the sage ground, with a soft offset shadow. */
     .paper-card {
         background: var(--card);
         border: 1px solid var(--line);
         border-radius: 1.25rem;
+        box-shadow: var(--shadow-soft);
+    }
+
+    /* The dark forest tile, for the one item a grid leads with. */
+    .forest-card {
+        background: var(--ink);
+        color: var(--paper);
+        border: 1px solid var(--ink);
+        border-radius: 1.25rem;
+        box-shadow: var(--shadow-lift);
     }
 
     /* Faint ruled grid, used behind heroes. */
@@ -387,6 +541,40 @@
         border-bottom-color: var(--line);
     }
 
+    /* The desktop navigation: links grouped in one white pill. */
+    .nav-pill {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.35rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--card);
+        box-shadow: var(--shadow-soft);
+    }
+
+    .nav-pill-link {
+        display: block;
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        font-size: 0.92rem;
+        font-weight: 500;
+        color: var(--stone);
+        transition:
+            background-color 0.2s ease,
+            color 0.2s ease;
+    }
+
+    .nav-pill-link:hover {
+        background: var(--paper);
+        color: var(--ink);
+    }
+
+    .nav-pill-link[aria-current='page'] {
+        background: var(--ink);
+        color: var(--paper);
+    }
+
     /* ── Loader ─────────────────────────────────────────────────── */
     .site-loader {
         position: fixed;
@@ -397,6 +585,16 @@
         background: var(--paper);
     }
 
+    /* ── Browser surfaces ───────────────────────────────────────── */
+    .site {
+        caret-color: var(--brand);
+        accent-color: var(--brand);
+    }
+
+    .site a {
+        text-underline-offset: 0.2em;
+    }
+
     /* ── Motion preferences ─────────────────────────────────────── */
     @media (prefers-reduced-motion: reduce) {
         .marquee-track,
@@ -404,4 +602,117 @@
             animation: none;
         }
     }
+}
+
+/*
+| Sign-in pages (layouts/auth/AuthEditorialLayout.vue).
+|
+| These rules sit outside the cascade layers on purpose: they restyle the
+| shared form components (shadcn-vue Input, Button, Checkbox), whose own
+| Tailwind utilities would otherwise win.
+*/
+
+/* Shown instead of the founder photo until one is uploaded. */
+.auth-portrait-empty {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background:
+        radial-gradient(rgb(255 255 255 / 0.08) 1px, transparent 1px) 0 0 / 22px
+            22px,
+        radial-gradient(120% 80% at 80% 10%, #1d5a49 0%, var(--ink) 60%);
+}
+
+.auth-portrait-empty span {
+    font-size: clamp(10rem, 24vw, 22rem);
+    line-height: 1;
+    color: rgb(255 255 255 / 0.06);
+}
+
+/* Darkens the bottom of the founder photo so the mission stays readable. */
+.auth-portrait-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgb(20 40 31 / 0.35) 0%,
+        rgb(20 40 31 / 0) 30%,
+        rgb(20 40 31 / 0.5) 62%,
+        rgb(20 40 31 / 0.94) 100%
+    );
+}
+
+.auth-card [data-slot='label'] {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.auth-card [data-slot='input'] {
+    height: 3.1rem;
+    border-radius: 0.9rem;
+    border-color: var(--line);
+    background: var(--paper);
+    padding-inline: 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--ink);
+    box-shadow: none;
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.auth-card [data-slot='input']:hover {
+    border-color: color-mix(in srgb, var(--line) 60%, var(--stone));
+}
+
+.auth-card [data-slot='input']:focus-visible {
+    background: var(--card);
+    border-color: var(--brand);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 16%, transparent);
+    outline: none;
+}
+
+.auth-card [data-slot='input'][aria-invalid='true'] {
+    border-color: var(--destructive);
+    background: var(--card);
+}
+
+.auth-card [data-slot='button']:not([data-variant='link']) {
+    height: 3.25rem;
+    border-radius: 999px;
+    background: var(--brand);
+    color: var(--brand-foreground);
+    font-size: 1rem;
+    font-weight: 700;
+    box-shadow: 0 12px 26px -14px var(--brand);
+    transition:
+        background-color 0.2s ease,
+        transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-card [data-slot='button']:not([data-variant='link']):hover {
+    background: var(--ink);
+    transform: translateY(-1px);
+}
+
+.auth-card [data-slot='checkbox'] {
+    border-color: var(--line);
+    border-radius: 0.35rem;
+}
+
+.auth-card [data-slot='checkbox'][data-state='checked'] {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--brand-foreground);
+}
+
+/* Text links inside the card (forgot password, resend...) use the accent. */
+.auth-card a:not([data-slot]) {
+    color: var(--brand-text);
+    font-weight: 600;
+    text-decoration-color: color-mix(in srgb, var(--brand) 35%, transparent);
 }

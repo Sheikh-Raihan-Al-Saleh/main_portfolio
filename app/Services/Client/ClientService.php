@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Services\Media\MediaService;
 use App\Services\Studio\StudioService;
 use App\Support\SortOrder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 
@@ -29,7 +30,11 @@ class ClientService
      */
     public function visible(): Collection
     {
-        return $this->studioService->current()->clients()->visible()->ordered()->get();
+        return $this->studioService->current()->clients()
+            ->where('is_visible', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
     }
 
     /**
@@ -40,10 +45,11 @@ class ClientService
     public function list(?string $search = null): Collection
     {
         return $this->studioService->current()->clients()
-            ->when($search, fn ($query) => $query->where(
-                fn ($inner) => $inner->whereLike('name', "%{$search}%")->orWhereLike('industry', "%{$search}%"),
+            ->when($search, fn (Builder $query) => $query->where(
+                fn (Builder $searchQuery) => $searchQuery->whereLike('name', "%{$search}%")->orWhereLike('industry', "%{$search}%"),
             ))
-            ->ordered()
+            ->orderBy('sort_order')
+            ->orderBy('name')
             ->get();
     }
 
@@ -95,10 +101,10 @@ class ClientService
     /**
      * Save a new order for the logo strip.
      *
-     * @param  array<int, int>  $ids
+     * @param  array<int, int>  $orderedIds
      */
-    public function reorder(array $ids): void
+    public function reorder(array $orderedIds): void
     {
-        SortOrder::apply($this->studioService->current()->clients(), $ids);
+        SortOrder::apply($this->studioService->current()->clients(), $orderedIds);
     }
 }

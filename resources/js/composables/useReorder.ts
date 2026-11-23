@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import type { Ref } from 'vue';
-type Identifiable = { id: number };
+import type { Identifiable, UseReorderReturn } from '@/types';
 
 /**
  * Keeps a locally reorderable copy of a list and saves the new order to the
@@ -11,11 +11,7 @@ type Identifiable = { id: number };
 export function useReorder<T extends Identifiable>(
     source: () => T[],
     reorderUrl: string,
-): {
-    items: Ref<T[]>;
-    move: (index: number, direction: -1 | 1) => void;
-    saving: Ref<boolean>;
-} {
+): UseReorderReturn<T> {
     const items = ref([...source()]) as Ref<T[]>;
     const saving = ref(false);
 

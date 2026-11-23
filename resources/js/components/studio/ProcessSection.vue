@@ -7,7 +7,7 @@ import { resolveIcon } from '@/lib/iconResolver';
 import type { ProcessSectionProps } from '@/types';
 
 /**
- * 03 — How the system is built: the engineering stages as an editorial
+ * How the system is built: the engineering stages as an editorial
  * accordion. One stage is open at a time; the first starts open.
  */
 defineProps<ProcessSectionProps>();
@@ -23,7 +23,6 @@ const open = ref(0);
     >
         <div class="container-site">
             <SectionHeading
-                index="03"
                 :eyebrow="content.eyebrow"
                 :title="content.title"
                 :highlight="content.highlight"
@@ -34,7 +33,7 @@ const open = ref(0);
 
             <ol class="mt-16 border-t border-paper/20">
                 <li
-                    v-for="(stage, i) in content.stages"
+                    v-for="(stage, stageIndex) in content.stages"
                     :key="stage.label"
                     class="border-b border-paper/20"
                 >
@@ -42,15 +41,17 @@ const open = ref(0);
                         <button
                             type="button"
                             class="group flex w-full items-center gap-6 py-7 text-left sm:gap-10"
-                            :aria-expanded="open === i"
-                            :aria-controls="`stage-${i}`"
-                            @click="open = open === i ? -1 : i"
+                            :aria-expanded="open === stageIndex"
+                            :aria-controls="`stage-${stageIndex}`"
+                            @click="
+                                open = open === stageIndex ? -1 : stageIndex
+                            "
                         >
                             <span class="index-number w-8 shrink-0">{{
-                                String(i + 1).padStart(2, '0')
+                                String(stageIndex + 1).padStart(2, '0')
                             }}</span>
                             <span
-                                class="display flex-1 text-4xl transition-colors group-hover:text-brand sm:text-6xl"
+                                class="display flex-1 text-4xl transition-colors group-hover:text-brand-text sm:text-6xl"
                             >
                                 {{ stage.label }}
                             </span>
@@ -59,7 +60,10 @@ const open = ref(0);
                             }}</span>
                             <Plus
                                 class="size-6 shrink-0 transition-transform duration-500"
-                                :class="open === i && 'rotate-45 text-brand'"
+                                :class="
+                                    open === stageIndex &&
+                                    'rotate-45 text-brand-text'
+                                "
                                 aria-hidden="true"
                             />
                         </button>
@@ -67,8 +71,8 @@ const open = ref(0);
 
                     <AnimatePresence :initial="false">
                         <motion.div
-                            v-if="open === i"
-                            :id="`stage-${i}`"
+                            v-if="open === stageIndex"
+                            :id="`stage-${stageIndex}`"
                             class="overflow-hidden"
                             :initial="{ height: 0, opacity: 0 }"
                             :animate="{ height: 'auto', opacity: 1 }"
@@ -86,7 +90,7 @@ const open = ref(0);
                                 >
                                     <component
                                         :is="resolveIcon(stage.icon)"
-                                        class="mt-1 size-6 shrink-0 text-brand"
+                                        class="mt-1 size-6 shrink-0 text-brand-text"
                                         aria-hidden="true"
                                     />
                                     <p

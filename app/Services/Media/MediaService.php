@@ -76,6 +76,9 @@ class MediaService
         return $previous;
     }
 
+    /**
+     * Delete a stored file, if the path is set and the file exists.
+     */
     public function delete(?string $path): void
     {
         if (filled($path) && Storage::disk(self::DISK)->exists($path)) {
@@ -93,6 +96,9 @@ class MediaService
         }
     }
 
+    /**
+     * Whether a stored file exists for this path.
+     */
     public function exists(?string $path): bool
     {
         return filled($path) && Storage::disk(self::DISK)->exists($path);

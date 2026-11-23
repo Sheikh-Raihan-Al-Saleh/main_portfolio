@@ -12,7 +12,6 @@ import type { WorkSectionProps } from '@/types';
  */
 withDefaults(defineProps<WorkSectionProps>(), {
     id: undefined,
-    index: null,
     highlight: null,
     description: null,
     total: 0,
@@ -28,7 +27,6 @@ withDefaults(defineProps<WorkSectionProps>(), {
     <section :id="id" class="section scroll-mt-24">
         <div class="container-site">
             <SectionHeading
-                :index="index"
                 :eyebrow="eyebrow"
                 :title="title"
                 :highlight="highlight"

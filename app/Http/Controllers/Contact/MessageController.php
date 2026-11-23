@@ -19,6 +19,9 @@ class MessageController extends Controller
         private readonly ContactMessageService $messageService,
     ) {}
 
+    /**
+     * Show the list of messages.
+     */
     public function index(Request $request): Response
     {
         $filter = $request->string('filter')->trim()->value();
@@ -39,6 +42,9 @@ class MessageController extends Controller
         return Inertia::render('admin/messages/Show', ['message' => $message]);
     }
 
+    /**
+     * Mark a message as unread again and go back to the inbox.
+     */
     public function markUnread(ContactMessage $message): RedirectResponse
     {
         $this->messageService->markUnread($message);
@@ -47,6 +53,9 @@ class MessageController extends Controller
         return to_route('admin.messages.index');
     }
 
+    /**
+     * Delete a message.
+     */
     public function destroy(ContactMessage $message): RedirectResponse
     {
         $this->messageService->delete($message);

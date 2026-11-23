@@ -6,6 +6,7 @@ use App\Models\LandingSection;
 use App\Models\Project;
 use App\Models\ProjectLandingPage;
 use App\Services\Media\MediaService;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -14,8 +15,12 @@ use Illuminate\Support\Facades\DB;
  */
 class LandingPageService
 {
+    /** Hero screenshot slots, by position. */
+    public const HERO_SLOTS = [0 => 'desktop', 1 => 'tablet', 2 => 'phone'];
+
     public function __construct(
         private readonly MediaService $mediaService,
+        private readonly LandingSectionService $sectionService,
     ) {}
 
     /**
@@ -29,10 +34,10 @@ class LandingPageService
         }
 
         return $project->landingPage()
-            ->published()
+            ->where('is_published', true)
             ->with([
                 'heroMedia',
-                'sections' => fn ($query) => $query->visible()->ordered(),
+                'sections' => fn (Relation $query) => $query->where('is_visible', true)->orderBy('sort_order')->orderBy('id'),
             ])
             ->first();
     }
@@ -46,7 +51,7 @@ class LandingPageService
         return $project->landingPage()
             ->with([
                 'heroMedia',
-                'sections' => fn ($query) => $query->ordered(),
+                'sections' => fn (Relation $query) => $query->orderBy('sort_order')->orderBy('id'),
             ])
             ->first();
     }
@@ -120,7 +125,7 @@ class LandingPageService
         return array_values(array_filter([
             $page->og_image_path,
             ...$page->heroMedia->pluck('path'),
-            ...$page->sections->flatMap(fn (LandingSection $section): array => $section->mediaPaths()),
+            ...$page->sections->flatMap(fn (LandingSection $section): array => $this->sectionService->mediaPaths($section)),
         ]));
     }
 
@@ -132,7 +137,7 @@ class LandingPageService
      */
     private function saveHeroSlots(ProjectLandingPage $page, array $files, array $remove): void
     {
-        foreach (array_keys(ProjectLandingPage::HERO_SLOTS) as $slot) {
+        foreach (array_keys(self::HERO_SLOTS) as $slot) {
             $file = $files[$slot] ?? null;
             $clear = filter_var($remove[$slot] ?? false, FILTER_VALIDATE_BOOLEAN);
 

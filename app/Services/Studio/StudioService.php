@@ -5,6 +5,7 @@ namespace App\Services\Studio;
 use App\Models\Studio;
 use App\Services\Media\MediaService;
 use App\Services\SocialLink\SocialLinkService;
+use App\Support\Defaults\StudioContent;
 use App\Support\Defaults\StudioDefaults;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
@@ -52,12 +53,23 @@ class StudioService
                 'name' => $studio->name,
                 'short_name' => $studio->short_name ?: $studio->name,
                 'tagline' => $studio->tagline,
-                'logo_url' => $studio->logo_url,
-                'logo_dark_url' => $studio->logo_dark_url,
-                'logo_mark_url' => $studio->logo_mark_url,
+                'logo_url' => MediaService::url($studio->logo_path),
+                'logo_dark_url' => MediaService::url($studio->logo_dark_path),
+                'logo_mark_url' => MediaService::url($studio->logo_mark_path),
                 'website_url' => $studio->website_url,
             ];
         });
+    }
+
+    /**
+     * The home page's fixed-section copy: stored edits merged over the
+     * defaults, so a section added later still renders completely.
+     *
+     * @return array<string, mixed>
+     */
+    public function content(): array
+    {
+        return StudioContent::merge($this->current()->content);
     }
 
     /**

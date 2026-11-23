@@ -16,7 +16,6 @@ defineProps<ExperienceSectionProps>();
     <section id="experience" class="section scroll-mt-24">
         <div class="container-site">
             <SectionHeading
-                index="04"
                 :eyebrow="copy.eyebrow"
                 :title="copy.title"
                 :highlight="copy.highlight"
@@ -26,10 +25,10 @@ defineProps<ExperienceSectionProps>();
 
             <ol class="mt-16">
                 <Reveal
-                    v-for="(job, i) in experiences"
+                    v-for="(job, jobIndex) in experiences"
                     :key="job.id"
                     as="li"
-                    :delay="i * 0.05"
+                    :delay="jobIndex * 0.05"
                     class="rule grid gap-6 py-10 lg:grid-cols-12"
                 >
                     <div class="lg:col-span-3">
@@ -115,10 +114,10 @@ defineProps<ExperienceSectionProps>();
                 <h3 class="eyebrow mb-6">Education</h3>
                 <ul class="grid gap-5 md:grid-cols-2">
                     <Reveal
-                        v-for="(school, i) in educations"
+                        v-for="(school, schoolIndex) in educations"
                         :key="school.id"
                         as="li"
-                        :delay="i * 0.08"
+                        :delay="schoolIndex * 0.08"
                         class="paper-card flex h-full gap-5 p-7"
                     >
                         <GraduationCap

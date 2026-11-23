@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Form, Head, router } from '@inertiajs/vue3';
+import { Form, Head } from '@inertiajs/vue3';
 import { Eye, EyeOff, Pencil, Plus, Search, Users } from '@lucide/vue';
 import { motion } from 'motion-v';
-import { computed, ref, watch } from 'vue';
+import { computed } from 'vue';
 import ClientController from '@/actions/App/Http/Controllers/Client/ClientController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
@@ -28,6 +28,8 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
+import { useEditDialog } from '@/composables/useEditDialog';
 import { useReorder } from '@/composables/useReorder';
 import { fadeUp } from '@/lib/motion';
 import clientRoutes from '@/routes/admin/clients';
@@ -47,40 +49,17 @@ const { items, move, saving } = useReorder<Client>(
     clientRoutes.reorder().url,
 );
 
-const open = ref(false);
-const editing = ref<Client | null>(null);
-const search = ref(props.filters.search ?? '');
-
-const visibleCount = computed(
-    () => items.value.filter((c) => c.is_visible).length,
+/** Create and edit happen in a modal, so the list stays in view. */
+const { dialogOpen, editing, openCreate, openEdit, closeDialog } =
+    useEditDialog<Client>();
+const { search } = useDebouncedSearch(
+    clientRoutes.index().url,
+    props.filters.search,
 );
 
-function create() {
-    editing.value = null;
-    open.value = true;
-}
-
-function edit(client: Client) {
-    editing.value = client;
-    open.value = true;
-}
-
-// Debounce so typing doesn't fire a request per keystroke.
-let searchTimer: ReturnType<typeof setTimeout> | null = null;
-
-watch(search, (value) => {
-    if (searchTimer) {
-        clearTimeout(searchTimer);
-    }
-
-    searchTimer = setTimeout(() => {
-        router.get(clientRoutes.index().url, value ? { search: value } : {}, {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-        });
-    }, 300);
-});
+const visibleCount = computed(
+    () => items.value.filter((client) => client.is_visible).length,
+);
 </script>
 
 <template>
@@ -102,7 +81,7 @@ watch(search, (value) => {
                         Preview strip
                     </a>
                 </Button>
-                <Button @click="create">
+                <Button @click="openCreate">
                     <Plus class="size-4" />
                     New client
                 </Button>
@@ -137,7 +116,7 @@ watch(search, (value) => {
                     With logo
                 </p>
                 <p class="mt-1 text-2xl font-bold tabular-nums">
-                    {{ items.filter((c) => c.logo_url).length }}
+                    {{ items.filter((client) => client.logo_url).length }}
                 </p>
             </div>
         </div>
@@ -279,7 +258,7 @@ watch(search, (value) => {
                                     variant="ghost"
                                     size="icon-sm"
                                     :aria-label="`Edit ${client.name}`"
-                                    @click="edit(client)"
+                                    @click="openEdit(client)"
                                 >
                                     <Pencil class="size-4" />
                                 </Button>
@@ -301,7 +280,7 @@ watch(search, (value) => {
                                 Add the studios, products and teams you have
                                 shipped for.
                             </p>
-                            <Button size="sm" class="mt-4" @click="create">
+                            <Button size="sm" class="mt-4" @click="openCreate">
                                 <Plus class="size-4" />
                                 New client
                             </Button>
@@ -312,7 +291,7 @@ watch(search, (value) => {
         </motion.div>
     </div>
 
-    <Dialog v-model:open="open">
+    <Dialog v-model:open="dialogOpen">
         <DialogContent class="sm:max-w-lg">
             <DialogHeader>
                 <DialogTitle>
@@ -331,7 +310,7 @@ watch(search, (value) => {
                 class="grid gap-4"
                 enctype="multipart/form-data"
                 preserve-scroll
-                :on-success="() => (open = false)"
+                :on-success="closeDialog"
             >
                 <div class="grid gap-2">
                     <Label for="client-name">Name</Label>
@@ -395,7 +374,7 @@ watch(search, (value) => {
                 </label>
 
                 <div class="flex justify-end gap-2">
-                    <Button type="button" variant="ghost" @click="open = false">
+                    <Button type="button" variant="ghost" @click="closeDialog">
                         Cancel
                     </Button>
                     <Button type="submit" :disabled="processing">
@@ -418,7 +397,7 @@ watch(search, (value) => {
                 class="grid gap-4"
                 enctype="multipart/form-data"
                 preserve-scroll
-                :on-success="() => (open = false)"
+                :on-success="closeDialog"
             >
                 <div class="grid gap-2">
                     <Label for="new-client-name">Name</Label>
@@ -465,7 +444,7 @@ watch(search, (value) => {
                 </label>
 
                 <div class="flex justify-end gap-2">
-                    <Button type="button" variant="ghost" @click="open = false">
+                    <Button type="button" variant="ghost" @click="closeDialog">
                         Cancel
                     </Button>
                     <Button type="submit" :disabled="processing">

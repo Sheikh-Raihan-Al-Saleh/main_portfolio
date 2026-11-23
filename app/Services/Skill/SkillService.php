@@ -6,7 +6,9 @@ use App\Models\Skill;
 use App\Models\SkillCategory;
 use App\Services\Founder\FounderService;
 use App\Support\SortOrder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -33,8 +35,9 @@ class SkillService
     public function categoriesWithSkills(): Collection
     {
         return $this->founderService->current()->skillCategories()
-            ->ordered()
-            ->with(['skills' => fn ($query) => $query->ordered()])
+            ->with(['skills' => fn (Relation $skillQuery) => $skillQuery->orderBy('sort_order')->orderBy('name')])
+            ->orderBy('sort_order')
+            ->orderBy('name')
             ->get();
     }
 
@@ -46,7 +49,8 @@ class SkillService
     public function categoryOptions(): array
     {
         return $this->founderService->current()->skillCategories()
-            ->ordered()
+            ->orderBy('sort_order')
+            ->orderBy('name')
             ->get(['id', 'name'])
             ->map(fn (SkillCategory $category): array => ['value' => $category->id, 'label' => $category->name])
             ->all();
@@ -79,19 +83,22 @@ class SkillService
         return $skill;
     }
 
+    /**
+     * Delete a skill.
+     */
     public function delete(Skill $skill): void
     {
         $skill->delete();
     }
 
     /**
-     * @param  array<int, int>  $ids
+     * @param  array<int, int>  $orderedIds
      */
-    public function reorder(array $ids): void
+    public function reorder(array $orderedIds): void
     {
         $categoryIds = $this->founderService->current()->skillCategories()->select('id');
 
-        SortOrder::apply(Skill::query()->whereIn('skill_category_id', $categoryIds), $ids);
+        SortOrder::apply(Skill::query()->whereIn('skill_category_id', $categoryIds), $orderedIds);
     }
 
     // ── Categories ────────────────────────────────────────────────
@@ -110,6 +117,9 @@ class SkillService
         ]);
     }
 
+    /**
+     * Rename a category; its slug follows the new name.
+     */
     public function updateCategory(SkillCategory $category, string $name): SkillCategory
     {
         $category->update([
@@ -133,11 +143,11 @@ class SkillService
     }
 
     /**
-     * @param  array<int, int>  $ids
+     * @param  array<int, int>  $orderedIds
      */
-    public function reorderCategories(array $ids): void
+    public function reorderCategories(array $orderedIds): void
     {
-        SortOrder::apply($this->founderService->current()->skillCategories(), $ids);
+        SortOrder::apply($this->founderService->current()->skillCategories(), $orderedIds);
     }
 
     // ── Helpers ───────────────────────────────────────────────────
@@ -151,6 +161,9 @@ class SkillService
             ?? throw ValidationException::withMessages(['skill_category_id' => __('Choose a valid category.')]);
     }
 
+    /**
+     * A URL-safe slug for a category name, with a numeric suffix until it is unique among the founder's categories.
+     */
     private function uniqueCategorySlug(string $name, ?int $ignoreId = null): string
     {
         $categories = $this->founderService->current()->skillCategories();
@@ -158,7 +171,7 @@ class SkillService
         $slug = $base;
         $suffix = 2;
 
-        while ((clone $categories)->where('slug', $slug)->when($ignoreId, fn ($query) => $query->whereKeyNot($ignoreId))->exists()) {
+        while ((clone $categories)->where('slug', $slug)->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))->exists()) {
             $slug = $base.'-'.$suffix++;
         }
 

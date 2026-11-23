@@ -31,12 +31,18 @@ class AccountService
         return $user;
     }
 
+    /**
+     * Save a new password for the user.
+     */
     public function updatePassword(User $user, string $password): void
     {
         // The model's "hashed" cast hashes the value on save.
         $user->update(['password' => $password]);
     }
 
+    /**
+     * Delete the user's account.
+     */
     public function delete(User $user): void
     {
         $user->delete();

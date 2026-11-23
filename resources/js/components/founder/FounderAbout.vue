@@ -33,7 +33,6 @@ const facts = computed(() =>
         <div class="container-site grid gap-14 lg:grid-cols-12">
             <div class="lg:col-span-5">
                 <SectionHeading
-                    index="01"
                     :eyebrow="copy.eyebrow"
                     :title="copy.title"
                     :highlight="copy.highlight"
@@ -62,8 +61,10 @@ const facts = computed(() =>
             <div class="lg:col-span-6 lg:col-start-7">
                 <Reveal>
                     <p
-                        v-for="(paragraph, i) in paragraphs(founder.bio)"
-                        :key="i"
+                        v-for="(paragraph, paragraphIndex) in paragraphs(
+                            founder.bio,
+                        )"
+                        :key="paragraphIndex"
                         class="lead mb-6 last:mb-0"
                     >
                         {{ paragraph }}
@@ -75,11 +76,11 @@ const facts = computed(() =>
                         <p class="meta mb-5">{{ copy.message_label }}</p>
                         <blockquote class="grid gap-4">
                             <p
-                                v-for="(paragraph, i) in paragraphs(
-                                    founder.founder_message,
-                                )"
-                                :key="i"
-                                class="display text-2xl leading-snug sm:text-3xl"
+                                v-for="(
+                                    paragraph, paragraphIndex
+                                ) in paragraphs(founder.founder_message)"
+                                :key="paragraphIndex"
+                                class="quote-text text-xl sm:text-2xl"
                             >
                                 {{ paragraph }}
                             </p>

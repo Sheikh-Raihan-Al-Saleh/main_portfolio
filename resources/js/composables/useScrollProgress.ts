@@ -1,21 +1,8 @@
-import type { MaybeComputedElementRef } from '@vueuse/core';
 import { useMotionValueEvent, useScroll, useSpring } from 'motion-v';
 import type { MotionValue } from 'motion-v';
 import { ref } from 'vue';
 import type { Ref } from 'vue';
-
-type ScrollProgressOptions = {
-    /** Element to track. Omit to track the whole page. */
-    target?: MaybeComputedElementRef;
-    /**
-     * Where tracking starts and ends relative to the target and viewport.
-     * Defaults to "from the moment the element's top hits the viewport bottom
-     * until its bottom hits the viewport top".
-     */
-    offset?: ['start end', 'end start'] | [string, string];
-    /** Smooth the value with a spring. Off by default — scrubbing should be exact. */
-    smooth?: boolean;
-};
+import type { ScrollProgressOptions } from '@/types';
 
 /**
  * Scroll progress as both a `MotionValue` (for binding straight to `motion`

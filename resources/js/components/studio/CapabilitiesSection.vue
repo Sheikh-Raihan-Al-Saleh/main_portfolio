@@ -5,17 +5,50 @@ import { resolveIcon } from '@/lib/iconResolver';
 import type { CapabilitiesSectionProps } from '@/types';
 
 /**
- * 01 — What the studio builds: a grid of capabilities and the four layers
+ * What the studio builds: a bento grid of capabilities and the four layers
  * every product is built from.
  */
-defineProps<CapabilitiesSectionProps>();
+const props = defineProps<CapabilitiesSectionProps>();
+
+/**
+ * Grid spans for the bento. The first capability leads across two columns;
+ * the last one widens to close the final row, so no card sits alone beside
+ * an empty gap (3 columns on large screens, 2 on medium ones).
+ */
+function bentoSpanClass(itemIndex: number): string[] {
+    const itemCount = props.content.items.length;
+    const lastIndex = itemCount - 1;
+    const cellsWithLeadTile = itemCount + 1;
+    const classes: string[] = [];
+
+    if (itemIndex === 0) {
+        classes.push('sm:col-span-2');
+    }
+
+    if (itemIndex === lastIndex && itemIndex !== 0) {
+        if (cellsWithLeadTile % 2 === 1) {
+            classes.push('sm:col-span-2');
+        }
+
+        const largeRemainder = cellsWithLeadTile % 3;
+
+        if (largeRemainder === 1) {
+            classes.push('lg:col-span-3');
+        } else if (largeRemainder === 2) {
+            classes.push('lg:col-span-2');
+        } else {
+            classes.push('lg:col-span-1');
+        }
+    }
+
+    return classes;
+}
 </script>
 
 <template>
     <section id="capabilities" class="section scroll-mt-24">
         <div class="container-site">
             <SectionHeading
-                index="01"
                 :eyebrow="content.eyebrow"
                 :title="content.title"
                 :highlight="content.highlight"
@@ -23,21 +56,32 @@ defineProps<CapabilitiesSectionProps>();
                 align="split"
             />
 
-            <ul
-                class="mt-16 grid border-t border-l border-line sm:grid-cols-2 lg:grid-cols-3"
-            >
+            <!-- A bento grid: the first capability leads as a wide forest tile. -->
+            <ul class="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <li
-                    v-for="(item, i) in content.items"
+                    v-for="(item, itemIndex) in content.items"
                     :key="item.title"
-                    class="group border-r border-b border-line"
+                    :class="bentoSpanClass(itemIndex)"
                 >
-                    <Reveal
-                        :delay="(i % 3) * 0.08"
-                        class="flex h-full flex-col p-7 sm:p-9"
-                    >
-                        <div class="flex items-center justify-between">
+                    <!-- The card sits inside Reveal: Reveal animates its own
+                         transform, which would cancel the hover lift. -->
+                    <Reveal :delay="(itemIndex % 3) * 0.08" class="h-full">
+                        <div
+                            :data-tone="itemIndex === 0 ? 'dark' : undefined"
+                            :class="[
+                                'group flex h-full flex-col p-7 transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 sm:p-8',
+                                itemIndex === 0
+                                    ? 'forest-card'
+                                    : 'paper-card hover:shadow-[var(--shadow-lift)]',
+                            ]"
+                        >
                             <span
-                                class="grid size-12 place-items-center rounded-full border border-line transition-colors duration-500 group-hover:border-brand group-hover:bg-brand group-hover:text-brand-foreground"
+                                :class="[
+                                    'grid size-12 place-items-center rounded-2xl',
+                                    itemIndex === 0
+                                        ? 'bg-[var(--pop)] text-ink'
+                                        : 'bg-brand-subtle text-brand-text',
+                                ]"
                             >
                                 <component
                                     :is="resolveIcon(item.icon)"
@@ -45,26 +89,39 @@ defineProps<CapabilitiesSectionProps>();
                                     aria-hidden="true"
                                 />
                             </span>
-                            <span class="meta">{{
-                                String(i + 1).padStart(2, '0')
-                            }}</span>
-                        </div>
 
-                        <h3 class="display mt-10 text-3xl">{{ item.title }}</h3>
-                        <p class="body-copy mt-3">{{ item.summary }}</p>
-
-                        <ul
-                            v-if="item.tech?.length"
-                            class="mt-auto flex flex-wrap gap-2 pt-8"
-                        >
-                            <li
-                                v-for="tech in item.tech"
-                                :key="tech"
-                                class="tag"
+                            <h3
+                                :class="[
+                                    'display mt-8',
+                                    itemIndex === 0 ? 'text-4xl' : 'text-2xl',
+                                ]"
                             >
-                                {{ tech }}
-                            </li>
-                        </ul>
+                                {{ item.title }}
+                            </h3>
+                            <p
+                                :class="[
+                                    'mt-3 max-w-[52ch] leading-relaxed',
+                                    itemIndex === 0
+                                        ? 'text-lg text-paper/75'
+                                        : 'body-copy',
+                                ]"
+                            >
+                                {{ item.summary }}
+                            </p>
+
+                            <ul
+                                v-if="item.tech?.length"
+                                class="mt-auto flex flex-wrap gap-2 pt-7"
+                            >
+                                <li
+                                    v-for="tech in item.tech"
+                                    :key="tech"
+                                    class="tag"
+                                >
+                                    {{ tech }}
+                                </li>
+                            </ul>
+                        </div>
                     </Reveal>
                 </li>
             </ul>
@@ -84,10 +141,12 @@ defineProps<CapabilitiesSectionProps>();
 
                 <ol class="lg:col-span-6 lg:col-start-7">
                     <Reveal
-                        v-for="(layer, i) in [...content.stack].reverse()"
+                        v-for="(layer, layerIndex) in [
+                            ...content.stack,
+                        ].reverse()"
                         :key="layer.label"
                         as="li"
-                        :delay="i * 0.08"
+                        :delay="layerIndex * 0.08"
                         class="rule flex items-baseline justify-between gap-6 py-5 last:border-b last:border-line"
                     >
                         <span class="display text-3xl sm:text-4xl">{{

@@ -2,7 +2,6 @@
 import { Head } from '@inertiajs/vue3';
 import { Briefcase, Pencil, Plus } from '@lucide/vue';
 import { motion } from 'motion-v';
-import { ref } from 'vue';
 import ExperienceController from '@/actions/App/Http/Controllers/Experience/ExperienceController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
@@ -18,8 +17,10 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useEditDialog } from '@/composables/useEditDialog';
 import { useReorder } from '@/composables/useReorder';
 import { fadeUp } from '@/lib/motion';
+import { formatPeriod } from '@/lib/text';
 import experienceRoutes from '@/routes/admin/experiences';
 import type { Experience } from '@/types';
 import type { AdminExperiencesIndexProps } from '@/types';
@@ -38,31 +39,9 @@ const { items, move, saving } = useReorder<Experience>(
     experienceRoutes.reorder().url,
 );
 
-function period(experience: Experience): string {
-    const format = (value: string | null) =>
-        value
-            ? new Date(value).toLocaleDateString(undefined, {
-                  month: 'short',
-                  year: 'numeric',
-              })
-            : 'Present';
-
-    return `${format(experience.start_date)} — ${format(experience.end_date)}`;
-}
-
 /** Create and edit happen in a modal, so the list stays in view. */
-const dialogOpen = ref(false);
-const editing = ref<Experience | null>(null);
-
-function openCreate() {
-    editing.value = null;
-    dialogOpen.value = true;
-}
-
-function openEdit(experience: Experience) {
-    editing.value = experience;
-    dialogOpen.value = true;
-}
+const { dialogOpen, editing, openCreate, openEdit, closeDialog } =
+    useEditDialog<Experience>();
 </script>
 
 <template>
@@ -147,7 +126,13 @@ function openEdit(experience: Experience) {
                         <TableCell
                             class="hidden text-sm text-muted-foreground sm:table-cell"
                         >
-                            {{ period(experience) }}
+                            {{
+                                formatPeriod(
+                                    experience.start_date,
+                                    experience.end_date,
+                                    'month',
+                                )
+                            }}
                         </TableCell>
 
                         <TableCell>
@@ -213,8 +198,8 @@ function openEdit(experience: Experience) {
                         : ExperienceController.store.form()
                 "
                 :submit-label="editing ? 'Save changes' : 'Create experience'"
-                @saved="dialogOpen = false"
-                @cancel="dialogOpen = false"
+                @saved="closeDialog"
+                @cancel="closeDialog"
             />
         </FormDialog>
     </div>

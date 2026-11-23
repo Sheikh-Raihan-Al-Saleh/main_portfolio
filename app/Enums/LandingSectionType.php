@@ -25,6 +25,9 @@ enum LandingSectionType: string
     case Cta = 'cta';
     case RichText = 'richtext';
 
+    /**
+     * The human name shown in the admin block picker.
+     */
     public function label(): string
     {
         return match ($this) {

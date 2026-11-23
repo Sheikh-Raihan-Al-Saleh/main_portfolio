@@ -52,10 +52,10 @@ export function yearRange(
     end: string | null | undefined,
     presentLabel = 'Present',
 ): string {
-    const from = start ? new Date(start).getFullYear() : null;
-    const to = end ? new Date(end).getFullYear() : presentLabel;
+    const startYear = start ? new Date(start).getFullYear() : null;
+    const endLabel = end ? new Date(end).getFullYear() : presentLabel;
 
-    return from ? `${from} — ${to}` : String(to);
+    return startYear ? `${startYear} — ${endLabel}` : String(endLabel);
 }
 
 /** "Jan 2022" from an ISO date. */
@@ -68,6 +68,40 @@ export function monthYear(date: string | null | undefined): string {
         month: 'short',
         year: 'numeric',
     });
+}
+
+/** "12 Jan 2026" from an ISO date, in the visitor's locale. */
+export function formatDate(date: string): string {
+    return new Date(date).toLocaleDateString(undefined, {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    });
+}
+
+/**
+ * "2019 — Present" (style "year") or "Jan 2019 — Mar 2022" (style "month")
+ * from two ISO dates, in the visitor's locale. A missing date reads "Present".
+ */
+export function formatPeriod(
+    start: string | null,
+    end: string | null,
+    style: 'year' | 'month',
+): string {
+    const formatOne = (date: string | null): string => {
+        if (!date) {
+            return 'Present';
+        }
+
+        return style === 'year'
+            ? new Date(date).getFullYear().toString()
+            : new Date(date).toLocaleDateString(undefined, {
+                  month: 'short',
+                  year: 'numeric',
+              });
+    };
+
+    return `${formatOne(start)} — ${formatOne(end)}`;
 }
 
 /** Text paragraphs from a multi-line string, blank lines removed. */

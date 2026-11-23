@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 
+/**
+ * Base controller: shared helpers for every controller.
+ */
 abstract class Controller
 {
     /**

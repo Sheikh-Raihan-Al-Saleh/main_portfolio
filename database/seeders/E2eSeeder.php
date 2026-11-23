@@ -69,13 +69,13 @@ class E2eSeeder extends Seeder
         /** @var list<array{0: int<0, 255>, 1: int<0, 255>, 2: int<0, 255>}> $palette */
         $palette = [[79, 70, 229], [14, 165, 233], [168, 85, 247], [234, 88, 12], [16, 185, 129], [225, 29, 72]];
 
-        Project::query()->orderBy('id')->get()->each(function (Project $project, int $i) use ($palette): void {
+        Project::query()->orderBy('id')->get()->each(function (Project $project, int $index) use ($palette): void {
             $project->update([
-                'cover_image_path' => $this->image("e2e/cover-{$project->id}.png", 1280, 800, $palette[$i % count($palette)], $project->title),
+                'cover_image_path' => $this->image("e2e/cover-{$project->id}.png", 1280, 800, $palette[$index % count($palette)], $project->title),
             ]);
         });
 
-        $landingProject = Project::query()->published()->where('owner_type', 'studio')->orderBy('id')->firstOrFail();
+        $landingProject = Project::query()->where('is_published', true)->where('owner_type', 'studio')->orderBy('id')->firstOrFail();
 
         $landingPage = $landingProject->landingPage()->updateOrCreate([], [
             'headline' => "{$landingProject->title}, end to end",

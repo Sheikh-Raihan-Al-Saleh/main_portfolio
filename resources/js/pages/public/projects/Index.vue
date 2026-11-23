@@ -23,14 +23,18 @@ const technologies = computed<TechnologyTag[]>(() => {
     const unique = new Map<string, TechnologyTag>();
 
     props.projects.forEach((project) =>
-        project.technologies.forEach((tech) => unique.set(tech.slug, tech)),
+        project.technologies.forEach((technology) =>
+            unique.set(technology.slug, technology),
+        ),
     );
 
-    return [...unique.values()].sort((a, b) => a.name.localeCompare(b.name));
+    return [...unique.values()].sort((first, second) =>
+        first.name.localeCompare(second.name),
+    );
 });
 
 // A stale ?tech= link that no project carries falls back to "all".
-const tech = ref<string | null>(
+const technologyFilter = ref<string | null>(
     technologies.value.some((item) => item.slug === props.filters.tech)
         ? props.filters.tech
         : null,
@@ -40,8 +44,10 @@ const visible = computed(() =>
     props.projects.filter(
         (project) =>
             (owner.value === null || project.owner === owner.value) &&
-            (tech.value === null ||
-                project.technologies.some((item) => item.slug === tech.value)),
+            (technologyFilter.value === null ||
+                project.technologies.some(
+                    (item) => item.slug === technologyFilter.value,
+                )),
     ),
 );
 
@@ -51,12 +57,12 @@ const owners = computed(() => [
     { value: 'founder' as const, label: founder.value.name },
 ]);
 
-watch([owner, tech], ([ownerValue, techValue]) => {
+watch([owner, technologyFilter], ([ownerValue, technologyValue]) => {
     const url = new URL(window.location.href);
 
     for (const [key, value] of [
         ['owner', ownerValue],
-        ['tech', techValue],
+        ['tech', technologyValue],
     ] as const) {
         if (value) {
             url.searchParams.set(key, value);
@@ -121,9 +127,9 @@ watch([owner, tech], ([ownerValue, techValue]) => {
                 <button
                     type="button"
                     class="tag shrink-0 cursor-pointer"
-                    :class="tech === null && 'tag-active'"
-                    :aria-pressed="tech === null"
-                    @click="tech = null"
+                    :class="technologyFilter === null && 'tag-active'"
+                    :aria-pressed="technologyFilter === null"
+                    @click="technologyFilter = null"
                 >
                     Any stack
                 </button>
@@ -132,9 +138,12 @@ watch([owner, tech], ([ownerValue, techValue]) => {
                     :key="item.slug"
                     type="button"
                     class="tag shrink-0 cursor-pointer transition-colors hover:border-ink"
-                    :class="tech === item.slug && 'tag-active'"
-                    :aria-pressed="tech === item.slug"
-                    @click="tech = tech === item.slug ? null : item.slug"
+                    :class="technologyFilter === item.slug && 'tag-active'"
+                    :aria-pressed="technologyFilter === item.slug"
+                    @click="
+                        technologyFilter =
+                            technologyFilter === item.slug ? null : item.slug
+                    "
                 >
                     {{ item.name }}
                 </button>
@@ -150,7 +159,7 @@ watch([owner, tech], ([ownerValue, techValue]) => {
 
         <ProjectGrid
             v-if="visible.length"
-            :key="`${owner}-${tech}`"
+            :key="`${owner}-${technologyFilter}`"
             :projects="visible"
         />
         <p v-else class="lead py-20 text-center text-stone">

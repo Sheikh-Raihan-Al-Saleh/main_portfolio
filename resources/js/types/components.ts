@@ -5,7 +5,6 @@
 
 import type { LinkComponentBaseProps } from '@inertiajs/core';
 import type { Method } from '@inertiajs/core';
-import type { Mesh, Vector3 } from 'three';
 import type { Component } from 'vue';
 import type { HTMLAttributes } from 'vue';
 import type {
@@ -357,22 +356,6 @@ export type SectionListRowProps = {
     noun?: string;
 };
 
-// components/auth/LoginScene.vue
-/** One floating card in the login scene. */
-export type LoginSceneCard = {
-    mesh: Mesh;
-    title: string | null;
-    base: Vector3;
-    phase: number;
-    hover: number;
-};
-export type LoginSceneShowcase = { title: string; cover: string }[];
-export type LoginSceneProps = {
-    covers: LoginSceneShowcase;
-    logoUrl: string | null;
-    brandName: string;
-};
-
 // components/brand/BrandLogo.vue
 export type BrandLogoProps = {
     /** Full logo, or the square mark (also the favicon). */
@@ -625,8 +608,6 @@ export type SectionHeadingProps = {
     title: string;
     highlight?: string | null;
     description?: string | null;
-    /** Chapter number shown before the eyebrow, e.g. "01". */
-    index?: string | null;
     align?: 'left' | 'split';
     size?: 'md' | 'lg';
     class?: string;
@@ -677,7 +658,6 @@ export type ValueSectionProps = { content: ValueContent };
 // components/studio/WorkSection.vue
 export type WorkSectionProps = {
     id?: string;
-    index?: string | null;
     eyebrow: string;
     title: string;
     highlight?: string | null;
@@ -749,6 +729,3 @@ export type SectionListRowEmits = {
     move: [index: number, direction: -1 | 1];
     edit: [];
 };
-
-// components/auth/LoginScene.vue
-export type LoginSceneEmits = { hover: [title: string | null] };

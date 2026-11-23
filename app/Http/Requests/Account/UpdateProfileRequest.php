@@ -6,6 +6,9 @@ use App\Http\Requests\Concerns\ProfileValidationRules;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validates the profile form (name and email).
+ */
 class UpdateProfileRequest extends FormRequest
 {
     use ProfileValidationRules;

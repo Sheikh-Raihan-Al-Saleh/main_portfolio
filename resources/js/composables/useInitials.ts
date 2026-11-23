@@ -1,6 +1,4 @@
-export type UseInitialsReturn = {
-    getInitials: (fullName?: string) => string;
-};
+import type { UseInitialsReturn } from '@/types';
 
 function getInitial(name: string): string {
     return Array.from(name)[0] ?? '';

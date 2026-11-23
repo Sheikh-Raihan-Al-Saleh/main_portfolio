@@ -21,6 +21,9 @@ class LandingSectionController extends Controller
         private readonly LandingSectionService $sectionService,
     ) {}
 
+    /**
+     * Validate and save a new content block. The service does the work.
+     */
     public function store(StoreLandingSectionRequest $request): RedirectResponse
     {
         $owner = $this->sectionService->ownerFor($request->validated('owner'), $request->validated('project_id'));
@@ -30,6 +33,9 @@ class LandingSectionController extends Controller
         return back();
     }
 
+    /**
+     * Validate and save the changes to a content block. The service does the work.
+     */
     public function update(UpdateLandingSectionRequest $request, LandingSection $landingSection): RedirectResponse
     {
         $this->sectionService->update($landingSection, $request->validated());
@@ -38,6 +44,9 @@ class LandingSectionController extends Controller
         return back();
     }
 
+    /**
+     * Delete a content block.
+     */
     public function destroy(LandingSection $landingSection): RedirectResponse
     {
         $this->sectionService->delete($landingSection);
@@ -46,6 +55,9 @@ class LandingSectionController extends Controller
         return back();
     }
 
+    /**
+     * Save the new display order of the content blocks.
+     */
     public function reorder(ReorderRequest $request): RedirectResponse
     {
         $this->sectionService->reorder($request->validated('ids'));

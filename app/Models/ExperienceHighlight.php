@@ -17,7 +17,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['body', 'sort_order'])]
 class ExperienceHighlight extends Model
 {
-    /** @return BelongsTo<Experience, $this> */
+    /**
+     * The role this bullet point belongs to (inverse of one-to-many).
+     *
+     * @return BelongsTo<Experience, $this>
+     */
     public function experience(): BelongsTo
     {
         return $this->belongsTo(Experience::class);

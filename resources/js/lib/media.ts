@@ -14,10 +14,10 @@ export function mediaUrl(path: string | null | undefined): string | undefined {
 }
 
 function formatBytes(bytes: number): string {
-    const mb = bytes / 1024 / 1024;
+    const megabytes = bytes / 1024 / 1024;
 
-    return mb >= 1
-        ? `${Number(mb.toFixed(1))} MB`
+    return megabytes >= 1
+        ? `${Number(megabytes.toFixed(1))} MB`
         : `${Math.ceil(bytes / 1024)} KB`;
 }
 

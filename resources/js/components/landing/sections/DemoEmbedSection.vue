@@ -25,14 +25,14 @@ const aspectClass = computed(() => {
     }
 });
 async function requestFullscreen() {
-    const el = wrapper.value;
+    const wrapperElement = wrapper.value;
 
-    if (!el?.requestFullscreen) {
+    if (!wrapperElement?.requestFullscreen) {
         return;
     }
 
     try {
-        await el.requestFullscreen();
+        await wrapperElement.requestFullscreen();
     } catch {
         /* ignore */
     }

@@ -97,8 +97,8 @@ onMounted(async () => {
                     >
                         <div v-if="!recoveryCodesList.length" class="space-y-2">
                             <div
-                                v-for="n in 8"
-                                :key="n"
+                                v-for="placeholderNumber in 8"
+                                :key="placeholderNumber"
                                 class="h-4 animate-pulse rounded bg-muted-foreground/20"
                             ></div>
                         </div>

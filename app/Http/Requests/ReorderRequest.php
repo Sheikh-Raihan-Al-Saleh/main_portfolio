@@ -10,6 +10,9 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class ReorderRequest extends FormRequest
 {
+    /**
+     * Only an admin may send this form.
+     */
     public function authorize(): bool
     {
         return $this->user()?->is_admin === true;

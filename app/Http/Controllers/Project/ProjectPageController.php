@@ -37,6 +37,9 @@ class ProjectPageController extends Controller
         ]);
     }
 
+    /**
+     * Show a published project. Drafts return 404.
+     */
     public function show(Project $project): Response
     {
         abort_unless($project->is_published, 404);

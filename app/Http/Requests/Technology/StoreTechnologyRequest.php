@@ -3,12 +3,19 @@
 namespace App\Http\Requests\Technology;
 
 use App\Models\Technology;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Validator;
 
+/**
+ * Validates the admin technology form (create; the update request extends it).
+ */
 class StoreTechnologyRequest extends FormRequest
 {
+    /**
+     * Only an admin may send this form.
+     */
     public function authorize(): bool
     {
         return $this->user()?->is_admin === true;
@@ -39,7 +46,7 @@ class StoreTechnologyRequest extends FormRequest
 
                 $taken = Technology::query()
                     ->where('slug', Str::slug((string) $this->input('name')))
-                    ->when($ignoreId, fn ($query) => $query->whereKeyNot($ignoreId))
+                    ->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))
                     ->exists();
 
                 if ($taken) {

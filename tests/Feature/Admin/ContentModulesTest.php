@@ -68,7 +68,7 @@ test('experience highlights are stored as ordered rows', function () {
 
     $experience = Experience::query()->with('highlights')->sole();
     expect($experience->highlights->pluck('body')->all())->toBe(['First', 'Second'])
-        ->and($experience->is_current)->toBeTrue();
+        ->and($experience->end_date)->toBeNull();
 
     $this->actingAs($this->admin)->put("/admin/experiences/{$experience->id}", [
         'company' => 'Acme',

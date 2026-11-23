@@ -119,8 +119,8 @@ watch(
                             class="absolute inset-0 grid grid-cols-5 opacity-50"
                         >
                             <div
-                                v-for="i in 5"
-                                :key="`col-${i}`"
+                                v-for="columnNumber in 5"
+                                :key="`col-${columnNumber}`"
                                 class="border-r border-border last:border-r-0"
                             />
                         </div>
@@ -128,8 +128,8 @@ watch(
                             class="absolute inset-0 grid grid-rows-5 opacity-50"
                         >
                             <div
-                                v-for="i in 5"
-                                :key="`row-${i}`"
+                                v-for="rowNumber in 5"
+                                :key="`row-${rowNumber}`"
                                 class="border-b border-border last:border-b-0"
                             />
                         </div>

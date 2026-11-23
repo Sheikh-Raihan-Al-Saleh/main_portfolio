@@ -85,8 +85,10 @@ const figures = computed(() =>
 
             <Reveal :delay="0.1" class="lg:col-span-7 lg:col-start-6">
                 <p
-                    v-for="(paragraph, i) in paragraphs(studio.bio)"
-                    :key="i"
+                    v-for="(paragraph, paragraphIndex) in paragraphs(
+                        studio.bio,
+                    )"
+                    :key="paragraphIndex"
                     class="lead mb-6"
                 >
                     {{ paragraph }}
@@ -146,10 +148,10 @@ const figures = computed(() =>
                     {{ founder.headline }}
                 </p>
                 <p
-                    v-for="(paragraph, i) in paragraphs(
+                    v-for="(paragraph, paragraphIndex) in paragraphs(
                         founder.founder_message || founder.bio,
                     )"
-                    :key="i"
+                    :key="paragraphIndex"
                     class="body-copy mt-6"
                 >
                     {{ paragraph }}

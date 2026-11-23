@@ -13,6 +13,9 @@ use Illuminate\Validation\Rule;
  */
 class StoreLandingSectionRequest extends FormRequest
 {
+    /**
+     * Only an admin may send this form.
+     */
     public function authorize(): bool
     {
         return $this->user()?->is_admin === true;
@@ -104,6 +107,9 @@ class StoreLandingSectionRequest extends FormRequest
         });
     }
 
+    /**
+     * Turn checkbox values ("on", "1", missing) into real booleans before validation.
+     */
     protected function prepareForValidation(): void
     {
         $this->merge(['is_visible' => $this->boolean('is_visible')]);

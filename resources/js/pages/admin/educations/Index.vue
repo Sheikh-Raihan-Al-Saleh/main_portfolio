@@ -2,7 +2,6 @@
 import { Head } from '@inertiajs/vue3';
 import { GraduationCap, Pencil, Plus } from '@lucide/vue';
 import { motion } from 'motion-v';
-import { ref } from 'vue';
 import EducationController from '@/actions/App/Http/Controllers/Education/EducationController';
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
 import DeleteAction from '@/components/admin/DeleteAction.vue';
@@ -17,8 +16,10 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useEditDialog } from '@/composables/useEditDialog';
 import { useReorder } from '@/composables/useReorder';
 import { fadeUp } from '@/lib/motion';
+import { formatPeriod } from '@/lib/text';
 import educationRoutes from '@/routes/admin/educations';
 import type { Education } from '@/types';
 import type { AdminEducationsIndexProps } from '@/types';
@@ -37,26 +38,9 @@ const { items, move, saving } = useReorder<Education>(
     educationRoutes.reorder().url,
 );
 
-function period(education: Education): string {
-    const format = (value: string | null) =>
-        value ? new Date(value).getFullYear().toString() : 'Present';
-
-    return `${format(education.start_date)} — ${format(education.end_date)}`;
-}
-
 /** Create and edit happen in a modal, so the list stays in view. */
-const dialogOpen = ref(false);
-const editing = ref<Education | null>(null);
-
-function openCreate() {
-    editing.value = null;
-    dialogOpen.value = true;
-}
-
-function openEdit(education: Education) {
-    editing.value = education;
-    dialogOpen.value = true;
-}
+const { dialogOpen, editing, openCreate, openEdit, closeDialog } =
+    useEditDialog<Education>();
 </script>
 
 <template>
@@ -136,7 +120,13 @@ function openEdit(education: Education) {
                         <TableCell
                             class="hidden text-sm text-muted-foreground sm:table-cell"
                         >
-                            {{ period(education) }}
+                            {{
+                                formatPeriod(
+                                    education.start_date,
+                                    education.end_date,
+                                    'year',
+                                )
+                            }}
                         </TableCell>
 
                         <TableCell>
@@ -202,8 +192,8 @@ function openEdit(education: Education) {
                         : EducationController.store.form()
                 "
                 :submit-label="editing ? 'Save changes' : 'Create education'"
-                @saved="dialogOpen = false"
-                @cancel="dialogOpen = false"
+                @saved="closeDialog"
+                @cancel="closeDialog"
             />
         </FormDialog>
     </div>

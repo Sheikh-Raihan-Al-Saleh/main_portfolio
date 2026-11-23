@@ -23,6 +23,7 @@ import AnimatedCounter from '@/components/site/AnimatedCounter.vue';
 import { Button } from '@/components/ui/button';
 import { useSite } from '@/composables/useSite';
 import { fadeUp, stagger } from '@/lib/motion';
+import { formatDate } from '@/lib/text';
 import { dashboard } from '@/routes/admin';
 import clients from '@/routes/admin/clients';
 import educations from '@/routes/admin/educations';
@@ -144,14 +145,6 @@ const donutSlices = computed(() =>
         color: donutColors[index % donutColors.length],
     })),
 );
-
-function formatDate(value: string): string {
-    return new Date(value).toLocaleDateString(undefined, {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-    });
-}
 </script>
 
 <template>

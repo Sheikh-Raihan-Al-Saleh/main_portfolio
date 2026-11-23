@@ -4,6 +4,7 @@ namespace App\Http\Resources\Founder;
 
 use App\Models\Founder;
 use App\Models\SocialLink;
+use App\Services\Media\MediaService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -31,10 +32,10 @@ class FounderResource extends JsonResource
             'location' => $this->location,
             'public_email' => $this->public_email,
             'phone' => $this->phone,
-            'avatar_url' => $this->avatar_url,
-            'logo_url' => $this->logo_url,
-            'resume_url' => $this->resume_url,
-            'og_image_url' => $this->og_image_url,
+            'avatar_url' => MediaService::url($this->avatar_path),
+            'logo_url' => MediaService::url($this->logo_path),
+            'resume_url' => self::resumeUrl($this->resource),
+            'og_image_url' => MediaService::url($this->og_image_path),
             'hero' => [
                 'title' => $this->hero_title,
                 'statement' => $this->hero_statement,
@@ -52,5 +53,14 @@ class FounderResource extends JsonResource
                 'description' => $this->meta_description,
             ],
         ];
+    }
+
+    /**
+     * The resume download link, or null when no resume is uploaded. The file
+     * is served by a route (not the uploads URL) so it gets a readable name.
+     */
+    public static function resumeUrl(Founder $founder): ?string
+    {
+        return $founder->resume_path ? route('resume', absolute: false) : null;
     }
 }

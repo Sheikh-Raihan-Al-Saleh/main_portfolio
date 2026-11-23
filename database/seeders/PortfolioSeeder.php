@@ -364,7 +364,7 @@ class PortfolioSeeder extends Seeder
      */
     private function seedLandingPage(): void
     {
-        $project = Project::query()->featured()->ordered()->with('technologies:id,name')->first();
+        $project = Project::query()->where('is_featured', true)->orderBy('sort_order')->orderByDesc('id')->with('technologies:id,name')->first();
 
         if ($project === null || $project->landingPage()->exists()) {
             return;

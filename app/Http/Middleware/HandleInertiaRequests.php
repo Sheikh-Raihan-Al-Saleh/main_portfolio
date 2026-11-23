@@ -10,6 +10,9 @@ use App\Services\Studio\StudioService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
+/**
+ * Shares the props every Inertia page needs (user, brand, studio, founder...).
+ */
 class HandleInertiaRequests extends Middleware
 {
     /**

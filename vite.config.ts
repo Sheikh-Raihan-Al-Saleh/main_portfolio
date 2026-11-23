@@ -18,10 +18,17 @@ export default defineConfig({
                 bunny('JetBrains Mono', {
                     weights: [400, 500, 600, 700],
                 }),
-                // Serif display face for the public site's editorial headlines.
+                // Serif display face for the admin panel's headings.
                 bunny('Instrument Serif', {
                     weights: [400],
                     styles: ['normal', 'italic'],
+                }),
+                // The public site: Bricolage Grotesque headlines, DM Sans text.
+                bunny('Bricolage Grotesque', {
+                    weights: [500, 600, 700, 800],
+                }),
+                bunny('DM Sans', {
+                    weights: [400, 500, 600, 700],
                 }),
             ],
         }),

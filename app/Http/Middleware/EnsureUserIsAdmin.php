@@ -6,6 +6,9 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Lets only admin users through to the admin panel.
+ */
 class EnsureUserIsAdmin
 {
     /**

@@ -7,6 +7,7 @@ use App\Http\Resources\LandingPage\LandingPageResource;
 use App\Http\Resources\LandingPage\LandingSectionResource;
 use App\Models\Project;
 use App\Services\LandingPage\LandingPageService;
+use App\Services\Media\MediaService;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -30,7 +31,8 @@ class LandingPageController extends Controller
 
         return Inertia::render('public/landing/Show', [
             'project' => [
-                ...$project->only(['id', 'title', 'slug', 'summary', 'role', 'owner_type', 'live_url', 'repo_url', 'cover_image_url']),
+                ...$project->only(['id', 'title', 'slug', 'summary', 'role', 'owner_type', 'live_url', 'repo_url']),
+                'cover_image_url' => MediaService::url($project->cover_image_path),
                 'started_at' => $project->started_at?->toDateString(),
                 'completed_at' => $project->completed_at?->toDateString(),
             ],

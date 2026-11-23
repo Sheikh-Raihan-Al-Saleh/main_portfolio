@@ -215,7 +215,9 @@ const tabs: FormTab[] = [
                         <TagInput
                             name="tech_stack"
                             :model-value="
-                                project?.technologies.map((tech) => tech.name)
+                                project?.technologies.map(
+                                    (technology) => technology.name,
+                                )
                             "
                             :suggestions="technologyOptions"
                             placeholder="Laravel, Vue, MySQL…"

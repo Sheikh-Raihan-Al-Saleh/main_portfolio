@@ -47,7 +47,6 @@ const { studio } = useSite();
 
     <WorkSection
         id="work"
-        index="02"
         :eyebrow="content.work.eyebrow"
         :title="content.work.title"
         :highlight="content.work.highlight"

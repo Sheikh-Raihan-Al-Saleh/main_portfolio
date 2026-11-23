@@ -12,8 +12,8 @@ const images = computed(() => props.section.data.images ?? []);
 const openIndex = ref<number | null>(null);
 const open = computed({
     get: () => openIndex.value !== null,
-    set: (v: boolean) => {
-        if (!v) {
+    set: (isOpen: boolean) => {
+        if (!isOpen) {
             openIndex.value = null;
         }
     },

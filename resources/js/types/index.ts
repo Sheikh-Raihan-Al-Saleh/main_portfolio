@@ -1,5 +1,6 @@
 export * from './auth';
 export * from './components';
+export * from './composables';
 export * from './forms';
 export * from './landing';
 export * from './navigation';

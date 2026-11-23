@@ -10,7 +10,7 @@ import { about } from '@/routes';
 import type { AboutSectionProps } from '@/types';
 
 /**
- * 05 — The studio in its own words: bio, mission and founding facts.
+ * The studio in its own words: bio, mission and founding facts.
  */
 defineProps<AboutSectionProps>();
 
@@ -30,7 +30,6 @@ const facts = computed(() =>
         <div class="container-site grid gap-14 lg:grid-cols-12">
             <div class="lg:col-span-5">
                 <SectionHeading
-                    index="05"
                     :eyebrow="content.eyebrow"
                     :title="content.title"
                     :highlight="content.highlight"
@@ -51,8 +50,10 @@ const facts = computed(() =>
             <div class="lg:col-span-6 lg:col-start-7">
                 <Reveal>
                     <p
-                        v-for="(paragraph, i) in paragraphs(studio.bio)"
-                        :key="i"
+                        v-for="(paragraph, paragraphIndex) in paragraphs(
+                            studio.bio,
+                        )"
+                        :key="paragraphIndex"
                         class="lead mb-6 last:mb-0"
                     >
                         {{ paragraph }}

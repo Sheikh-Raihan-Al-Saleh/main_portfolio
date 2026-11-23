@@ -73,6 +73,19 @@ test('the logo mark must be square', function () {
         ->assertSessionHasErrors('logo_mark');
 });
 
+test('logos may be uploaded as JPG', function () {
+    $this->actingAs($this->admin)
+        ->put('/admin/studio', [
+            'name' => 'Acme',
+            'logo' => UploadedFile::fake()->image('logo.jpg', 600, 160),
+            'logo_mark' => UploadedFile::fake()->image('mark.jpeg', 256, 256),
+        ])
+        ->assertSessionHasNoErrors();
+
+    $studio = app(StudioService::class)->current()->fresh();
+    Storage::disk('uploads')->assertExists([$studio->logo_path, $studio->logo_mark_path]);
+});
+
 test('replacing a logo deletes the old file and remove clears it', function () {
     $this->actingAs($this->admin)->put('/admin/studio', [
         'name' => 'Acme',

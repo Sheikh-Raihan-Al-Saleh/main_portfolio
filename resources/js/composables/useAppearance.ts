@@ -1,16 +1,14 @@
-import type { ComputedRef, Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
-import type { Appearance, ResolvedAppearance, ThemeAppearance } from '@/types';
+import type {
+    Appearance,
+    ResolvedAppearance,
+    ThemeAppearance,
+    UseAppearanceReturn,
+} from '@/types';
 
 export type { Appearance, ResolvedAppearance, ThemeAppearance };
 
 const ADMIN_THEMES = ['colorful', 'aesthetic', 'modern'] as const;
-
-export type UseAppearanceReturn = {
-    appearance: Ref<ThemeAppearance>;
-    resolvedAppearance: ComputedRef<ResolvedAppearance>;
-    updateAppearance: (value: ThemeAppearance) => void;
-};
 
 export function updateTheme(value: ThemeAppearance): void {
     if (typeof window === 'undefined') {

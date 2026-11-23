@@ -7,6 +7,7 @@ use App\Models\ContactMessage;
 use App\Services\Founder\FounderService;
 use App\Services\Studio\StudioService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
@@ -29,7 +30,7 @@ class ContactMessageService
      *
      * @param  array<string, mixed>  $data  Validated form data.
      */
-    public function receive(array $data, ?string $ip, ?string $userAgent): ContactMessage
+    public function receive(array $data, ?string $ipAddress, ?string $userAgent): ContactMessage
     {
         $recipient = ($data['site'] ?? 'studio') === 'founder'
             ? $this->founderService->current()
@@ -37,7 +38,7 @@ class ContactMessageService
 
         $message = new ContactMessage([
             ...collect($data)->only(['name', 'email', 'subject', 'message'])->all(),
-            'ip_address' => $ip,
+            'ip_address' => $ipAddress,
             'user_agent' => str($userAgent)->limit(250)->value(),
         ]);
         $message->recipient()->associate($recipient);
@@ -60,17 +61,23 @@ class ContactMessageService
     public function list(?string $filter = null): LengthAwarePaginator
     {
         return ContactMessage::query()
-            ->when($filter === 'unread', fn ($query) => $query->unread())
+            ->when($filter === 'unread', fn (Builder $query) => $query->whereNull('read_at'))
             ->latest()
             ->paginate(15)
             ->withQueryString();
     }
 
+    /**
+     * How many messages are still unread (shown as a badge in the admin sidebar).
+     */
     public function unreadCount(): int
     {
-        return ContactMessage::query()->unread()->count();
+        return ContactMessage::query()->whereNull('read_at')->count();
     }
 
+    /**
+     * Mark a message as read, unless it already is.
+     */
     public function markRead(ContactMessage $message): void
     {
         if ($message->read_at === null) {
@@ -78,11 +85,17 @@ class ContactMessageService
         }
     }
 
+    /**
+     * Mark a message as unread again.
+     */
     public function markUnread(ContactMessage $message): void
     {
         $message->forceFill(['read_at' => null])->save();
     }
 
+    /**
+     * Delete a message.
+     */
     public function delete(ContactMessage $message): void
     {
         $message->delete();
@@ -100,10 +113,10 @@ class ContactMessageService
 
         try {
             Mail::to($address)->send(new NewContactMessage($message, $this->studioService->brand()));
-        } catch (Throwable $e) {
+        } catch (Throwable $exception) {
             Log::error('Failed to send contact notification.', [
                 'contact_message_id' => $message->id,
-                'exception' => $e->getMessage(),
+                'exception' => $exception->getMessage(),
             ]);
         }
     }
