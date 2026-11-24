@@ -3,17 +3,17 @@
 use App\Models\Client;
 use App\Models\Education;
 use App\Models\Experience;
+use App\Models\Founder;
 use App\Models\LandingSection;
 use App\Models\Project;
 use App\Models\ProjectLandingPage;
 use App\Models\Skill;
-use App\Services\Founder\FounderService;
-use App\Services\Studio\StudioService;
+use App\Models\Studio;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 test('the studio home page shows studio work, founder work, clients and blocks', function () {
-    $studio = app(StudioService::class)->current();
+    $studio = Studio::current();
     Project::factory()->count(2)->forStudio()->create();
     Project::factory()->forStudio()->draft()->create();
     Project::factory()->forFounder()->create();
@@ -24,7 +24,7 @@ test('the studio home page shows studio work, founder work, clients and blocks',
     $this->get('/')
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('public/home/Index')
+            ->component('studio/HomePage')
             ->has('projects', 2)
             ->where('totalProjects', 2)
             ->has('founderProjects', 1)
@@ -46,7 +46,7 @@ test('the about page renders the studio story and clients', function () {
     $this->get('/about')
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('public/about/Index')
+            ->component('studio/AboutPage')
             ->has('clients', 2)
             ->where('stats.clients', 2),
         );
@@ -64,7 +64,7 @@ test('the founder page shows only personal work and the full history', function 
     $this->get('/founder')
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('public/founder/Index')
+            ->component('founder/FounderPage')
             ->has('projects', 2)
             ->has('skillGroups', 1)
             ->has('skillGroups.0.skills', 3)
@@ -83,7 +83,7 @@ test('the archive lists every published project and seeds the filters', function
     $this->get('/projects?tech=laravel&owner=founder')
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('public/projects/Index')
+            ->component('project/ProjectArchive')
             ->has('projects', 2)
             ->where('filters.tech', 'laravel')
             ->where('filters.owner', 'founder'),
@@ -101,7 +101,7 @@ test('a project page shows the gallery and related work', function () {
     $this->get("/projects/{$project->slug}")
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('public/projects/Show')
+            ->component('project/ShowProject')
             ->where('project.slug', $project->slug)
             ->where('project.images.0.url', '/uploads/projects/gallery/a.jpg')
             ->has('related', 1),
@@ -125,7 +125,7 @@ test('a published landing page renders its visible blocks in order', function ()
     $this->get("/p/{$page->project->slug}")
         ->assertOk()
         ->assertInertia(fn ($inertia) => $inertia
-            ->component('public/landing/Show')
+            ->component('landingpage/ShowLandingPage')
             ->has('sections', 2)
             ->where('sections.0.heading', 'First')
             ->where('landingPage.hero_media', [null, null, '/uploads/landing/hero/phone.png']),
@@ -168,7 +168,7 @@ test('the resume streams the uploaded file and 404s without one', function () {
     $this->get('/resume')->assertNotFound();
 
     Storage::disk('uploads')->put('founder/resume/cv.pdf', '%PDF-1.4');
-    app(FounderService::class)->current()->forceFill(['resume_path' => 'founder/resume/cv.pdf'])->save();
+    Founder::current()->forceFill(['resume_path' => 'founder/resume/cv.pdf'])->save();
 
     $response = $this->get('/resume')->assertOk();
 
@@ -176,7 +176,7 @@ test('the resume streams the uploaded file and 404s without one', function () {
 });
 
 test('the brand is shared on public, auth and admin pages', function (string $uri, bool $asAdmin) {
-    app(StudioService::class)->update(['name' => 'Acme Studio']);
+    Studio::current()->update(['name' => 'Acme Studio']);
 
     $response = $asAdmin ? $this->actingAs(admin())->get($uri) : $this->get($uri);
 
@@ -216,3 +216,14 @@ test('public pages run a fixed number of queries however much content exists', f
 
     expect($large)->toBe($small);
 })->with(['/', '/founder', '/projects', '/about']);
+
+test('every page ships the named routes for the frontend route() helper', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    // The @routes directive prints Ziggy's route list; route() reads it.
+    // Ziggy prints "const Ziggy=" on the first render of a PHP process and
+    // merges into it on later renders (as in this test suite).
+    expect($html)->toMatch('/const Ziggy=|Object\.assign\(Ziggy\.routes/')
+        ->and($html)->toContain('"projectArchive"')
+        ->and($html)->toContain('"projectUpdate"');
+});

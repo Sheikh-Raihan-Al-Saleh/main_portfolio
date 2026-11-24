@@ -1,6 +1,13 @@
 import type { InertiaLinkProps } from '@inertiajs/vue3';
 import type { MaybeComputedElementRef } from '@vueuse/core';
 import type { ComputedRef, DeepReadonly, Ref } from 'vue';
+import type {
+    Client,
+    Education,
+    Experience,
+    Project,
+    Skill,
+} from './portfolio';
 import type { ResolvedAppearance, ThemeAppearance } from './ui';
 
 /**
@@ -81,6 +88,49 @@ export type UseDebouncedSearchReturn = {
     search: Ref<string>;
 };
 
+/** What every reorderable admin list composable shares. */
+type ReorderableList = {
+    /** Move the item at `index` one place up (-1) or down (1) and save. */
+    move: (index: number, direction: -1 | 1) => void;
+    /** True while the new order is being saved. */
+    saving: Ref<boolean>;
+};
+
+export type UseProjectListReturn = ReorderableList & {
+    /** The projects in their current (possibly just moved) order. */
+    projectList: Ref<Project[]>;
+    /** The search text, bound to the search input with v-model. */
+    search: Ref<string>;
+};
+
+export type UseClientListReturn = ReorderableList & {
+    /** The clients in their current (possibly just moved) order. */
+    clientList: Ref<Client[]>;
+    /** The search text, bound to the search input with v-model. */
+    search: Ref<string>;
+    /** How many clients are shown on the public site. */
+    visibleCount: ComputedRef<number>;
+};
+
+export type UseSkillListReturn = ReorderableList & {
+    /** Every skill of every category, in its current order. */
+    skillList: Ref<Skill[]>;
+    /** Category name by category ID. */
+    categoryNames: ComputedRef<Record<number, string>>;
+    /** Category choices for the skill form's select. */
+    categoryOptions: ComputedRef<Array<{ value: number; label: string }>>;
+};
+
+export type UseExperienceListReturn = ReorderableList & {
+    /** The roles in their current (possibly just moved) order. */
+    experienceList: Ref<Experience[]>;
+};
+
+export type UseEducationListReturn = ReorderableList & {
+    /** The education entries in their current (possibly just moved) order. */
+    educationList: Ref<Education[]>;
+};
+
 export type ScrollProgressOptions = {
     /** Element to track. Omit to track the whole page. */
     target?: MaybeComputedElementRef;
@@ -92,4 +142,17 @@ export type ScrollProgressOptions = {
     offset?: ['start end', 'end start'] | [string, string];
     /** Smooth the value with a spring. Off by default — scrubbing should be exact. */
     smooth?: boolean;
+};
+
+/** Chrome's install prompt event (not yet in TypeScript's DOM types). */
+export type BeforeInstallPromptEvent = Event & {
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+};
+
+export type UsePwaReturn = {
+    /** True while the browser offers to install the admin as an app. */
+    canInstall: Readonly<Ref<boolean>>;
+    /** Opens the browser's install dialog. */
+    install: () => Promise<void>;
 };

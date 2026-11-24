@@ -3,7 +3,7 @@
 namespace App\Http\Resources\Founder;
 
 use App\Models\Founder;
-use App\Services\Media\MediaService;
+use App\Services\FileService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -24,10 +24,10 @@ class FounderFormResource extends JsonResource
             // Every column, then every loaded relation (what Model::toArray() returns).
             ...$this->attributesToArray(),
             ...$this->relationsToArray(),
-            'avatar_url' => MediaService::url($this->avatar_path),
-            'logo_url' => MediaService::url($this->logo_path),
+            'avatar_url' => FileService::url($this->avatar_path),
+            'logo_url' => FileService::url($this->logo_path),
             'resume_url' => FounderResource::resumeUrl($this->resource),
-            'og_image_url' => MediaService::url($this->og_image_path),
+            'og_image_url' => FileService::url($this->og_image_path),
         ];
     }
 }

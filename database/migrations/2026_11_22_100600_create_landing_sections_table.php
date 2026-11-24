@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('heading', 180)->nullable();
             $table->string('subheading', 400)->nullable();
             $table->text('body')->nullable();
-            // Block-specific fields, validated per type by LandingSectionType.
+            // Block-specific fields, validated per type by LandingSectionType::dataRules().
             $table->json('data')->nullable();
             $table->unsignedInteger('sort_order')->default(0);
             $table->boolean('is_visible')->default(true);

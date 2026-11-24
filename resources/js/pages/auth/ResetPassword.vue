@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import InputError from '@/components/common/InputError.vue';
-import PasswordInput from '@/components/common/PasswordInput.vue';
+import InputError from '@/components/InputError.vue';
+import PasswordInput from '@/components/PasswordInput.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { update } from '@/routes/password';
+import { routeForm } from '@/composables/useRoute';
 import type { AuthResetPasswordProps } from '@/types';
 
 defineOptions({
@@ -26,7 +26,7 @@ const inputEmail = ref(props.email);
     <Head title="Reset password" />
 
     <Form
-        v-bind="update.form()"
+        v-bind="routeForm('password.update')"
         :transform="(data) => ({ ...data, token, email })"
         :reset-on-success="['password', 'password_confirmation']"
         v-slot="{ errors, processing }"

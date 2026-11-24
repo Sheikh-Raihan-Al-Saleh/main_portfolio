@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import AppearanceTabs from '@/components/account/AppearanceTabs.vue';
-import Heading from '@/components/common/Heading.vue';
-import { edit } from '@/routes/appearance';
+import AppearanceTabs from '@/components/Account/AppearanceTabs.vue';
+import Heading from '@/components/Heading.vue';
+import { route } from '@/composables/useRoute';
 
 defineOptions({
     layout: {
         breadcrumbs: [
             {
                 title: 'Appearance settings',
-                href: edit(),
+                href: route('appearanceEdit'),
             },
         ],
     },

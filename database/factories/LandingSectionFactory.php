@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Enums\LandingSectionType;
 use App\Models\LandingSection;
 use App\Models\ProjectLandingPage;
 use App\Models\Studio;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use InvalidArgumentException;
 
 /**
  * @extends Factory<LandingSection>
@@ -23,12 +23,12 @@ class LandingSectionFactory extends Factory
         return [
             'sectionable_type' => 'landing_page',
             'sectionable_id' => ProjectLandingPage::factory(),
-            'type' => LandingSectionType::Features,
+            'type' => 'features',
             'eyebrow' => null,
             'heading' => rtrim(fake()->sentence(4), '.'),
             'subheading' => fake()->sentence(12),
             'body' => null,
-            'data' => self::sampleData(LandingSectionType::Features),
+            'data' => self::sampleData('features'),
             'sort_order' => 0,
             'is_visible' => true,
         ];
@@ -37,7 +37,7 @@ class LandingSectionFactory extends Factory
     /**
      * Build this section as the given type, with a valid payload for it.
      */
-    public function ofType(LandingSectionType $type): static
+    public function ofType(string $type): static
     {
         return $this->state(fn (): array => [
             'type' => $type,
@@ -67,30 +67,30 @@ class LandingSectionFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public static function sampleData(LandingSectionType $type): array
+    public static function sampleData(string $type): array
     {
         return match ($type) {
-            LandingSectionType::Features => [
+            'features' => [
                 'items' => [
                     ['icon' => 'Zap', 'title' => 'Fast by default', 'text' => fake()->sentence(10)],
                     ['icon' => 'Shield', 'title' => 'Secure', 'text' => fake()->sentence(10)],
                     ['icon' => 'Layers', 'title' => 'Composable', 'text' => fake()->sentence(10)],
                 ],
             ],
-            LandingSectionType::DemoVideo => [
+            'demo_video' => [
                 'provider' => 'youtube',
                 'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                 'poster_path' => null,
                 'caption' => fake()->sentence(8),
                 'autoplay' => false,
             ],
-            LandingSectionType::DemoEmbed => [
+            'demo_embed' => [
                 'url' => 'https://example.com/demo',
                 'aspect' => '16/9',
                 'chrome' => 'browser',
                 'allow_fullscreen' => true,
             ],
-            LandingSectionType::DemoWalkthrough => [
+            'demo_walkthrough' => [
                 'frame' => 'browser',
                 'steps' => [
                     ['image_path' => 'landing/steps/one.png', 'title' => 'Sign in', 'caption' => fake()->sentence(9)],
@@ -98,16 +98,16 @@ class LandingSectionFactory extends Factory
                     ['image_path' => 'landing/steps/three.png', 'title' => 'Ship', 'caption' => fake()->sentence(9)],
                 ],
             ],
-            LandingSectionType::Stats => [
+            'stats' => [
                 'items' => [
                     ['value' => 99.9, 'suffix' => '%', 'label' => 'Uptime'],
                     ['value' => 40, 'suffix' => 'ms', 'label' => 'Median response'],
                 ],
             ],
-            LandingSectionType::Gallery => [
+            'gallery' => [
                 'images' => ['landing/gallery/one.png', 'landing/gallery/two.png'],
             ],
-            LandingSectionType::Testimonials => [
+            'testimonials' => [
                 'items' => [
                     [
                         'quote' => fake()->sentence(18),
@@ -117,23 +117,24 @@ class LandingSectionFactory extends Factory
                     ],
                 ],
             ],
-            LandingSectionType::Faq => [
+            'faq' => [
                 'items' => [
                     ['question' => 'Is there a trial?', 'answer' => fake()->sentence(14)],
                     ['question' => 'Can I self-host?', 'answer' => fake()->sentence(14)],
                 ],
             ],
-            LandingSectionType::Tech => [
+            'tech' => [
                 'items' => ['Laravel', 'Vue', 'Tailwind CSS', 'MySQL'],
             ],
-            LandingSectionType::Cta => [
+            'cta' => [
                 'label' => 'Start a project',
                 'url' => '/#contact',
                 'note' => 'Usually replies within a day.',
             ],
-            LandingSectionType::RichText => [
+            'richtext' => [
                 'markdown' => "## How it works\n\n".fake()->paragraph(4),
             ],
+            default => throw new InvalidArgumentException("Unknown landing section type [{$type}]."),
         };
     }
 }

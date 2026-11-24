@@ -8,7 +8,8 @@ use App\Http\Requests\Client\UpdateClientRequest;
 use App\Http\Requests\ReorderRequest;
 use App\Http\Resources\Client\ClientResource;
 use App\Models\Client;
-use App\Services\Client\ClientService;
+use App\Models\Studio;
+use App\Services\ClientService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,51 +20,60 @@ use Inertia\Response;
  */
 class ClientController extends Controller
 {
-    public function __construct(
-        private readonly ClientService $clientService,
-    ) {}
+    public function __construct(private ClientService $clients) {}
 
     /**
-     * Show the list of clients.
+     * Show the list of clients, optionally filtered by name or industry.
      */
     public function index(Request $request): Response
     {
         $search = $request->string('search')->trim()->value();
 
-        return Inertia::render('admin/clients/Index', [
-            'clients' => ClientResource::collection($this->clientService->list($search))->resolve(),
+        $query = Studio::current()->clients()->ordered();
+
+        if ($search !== '') {
+            $query->whereAny(['name', 'industry'], 'like', "%{$search}%");
+        }
+
+        $clients = $query->get();
+
+        return Inertia::render('client/ClientIndex', [
+            'clients' => ClientResource::collection($clients)->resolve(),
             'filters' => ['search' => $search ?: null],
         ]);
     }
 
     /**
-     * Validate and save a new client. The service does the work.
+     * Save a new client at the end of the strip, with its logo.
      */
     public function store(StoreClientRequest $request): RedirectResponse
     {
-        $this->clientService->create($request->validated());
+        $this->clients->create($request->validated());
+
         $this->toast(__('Client added.'));
 
         return back();
     }
 
     /**
-     * Validate and save the changes to a client. The service does the work.
+     * Save the changes to a client; a new logo replaces the old file.
      */
     public function update(UpdateClientRequest $request, Client $client): RedirectResponse
     {
-        $this->clientService->update($client, $request->validated());
+        $this->clients->update($client, $request->validated());
+
         $this->toast(__('Client updated.'));
 
         return back();
     }
 
     /**
-     * Delete a client.
+     * Delete a client and its logo file.
      */
     public function destroy(Client $client): RedirectResponse
     {
-        $this->clientService->delete($client);
+        $this->clients->delete($client);
+
         $this->toast(__('Client removed.'), 'error');
 
         return back();
@@ -74,7 +84,7 @@ class ClientController extends Controller
      */
     public function reorder(ReorderRequest $request): RedirectResponse
     {
-        $this->clientService->reorder($request->validated('ids'));
+        $this->saveSortOrder(Studio::current()->clients(), $request->validated('ids'));
 
         return back();
     }

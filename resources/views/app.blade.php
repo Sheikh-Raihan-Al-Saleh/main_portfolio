@@ -31,19 +31,38 @@
         </style>
 
         {{-- Favicon: the studio's logo mark when one is uploaded, else the bundled icon. --}}
-        @php($brand = app(\App\Services\Studio\StudioService::class)->brand())
+        @php($brand = \App\Models\Studio::brand())
+        @php($isAdminApp = request()->is('admin', 'admin/*', 'settings', 'settings/*'))
         @if ($brand['logo_mark_url'])
             <link rel="icon" href="{{ $brand['logo_mark_url'] }}">
-            <link rel="apple-touch-icon" href="{{ $brand['logo_mark_url'] }}">
+            @unless ($isAdminApp)
+                <link rel="apple-touch-icon" href="{{ $brand['logo_mark_url'] }}">
+            @endunless
         @else
             <link rel="icon" href="/favicon.ico" sizes="any">
             <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-            <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+            @unless ($isAdminApp)
+                <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+            @endunless
+        @endif
+
+        {{-- The admin panel installs as an app (PWA): manifest, colours and home-screen icon. --}}
+        @if ($isAdminApp)
+            <link rel="manifest" href="{{ route('pwaManifest') }}">
+            <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
+            <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+            <meta name="mobile-web-app-capable" content="yes">
+            <meta name="apple-mobile-web-app-capable" content="yes">
+            <meta name="apple-mobile-web-app-title" content="Admin">
+            <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+            <link rel="apple-touch-icon" href="/pwa/apple-touch-icon.png">
         @endif
         <meta property="og:site_name" content="{{ $brand['name'] }}">
 
         @fonts
 
+        {{-- Named routes for the frontend's route() helper (Ziggy). --}}
+        @routes
         @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         <x-inertia::head>
             <title>{{ $brand['name'] }}</title>

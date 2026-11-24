@@ -27,6 +27,14 @@ declare module '@inertiajs/core' {
     }
 }
 
+// The route list printed into the page by the @routes Blade directive
+// (Ziggy) as a global `const`: a global binding, not a property of window.
+declare global {
+    const Ziggy: {
+        routes: Record<string, { uri: string; methods: string[] }>;
+    };
+}
+
 declare module 'vue' {
     interface ComponentCustomProperties {
         $inertia: typeof Router;

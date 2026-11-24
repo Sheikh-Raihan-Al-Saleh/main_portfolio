@@ -1,14 +1,126 @@
 /*
-| Admin panel helpers. The panel is built from shadcn-vue components, which
-| read the shared tokens in app.css; these few classes add the cards, tiles
-| and headings its pages share, in the same paper-and-ink style as the site.
+| The admin panel: the "dev mode" theme.
+|
+| A code-editor look: cool greys, one green accent, JetBrains Mono for
+| headings, labels and numbers, Inter for reading text. Light and dark follow
+| the appearance toggle (.dark on <html>).
+|
+| The tokens are scoped to [data-site='admin'] (the admin layout wrapper, and
+| <body> for dialogs and toasts that portal out of it). This file loads after
+| site.css, so these win over its generic body[data-site] palette. Every
+| shadcn-vue component reads them, so the whole panel changes together.
 */
 
 @layer components {
+    /* ── Light ─────────────────────────────────────────────────── */
+    [data-site='admin'],
+    body[data-site='admin'] {
+        --paper: #f6f7f9;
+        --paper-deep: #e9ecf0;
+        --ink: #1b1f24;
+        --ink-soft: #3d444d;
+        --stone: #59626e;
+        --line: #e3e6ea;
+
+        --brand: #15803d;
+        --brand-foreground: #ffffff;
+        --brand-text: #15803d;
+        --brand-subtle: #dcfce7;
+
+        --info: #0369a1;
+        --syntax: #7c3aed;
+        --warn: #b45309;
+
+        --background: var(--paper);
+        --foreground: var(--ink);
+        --card: #ffffff;
+        --card-foreground: var(--ink);
+        --popover: #ffffff;
+        --popover-foreground: var(--ink);
+        --primary: var(--brand);
+        --primary-foreground: var(--brand-foreground);
+        --secondary: #eef1f4;
+        --secondary-foreground: var(--ink);
+        --muted: #f1f3f5;
+        --muted-foreground: var(--stone);
+        --accent: var(--paper-deep);
+        --accent-foreground: var(--ink);
+        --destructive: #cf222e;
+        --destructive-foreground: #ffffff;
+        --border: var(--line);
+        --input: #d5d9de;
+        --ring: var(--brand);
+        --radius: 0.5rem;
+
+        --chart-1: var(--brand);
+        --chart-2: var(--info);
+        --chart-3: var(--syntax);
+        --chart-4: var(--warn);
+        --chart-5: #c2410c;
+
+        --sidebar-background: #ffffff;
+        --sidebar-foreground: #4b5563;
+        --sidebar-primary: var(--brand);
+        --sidebar-primary-foreground: var(--brand-foreground);
+        --sidebar-accent: var(--paper-deep);
+        --sidebar-accent-foreground: #0b0d10;
+        --sidebar-border: var(--line);
+        --sidebar-ring: var(--brand);
+
+        --font-display: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+        --shadow-soft: 0 1px 2px rgb(16 24 40 / 0.05);
+        --shadow-lift: 0 10px 28px -14px rgb(16 24 40 / 0.22);
+    }
+
+    /* ── Dark ──────────────────────────────────────────────────── */
+    .dark [data-site='admin'],
+    .dark body[data-site='admin'] {
+        --paper: #0b0d10;
+        --paper-deep: #1a1f26;
+        --ink: #e6e8eb;
+        --ink-soft: #c9d1d9;
+        --stone: #8b949e;
+        --line: #1f242c;
+
+        --brand: #4ade80;
+        --brand-foreground: #0b0d10;
+        --brand-text: #4ade80;
+        --brand-subtle: #12301e;
+
+        --info: #7dd3fc;
+        --syntax: #c792ea;
+        --warn: #fbbf24;
+
+        --card: #12151a;
+        --popover: #12151a;
+        --secondary: #1f252d;
+        --muted: #161a20;
+        --destructive: #f85149;
+        --destructive-foreground: #0b0d10;
+        --input: #262c35;
+        --chart-5: #f78c6c;
+
+        --sidebar-background: #0e1114;
+        --sidebar-foreground: #a7b0ba;
+        --sidebar-accent: #1a1f26;
+        --sidebar-accent-foreground: #ffffff;
+
+        --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4);
+        --shadow-lift: 0 12px 32px -16px rgb(0 0 0 / 0.7);
+    }
+
+    :root:has([data-site='admin']) {
+        scrollbar-color: #c4c9d0 transparent;
+    }
+
+    :root.dark:has([data-site='admin']) {
+        scrollbar-color: #2d343e transparent;
+    }
+
     .ui-card {
         background: var(--card);
         border: 1px solid var(--border);
-        border-radius: 1rem;
+        border-radius: 0.75rem;
     }
 
     .ui-card-hover {
@@ -59,12 +171,12 @@
         background: var(--brand);
     }
 
-    /* Admin page titles use the site's serif display face. */
+    /* Admin page titles: the mono display face, set tight. */
     .admin-title {
         font-family: var(--font-display);
-        font-weight: 400;
-        letter-spacing: -0.01em;
-        line-height: 1.05;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
     }
 
     .ui-btn {
@@ -74,9 +186,10 @@
         gap: 0.5rem;
         min-height: 2.5rem;
         padding: 0 1rem;
-        border-radius: 999px;
-        font-size: 0.875rem;
-        font-weight: 500;
+        border-radius: var(--radius);
+        font-family: var(--font-display);
+        font-size: 0.8125rem;
+        font-weight: 700;
         transition:
             background-color 0.2s ease,
             color 0.2s ease;
@@ -94,8 +207,30 @@
     }
 
     .ui-btn-primary:hover {
-        background: var(--brand);
-        color: var(--brand-foreground);
+        background: color-mix(in srgb, var(--primary) 88%, var(--foreground));
+        color: var(--primary-foreground);
+    }
+
+    /* The blinking prompt cursor; still when motion is reduced. */
+    @keyframes ui-blink {
+        0%,
+        49% {
+            opacity: 1;
+        }
+        50%,
+        100% {
+            opacity: 0;
+        }
+    }
+
+    .ui-cursor {
+        animation: ui-blink 1.1s steps(1) infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ui-cursor {
+            animation: none;
+        }
     }
 
     /* Soft accent glow used in a few admin banners. */

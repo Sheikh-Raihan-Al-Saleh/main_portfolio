@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -14,9 +13,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $body
  * @property int $sort_order
  */
-#[Fillable(['body', 'sort_order'])]
 class ExperienceHighlight extends Model
 {
+    /**
+     * Every column is mass assignable; controllers pass only validated fields.
+     *
+     * @var array<int, string>
+     */
+    protected $guarded = [];
+
     /**
      * The role this bullet point belongs to (inverse of one-to-many).
      *

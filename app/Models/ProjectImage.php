@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Database\Factories\ProjectImageFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,11 +17,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $caption
  * @property int $sort_order
  */
-#[Fillable(['path', 'alt', 'caption', 'sort_order'])]
 class ProjectImage extends Model
 {
     /** @use HasFactory<ProjectImageFactory> */
     use HasFactory;
+
+    /**
+     * Every column is mass assignable; controllers pass only validated fields.
+     *
+     * @var array<int, string>
+     */
+    protected $guarded = [];
 
     /**
      * The project this image belongs to (inverse of one-to-many).

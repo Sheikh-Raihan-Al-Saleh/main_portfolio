@@ -4,13 +4,13 @@ use App\Models\Client;
 use App\Models\ContactMessage;
 use App\Models\Education;
 use App\Models\Experience;
+use App\Models\Founder;
 use App\Models\LandingSection;
 use App\Models\Project;
 use App\Models\ProjectLandingPage;
 use App\Models\Skill;
 use App\Models\SkillCategory;
 use App\Models\Technology;
-use App\Services\Founder\FounderService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,7 +21,7 @@ beforeEach(function () {
 // --- Skills -----------------------------------------------------------------
 
 test('skills are listed by category and can be created in a founder category', function () {
-    $category = app(FounderService::class)->current()->skillCategories()->first();
+    $category = Founder::current()->skillCategories()->ordered()->first();
 
     $this->actingAs($this->admin)->post('/admin/skills', [
         'skill_category_id' => $category->id,
@@ -43,7 +43,7 @@ test('a skill cannot be put in an unknown category', function () {
 
 test('categories can be added and renamed, and only empty ones deleted', function () {
     $this->actingAs($this->admin)->post('/admin/skill-categories', ['name' => 'Mobile'])->assertRedirect();
-    $category = SkillCategory::query()->where('slug', 'mobile')->sole();
+    $category = SkillCategory::where('slug', 'mobile')->sole();
 
     $this->actingAs($this->admin)->put("/admin/skill-categories/{$category->id}", ['name' => 'Mobile apps']);
     expect($category->fresh()->slug)->toBe('mobile-apps');
@@ -53,7 +53,7 @@ test('categories can be added and renamed, and only empty ones deleted', functio
 
     $category->skills()->delete();
     $this->actingAs($this->admin)->delete("/admin/skill-categories/{$category->id}")->assertSessionHasNoErrors();
-    expect(SkillCategory::query()->whereKey($category->id)->exists())->toBeFalse();
+    expect(SkillCategory::whereKey($category->id)->exists())->toBeFalse();
 });
 
 // --- Experience and education ------------------------------------------------
@@ -66,7 +66,7 @@ test('experience highlights are stored as ordered rows', function () {
         'highlights' => ['First', '', 'Second'],
     ])->assertRedirect('/admin/experiences');
 
-    $experience = Experience::query()->with('highlights')->sole();
+    $experience = Experience::with('highlights')->sole();
     expect($experience->highlights->pluck('body')->all())->toBe(['First', 'Second'])
         ->and($experience->end_date)->toBeNull();
 
@@ -85,10 +85,10 @@ test('education entries can be created and deleted', function () {
     $this->actingAs($this->admin)->post('/admin/educations', ['institution' => 'MIT', 'degree' => 'BSc'])
         ->assertRedirect('/admin/educations');
 
-    $education = Education::query()->sole();
+    $education = Education::sole();
     $this->actingAs($this->admin)->delete("/admin/educations/{$education->id}")->assertRedirect();
 
-    expect(Education::query()->count())->toBe(0);
+    expect(Education::count())->toBe(0);
 });
 
 // --- Clients and technologies ------------------------------------------------
@@ -102,14 +102,14 @@ test('clients can be added with a logo, updated and removed', function () {
         'logo' => UploadedFile::fake()->image('logo.png'),
     ])->assertRedirect();
 
-    $client = Client::query()->sole();
+    $client = Client::sole();
     Storage::disk('uploads')->assertExists($client->logo_path);
 
     $this->actingAs($this->admin)->put("/admin/clients/{$client->id}", ['name' => 'Northwind Inc', 'remove_logo' => '1']);
     expect($client->fresh()->logo_path)->toBeNull();
 
     $this->actingAs($this->admin)->delete("/admin/clients/{$client->id}");
-    expect(Client::query()->count())->toBe(0);
+    expect(Client::count())->toBe(0);
 });
 
 test('technologies are unique by slug', function () {
@@ -117,7 +117,7 @@ test('technologies are unique by slug', function () {
     $this->actingAs($this->admin)->post('/admin/technologies', ['name' => 'VUE.JS'])->assertSessionHasErrors('name');
 
     $this->actingAs($this->admin)->get('/admin/technologies')
-        ->assertInertia(fn ($page) => $page->component('admin/technologies/Index')->has('technologies', 1));
+        ->assertInertia(fn ($page) => $page->component('technology/TechnologyIndex')->has('technologies', 1));
 });
 
 // --- Reorder -----------------------------------------------------------------
@@ -127,7 +127,7 @@ test('a module list can be reordered through its own route', function () {
 
     $this->actingAs($this->admin)->post('/admin/projects/reorder', ['ids' => [$c->id, $a->id, $b->id]])->assertRedirect();
 
-    expect(Project::query()->orderBy('sort_order')->pluck('id')->all())->toBe([$c->id, $a->id, $b->id]);
+    expect(Project::orderBy('sort_order')->pluck('id')->all())->toBe([$c->id, $a->id, $b->id]);
 });
 
 test('reordering blocks only moves blocks of the same page', function () {
@@ -168,7 +168,7 @@ test('the dashboard reports stats, activity and completeness', function () {
     $this->actingAs($this->admin)->get('/admin')
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('admin/dashboard/Index')
+            ->component('Dashboard')
             ->where('stats.projects', 3)
             ->where('stats.publishedProjects', 2)
             ->where('stats.unreadMessages', 2)

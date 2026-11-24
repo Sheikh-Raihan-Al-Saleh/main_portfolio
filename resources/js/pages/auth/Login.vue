@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
-import InputError from '@/components/common/InputError.vue';
-import PasswordInput from '@/components/common/PasswordInput.vue';
-import TextLink from '@/components/common/TextLink.vue';
+import InputError from '@/components/InputError.vue';
+import PasswordInput from '@/components/PasswordInput.vue';
+import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { store } from '@/routes/login';
-import { request } from '@/routes/password';
+import { route, routeForm } from '@/composables/useRoute';
 import type { AuthLoginProps } from '@/types';
 
 defineOptions({
@@ -34,7 +33,7 @@ defineProps<AuthLoginProps>();
     </div>
 
     <Form
-        v-bind="store.form()"
+        v-bind="routeForm('login.store')"
         :reset-on-success="['password']"
         v-slot="{ errors, processing }"
         class="flex flex-col gap-6"
@@ -60,7 +59,7 @@ defineProps<AuthLoginProps>();
                     <Label for="password">Password</Label>
                     <TextLink
                         v-if="canResetPassword"
-                        :href="request()"
+                        :href="route('password.request')"
                         class="text-sm"
                         :tabindex="5"
                     >

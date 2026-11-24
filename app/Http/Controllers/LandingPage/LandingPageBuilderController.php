@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LandingPage\UpdateLandingPageRequest;
 use App\Http\Resources\LandingPage\LandingPageResource;
 use App\Models\Project;
-use App\Services\LandingPage\LandingPageService;
+use App\Services\LandingPageService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,35 +17,35 @@ use Inertia\Response;
  */
 class LandingPageBuilderController extends Controller
 {
-    public function __construct(
-        private readonly LandingPageService $landingPageService,
-    ) {}
+    public function __construct(private LandingPageService $landingPages) {}
 
     /**
-     * The page is created on first save, so the builder can open empty.
+     * Show the builder with every block. The page is created on its first
+     * save, so the builder can open empty.
      */
     public function edit(Project $project): Response
     {
-        $landingPage = $this->landingPageService->findForEdit($project);
+        $landingPage = $project->landingPage()->with('heroMedia')->first();
 
-        return Inertia::render('admin/projects/landing/Edit', [
+        return Inertia::render('landingpage/EditLandingPage', [
             'project' => $project->only(['id', 'title', 'slug']),
             'landingPage' => $landingPage ? LandingPageResource::make($landingPage)->resolve() : null,
-            'sections' => $landingPage ? $landingPage->sections : [],
+            'sections' => $landingPage ? $landingPage->sections()->ordered()->get() : [],
             'sectionTypes' => LandingSectionType::options(),
-            'previewUrl' => route('landing.show', $project->slug, absolute: false),
+            'previewUrl' => route('landingPageShow', $project->slug, absolute: false),
         ]);
     }
 
     /**
-     * Validate and save the landing page. It is created on its first save.
+     * Save the landing page. It is created on its first save.
      */
     public function update(UpdateLandingPageRequest $request, Project $project): RedirectResponse
     {
-        $this->landingPageService->save($project, $request->validated());
+        $this->landingPages->save($project, $request->validated());
+
         $this->toast(__('Landing page saved.'));
 
-        return to_route('admin.projects.landing.edit', $project);
+        return to_route('landingPageEdit', $project);
     }
 
     /**
@@ -53,9 +53,14 @@ class LandingPageBuilderController extends Controller
      */
     public function destroy(Project $project): RedirectResponse
     {
-        $this->landingPageService->delete($project);
+        $landingPage = $project->landingPage()->with(['heroMedia', 'sections'])->first();
+
+        if ($landingPage !== null) {
+            $this->landingPages->delete($landingPage);
+        }
+
         $this->toast(__('Landing page deleted.'), 'error');
 
-        return to_route('admin.projects.index');
+        return to_route('projectIndex');
     }
 }

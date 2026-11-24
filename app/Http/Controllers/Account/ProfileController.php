@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Account;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Account\DeleteProfileRequest;
 use App\Http\Requests\Account\UpdateProfileRequest;
-use App\Services\Account\AccountService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,10 +18,6 @@ use Inertia\Response;
  */
 class ProfileController extends Controller
 {
-    public function __construct(
-        private readonly AccountService $accountService,
-    ) {}
-
     /**
      * Show the user's profile settings page.
      */
@@ -34,19 +30,26 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's profile information.
+     * Update name and email. Changing the email clears its verification.
      */
     public function update(UpdateProfileRequest $request): RedirectResponse
     {
-        $this->accountService->updateProfile($request->user(), $request->validated());
+        $user = $request->user();
+        $user->fill(Arr::only($request->validated(), ['name', 'email']));
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
 
         $this->toast(__('Profile updated.'));
 
-        return to_route('profile.edit');
+        return to_route('profileEdit');
     }
 
     /**
-     * Delete the user's profile.
+     * Sign the user out and delete their account.
      */
     public function destroy(DeleteProfileRequest $request): RedirectResponse
     {
@@ -54,7 +57,7 @@ class ProfileController extends Controller
 
         Auth::logout();
 
-        $this->accountService->delete($user);
+        $user->delete();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

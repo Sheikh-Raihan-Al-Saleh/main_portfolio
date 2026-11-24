@@ -2,41 +2,34 @@
 
 namespace Database\Seeders;
 
-use App\Enums\LandingSectionType;
 use App\Models\ContactMessage;
+use App\Models\Founder;
+use App\Models\LandingSection;
 use App\Models\Project;
-use App\Services\Education\EducationService;
-use App\Services\Experience\ExperienceService;
-use App\Services\Founder\FounderService;
-use App\Services\LandingPage\LandingPageService;
-use App\Services\LandingPage\LandingSectionService;
-use App\Services\Media\MediaService;
-use App\Services\Project\ProjectService;
-use App\Services\Skill\SkillService;
-use App\Services\Studio\StudioService;
+use App\Models\ProjectLandingPage;
+use App\Models\SkillCategory;
+use App\Models\Studio;
+use App\Services\ExperienceService;
+use App\Services\FileService;
+use App\Services\ProjectService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
  * Realistic starter content, so the site looks finished on first run.
  *
- * Everything goes through the same services the admin panel uses, so seeded
- * data follows the same rules (slugs, ordering, technologies, highlights).
+ * Writes follow the same rules as the admin panel (slugs, ordering,
+ * technologies, highlights), through the same services and model helpers.
  * Each step skips itself when its content already exists, so the seeder is
  * safe to run again. Everything here is editable in the admin panel.
  */
 class PortfolioSeeder extends Seeder
 {
     public function __construct(
-        private readonly StudioService $studios,
-        private readonly FounderService $founders,
-        private readonly ProjectService $projects,
-        private readonly SkillService $skills,
-        private readonly ExperienceService $experiences,
-        private readonly EducationService $educations,
-        private readonly LandingPageService $landingPages,
-        private readonly LandingSectionService $sections,
+        private ProjectService $projects,
+        private ExperienceService $experiences,
     ) {}
 
     public function run(): void
@@ -51,7 +44,7 @@ class PortfolioSeeder extends Seeder
         $this->seedExperiences();
         $this->seedEducations();
 
-        if (ContactMessage::query()->doesntExist()) {
+        if (ContactMessage::doesntExist()) {
             ContactMessage::factory()->count(3)->create();
             ContactMessage::factory()->read()->count(2)->create();
         }
@@ -59,13 +52,13 @@ class PortfolioSeeder extends Seeder
 
     private function seedStudio(): void
     {
-        $studio = $this->studios->current();
+        $studio = Studio::current();
 
         if ($studio->name !== 'Your Studio') {
             return;
         }
 
-        $this->studios->update([
+        $this->saveSite(Studio::current(), [
             'name' => 'Sheikh Nabil',
             'short_name' => 'SN Studio',
             'legal_name' => 'Sheikh Nabil Studio',
@@ -103,19 +96,17 @@ class PortfolioSeeder extends Seeder
             'logo_path' => $this->putSvg('brand/logo.svg', $this->wordmarkSvg('SN', 'Sheikh Nabil')),
             'logo_mark_path' => $this->putSvg('brand/logo-mark.svg', $this->markSvg('SN')),
         ])->save();
-
-        $this->studios->forgetBrand();
     }
 
     private function seedFounder(): void
     {
-        $founder = $this->founders->current();
+        $founder = Founder::current();
 
         if ($founder->name !== 'Your Name') {
             return;
         }
 
-        $this->founders->update([
+        $this->saveSite(Founder::current(), [
             'name' => config('portfolio.public_identity.founder_name'),
             'headline' => 'Software Engineer',
             'tagline' => 'I build fast, accessible web applications end to end.',
@@ -149,7 +140,7 @@ class PortfolioSeeder extends Seeder
 
     private function seedSkills(): void
     {
-        $founder = $this->founders->current();
+        $founder = Founder::current();
 
         if ($founder->skills()->exists()) {
             return;
@@ -180,7 +171,7 @@ class PortfolioSeeder extends Seeder
         ];
 
         foreach ($skills as [$name, $category, $proficiency, $featured]) {
-            $this->skills->create([
+            $this->createSkill([
                 'skill_category_id' => $categories[$category],
                 'name' => $name,
                 'proficiency' => $proficiency,
@@ -191,7 +182,7 @@ class PortfolioSeeder extends Seeder
 
     private function seedProjects(): void
     {
-        if (Project::query()->exists()) {
+        if (Project::exists()) {
             return;
         }
 
@@ -272,7 +263,7 @@ class PortfolioSeeder extends Seeder
         ];
 
         foreach ($projects as $index => $project) {
-            $this->projects->create([
+            $this->createProject([
                 ...$project,
                 'is_published' => true,
                 'repo_url' => 'https://github.com/',
@@ -288,7 +279,7 @@ class PortfolioSeeder extends Seeder
      */
     private function seedClients(): void
     {
-        $studio = $this->studios->current();
+        $studio = Studio::current();
 
         if ($studio->clients()->exists()) {
             return;
@@ -323,7 +314,7 @@ class PortfolioSeeder extends Seeder
      */
     private function seedStudioHome(): void
     {
-        $studio = $this->studios->current();
+        $studio = Studio::current();
 
         if ($studio->sections()->exists()) {
             return;
@@ -331,7 +322,7 @@ class PortfolioSeeder extends Seeder
 
         $blocks = [
             [
-                'type' => LandingSectionType::Stats->value,
+                'type' => 'stats',
                 'heading' => 'By the numbers',
                 'subheading' => 'A few figures that describe how the studio actually operates.',
                 'data' => ['items' => [
@@ -341,7 +332,7 @@ class PortfolioSeeder extends Seeder
                 ]],
             ],
             [
-                'type' => LandingSectionType::Faq->value,
+                'type' => 'faq',
                 'heading' => 'Questions we get asked first',
                 'subheading' => 'If you are wondering whether we are the right studio, these are the short answers.',
                 'data' => ['items' => [
@@ -353,7 +344,7 @@ class PortfolioSeeder extends Seeder
         ];
 
         foreach ($blocks as $block) {
-            $this->sections->create($studio, [...$block, 'is_visible' => true]);
+            $this->createSection($studio, [...$block, 'is_visible' => true]);
         }
     }
 
@@ -364,13 +355,13 @@ class PortfolioSeeder extends Seeder
      */
     private function seedLandingPage(): void
     {
-        $project = Project::query()->where('is_featured', true)->orderBy('sort_order')->orderByDesc('id')->with('technologies:id,name')->first();
+        $project = Project::where('is_featured', true)->orderBy('sort_order')->orderByDesc('id')->with('technologies:id,name')->first();
 
         if ($project === null || $project->landingPage()->exists()) {
             return;
         }
 
-        $page = $this->landingPages->save($project, [
+        $page = $project->landingPage()->create([
             'eyebrow' => 'Case study',
             'headline' => "{$project->title}: built to ship, built to last",
             'subheadline' => 'How a sprawl of spreadsheets became a single auditable system that field staff actually enjoy using.',
@@ -386,7 +377,7 @@ class PortfolioSeeder extends Seeder
 
         $blocks = [
             [
-                'type' => LandingSectionType::Features->value,
+                'type' => 'features',
                 'eyebrow' => 'What it does',
                 'heading' => 'Built around the work, not the database',
                 'data' => ['items' => [
@@ -396,7 +387,7 @@ class PortfolioSeeder extends Seeder
                 ]],
             ],
             [
-                'type' => LandingSectionType::Stats->value,
+                'type' => 'stats',
                 'heading' => 'By the numbers',
                 'data' => ['items' => [
                     ['value' => 99.9, 'suffix' => '%', 'label' => 'Uptime over 12 months'],
@@ -406,7 +397,7 @@ class PortfolioSeeder extends Seeder
                 ]],
             ],
             [
-                'type' => LandingSectionType::DemoVideo->value,
+                'type' => 'demo_video',
                 'eyebrow' => 'Watch',
                 'heading' => 'Two minutes, end to end',
                 'data' => [
@@ -417,19 +408,19 @@ class PortfolioSeeder extends Seeder
                 ],
             ],
             [
-                'type' => LandingSectionType::DemoEmbed->value,
+                'type' => 'demo_embed',
                 'eyebrow' => 'Try it',
                 'heading' => 'The live demo',
                 'subheading' => 'Loads the real application in a sandboxed frame when you ask it to.',
                 'data' => ['url' => 'https://example.com', 'aspect' => '16/9', 'chrome' => 'browser', 'allow_fullscreen' => true],
             ],
             [
-                'type' => LandingSectionType::Tech->value,
+                'type' => 'tech',
                 'heading' => 'Built with',
                 'data' => ['items' => $project->technologies->pluck('name')->all() ?: ['Laravel', 'Vue', 'MySQL']],
             ],
             [
-                'type' => LandingSectionType::Faq->value,
+                'type' => 'faq',
                 'heading' => 'Questions I get asked',
                 'data' => ['items' => [
                     ['question' => 'Can this be adapted to another industry?', 'answer' => 'Yes. The ledger and inventory cores are domain-agnostic; the workflow layer is what changes.'],
@@ -438,7 +429,7 @@ class PortfolioSeeder extends Seeder
                 ]],
             ],
             [
-                'type' => LandingSectionType::Cta->value,
+                'type' => 'cta',
                 'eyebrow' => 'Next',
                 'heading' => 'Got something similar in mind?',
                 'subheading' => 'Tell us what is slowing your team down and we will tell you honestly whether software is the fix.',
@@ -447,13 +438,13 @@ class PortfolioSeeder extends Seeder
         ];
 
         foreach ($blocks as $block) {
-            $this->sections->create($page, [...$block, 'is_visible' => true]);
+            $this->createSection($page, [...$block, 'is_visible' => true]);
         }
     }
 
     private function seedExperiences(): void
     {
-        if ($this->founders->current()->experiences()->exists()) {
+        if (Founder::current()->experiences()->exists()) {
             return;
         }
 
@@ -502,17 +493,18 @@ class PortfolioSeeder extends Seeder
         ];
 
         foreach ($experiences as $experience) {
-            $this->experiences->create($experience);
+            $this->createExperience($experience);
         }
     }
 
     private function seedEducations(): void
     {
-        if ($this->founders->current()->educations()->exists()) {
+        if (Founder::current()->educations()->exists()) {
             return;
         }
 
-        $this->educations->create([
+        Founder::current()->educations()->create([
+            'sort_order' => 0,
             'institution' => 'University of Dhaka',
             'degree' => 'BSc',
             'field_of_study' => 'Computer Science & Engineering',
@@ -523,9 +515,86 @@ class PortfolioSeeder extends Seeder
         ]);
     }
 
+    /**
+     * Save a studio or founder form payload: its columns, slug and social links.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function saveSite(Studio|Founder $owner, array $data): void
+    {
+        $owner->fill(Arr::except($data, ['socials']));
+        $owner->slug = Str::slug($owner->name) ?: ($owner instanceof Studio ? 'studio' : 'founder');
+        $owner->save();
+
+        $owner->syncSocialLinks($data['socials'] ?? []);
+    }
+
+    /**
+     * Add a skill at the end of its category.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function createSkill(array $data): void
+    {
+        $category = SkillCategory::findOrFail((int) $data['skill_category_id']);
+
+        $category->skills()->create([
+            ...Arr::except($data, ['skill_category_id']),
+            'sort_order' => (int) $category->skills()->max('sort_order') + 1,
+        ]);
+    }
+
+    /**
+     * Add a project at the end of the list with its owner, slug and tech stack.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function createProject(array $data): void
+    {
+        $owner = $data['owner'] === 'founder' ? Founder::current() : Studio::current();
+
+        $project = new Project(Arr::except($data, ['owner', 'tech_stack']));
+        $project->owner()->associate($owner);
+        $project->slug = $this->projects->uniqueSlug($data['title']);
+        $project->sort_order = (int) Project::max('sort_order') + 1;
+        $project->published_at = $project->is_published ? now() : null;
+        $project->save();
+
+        $this->projects->syncTechnologies($project, $data['tech_stack'] ?? []);
+    }
+
+    /**
+     * Add a content block at the end of a page.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function createSection(Studio|ProjectLandingPage $owner, array $data): void
+    {
+        $section = new LandingSection($data);
+        $section->sort_order = (int) $owner->sections()->max('sort_order') + 1;
+        $owner->sections()->save($section);
+    }
+
+    /**
+     * Add a role at the end of the founder's history, with its highlights.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function createExperience(array $data): void
+    {
+        $founder = Founder::current();
+
+        $experience = $founder->experiences()->create([
+            ...Arr::except($data, ['highlights']),
+            'sort_order' => (int) $founder->experiences()->max('sort_order') + 1,
+        ]);
+
+        $this->experiences->syncHighlights($experience, $data['highlights'] ?? []);
+    }
+
     private function putSvg(string $path, string $svg): string
     {
-        Storage::disk(MediaService::DISK)->put($path, $svg);
+        Storage::disk(FileService::DISK)->put($path, $svg);
 
         return $path;
     }

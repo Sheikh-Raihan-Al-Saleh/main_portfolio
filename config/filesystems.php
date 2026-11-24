@@ -8,8 +8,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | The disk the framework uses when none is named. Application media never
-    | relies on this: every upload goes through App\Services\Media\MediaService,
-    | which always writes to the "uploads" disk below.
+    | relies on this: every upload goes through the file helpers of
+    | App\Http\Controllers\Controller, which always write to the "uploads" disk below.
     |
     */
 

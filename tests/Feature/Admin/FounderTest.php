@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Resources\Founder\FounderResource;
-use App\Services\Founder\FounderService;
+use App\Models\Founder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -10,7 +10,7 @@ test('the founder form loads with merged page copy', function () {
         ->get('/admin/founder')
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('admin/founder/Edit')
+            ->component('founder/EditFounder')
             ->has('founder.content.sections.about')
             ->has('socials'),
         );
@@ -30,7 +30,7 @@ test('an admin can update the founder profile, avatar and resume', function () {
         ->assertRedirect()
         ->assertSessionHasNoErrors();
 
-    $founder = app(FounderService::class)->current()->fresh('socialLinks');
+    $founder = Founder::current()->fresh('socialLinks');
 
     expect($founder->name)->toBe('Jo Founder')
         ->and($founder->roles)->toBe(['Engineer', 'Builder'])
@@ -41,5 +41,5 @@ test('an admin can update the founder profile, avatar and resume', function () {
 });
 
 test('a new founder starts with the default skill categories', function () {
-    expect(app(FounderService::class)->current()->skillCategories()->count())->toBe(6);
+    expect(Founder::current()->skillCategories()->count())->toBe(6);
 });

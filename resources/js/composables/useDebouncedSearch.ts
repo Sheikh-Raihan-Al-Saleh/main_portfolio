@@ -12,10 +12,14 @@ const SEARCH_DELAY_MILLISECONDS = 300;
  *
  * A pending search is cancelled when the page unmounts, so leaving the page
  * right after typing never navigates back to it.
+ *
+ * Pass `only` (e.g. ['projects', 'filters']) to reload just the list props,
+ * so the rest of the page is not recomputed on the server.
  */
 export function useDebouncedSearch(
     listUrl: string,
     initialSearch: string | null | undefined,
+    only: string[] = [],
 ): UseDebouncedSearchReturn {
     const search = ref(initialSearch ?? '');
     let searchTimerId: ReturnType<typeof setTimeout> | null = null;
@@ -36,6 +40,7 @@ export function useDebouncedSearch(
                 preserveState: true,
                 preserveScroll: true,
                 replace: true,
+                ...(only.length > 0 ? { only } : {}),
             });
         }, SEARCH_DELAY_MILLISECONDS);
     });

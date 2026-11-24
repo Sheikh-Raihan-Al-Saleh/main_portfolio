@@ -3,11 +3,14 @@
 namespace App\Support\Defaults;
 
 /**
- * Starting values and page copy for the founder's personal portfolio.
+ * The founder's starting values and default page copy. Admin edits are
+ * merged over these (see Founder::pageContent()).
  */
 class FounderDefaults
 {
     /**
+     * Starting values for a new founder row.
+     *
      * @return array<string, mixed>
      */
     public static function attributes(): array
@@ -45,17 +48,9 @@ class FounderDefaults
     }
 
     /**
-     * Stored page copy merged over the defaults.
+     * Footer columns. Links may use {{placeholder}} tokens ({{year}}, {{name}},
+     * {{email}}, {{github}}...), which the frontend resolves when the footer renders.
      *
-     * @param  array<string, mixed>|null  $content
-     * @return array<string, mixed>
-     */
-    public static function mergeContent(?array $content): array
-    {
-        return ContentMerger::merge(self::content(), $content);
-    }
-
-    /**
      * @return array<string, mixed>
      */
     public static function footer(): array
@@ -98,7 +93,7 @@ class FounderDefaults
 
     /**
      * Every heading and label the founder page renders. Each is editable in
-     * the admin panel; stored edits are merged over these by mergeContent().
+     * the admin panel; stored edits are merged over these by ContentMerger::merge().
      *
      * @return array<string, mixed>
      */

@@ -22,6 +22,7 @@ import type {
     ProjectCard,
     ProjectDetail,
     ProjectLandingPage,
+    RouteFormAttributes,
     SelectOption,
     Skill,
     SkillCategory,
@@ -31,14 +32,14 @@ import type {
     StudioStats,
     Technology,
 } from './index';
-// pages/admin/clients/Index.vue
-export type AdminClientsIndexProps = {
+// pages/client/ClientIndex.vue
+export type ClientIndexProps = {
     clients: Client[];
     filters: { search: string | null };
 };
 
-// pages/admin/dashboard/Index.vue
-export type AdminDashboardIndexProps = {
+// pages/Dashboard.vue
+export type DashboardProps = {
     stats: {
         projects: number;
         publishedProjects: number;
@@ -67,83 +68,83 @@ export type AdminDashboardIndexProps = {
     messageSources: MessageSource[];
 };
 
-// pages/admin/educations/Edit.vue
-export type AdminEducationsEditProps = {
+// pages/education/EditEducation.vue
+export type EditEducationProps = {
     education: Education;
 };
 
-// pages/admin/educations/EducationForm.vue
-export type AdminEducationsEducationFormProps = {
+// components/Education/EducationForm.vue
+export type EducationFormProps = {
     education?: Education;
     action: Record<string, unknown>;
     submitLabel: string;
     mode?: 'page' | 'dialog';
 };
 
-// pages/admin/educations/Index.vue
-export type AdminEducationsIndexProps = {
+// pages/education/EducationIndex.vue
+export type EducationIndexProps = {
     educations: Education[];
 };
 
-// pages/admin/experiences/Edit.vue
-export type AdminExperiencesEditProps = {
+// pages/experience/EditExperience.vue
+export type EditExperienceProps = {
     experience: Experience;
 };
 
-// pages/admin/experiences/ExperienceForm.vue
-export type AdminExperiencesExperienceFormProps = {
+// components/Experience/ExperienceForm.vue
+export type ExperienceFormProps = {
     experience?: Experience;
     action: Record<string, unknown>;
     submitLabel: string;
     mode?: 'page' | 'dialog';
 };
 
-// pages/admin/experiences/Index.vue
-export type AdminExperiencesIndexProps = {
+// pages/experience/ExperienceIndex.vue
+export type ExperienceIndexProps = {
     experiences: Experience[];
 };
 
-// pages/admin/founder/Edit.vue
-export type AdminFounderEditProps = {
+// pages/founder/EditFounder.vue
+export type EditFounderProps = {
     founder: Founder;
     socials: SocialMap;
 };
 
-// pages/admin/messages/Index.vue
-export type AdminMessagesIndexProps = {
+// pages/contact/MessageIndex.vue
+export type MessageIndexProps = {
     messages: Paginated<ContactMessage>;
     filters: { filter: string | null };
 };
 
-// pages/admin/messages/Show.vue
-export type AdminMessagesShowProps = {
+// pages/contact/ShowMessage.vue
+export type ShowMessageProps = {
     message: ContactMessage;
 };
 
-// pages/admin/projects/Create.vue
-export type AdminProjectsCreateProps = {
+// pages/project/CreateProject.vue
+export type CreateProjectProps = {
     owners: SelectOption[];
     technologyOptions: string[];
 };
 
-// pages/admin/projects/Edit.vue
-export type AdminProjectsEditProps = {
+// pages/project/EditProject.vue
+export type EditProjectProps = {
     project: Project;
     owners: SelectOption[];
     technologyOptions: string[];
 };
 
-// pages/admin/projects/Index.vue
-export type AdminProjectsIndexProps = {
+// pages/project/ProjectIndex.vue
+export type ProjectIndexProps = {
     projects: Project[];
     filters: { search: string | null };
 };
 
-// pages/admin/projects/ProjectForm.vue
-export type AdminProjectsProjectFormProps = {
+// components/Project/ProjectForm.vue
+export type ProjectFormProps = {
     project?: Project;
-    /** Wayfinder form props: `ProjectController.store.form()` or `.update.form(id)`. */
-    action: Record<string, unknown>;
+    /** Form attributes: `routeForm('projectStore')` or `routeForm('projectUpdate', slug)`. */
+    action: RouteFormAttributes;
     submitLabel: string;
     /** Who the project belongs to: the studio or the founder. */
     owners: SelectOption[];
@@ -151,8 +152,8 @@ export type AdminProjectsProjectFormProps = {
     technologyOptions: string[];
 };
 
-// pages/admin/projects/landing/Edit.vue
-export type AdminProjectsLandingEditProps = {
+// pages/landingpage/EditLandingPage.vue
+export type EditLandingPageProps = {
     project: { id: number; title: string; slug: string };
     landingPage: ProjectLandingPage | null;
     sections: LandingSection[];
@@ -160,30 +161,30 @@ export type AdminProjectsLandingEditProps = {
     previewUrl: string;
 };
 
-// pages/admin/skills/Create.vue
-export type AdminSkillsCreateProps = {
+// pages/skill/CreateSkill.vue
+export type CreateSkillProps = {
     categoryOptions: SelectOption<number>[];
 };
 
-// pages/admin/skills/Edit.vue
-export type AdminSkillsEditProps = {
+// pages/skill/EditSkill.vue
+export type EditSkillProps = {
     skill: Skill;
     categoryOptions: SelectOption<number>[];
 };
 
-// pages/admin/skills/Index.vue
-export type AdminSkillsIndexProps = {
+// pages/skill/SkillIndex.vue
+export type SkillIndexProps = {
     /** The founder's categories, in order, each with its skills. */
     categories: SkillCategory[];
 };
 
-// pages/admin/skills/SkillCategoryManager.vue
-export type AdminSkillsSkillCategoryManagerProps = {
+// components/Skill/SkillCategoryManager.vue
+export type SkillCategoryManagerProps = {
     categories: SkillCategory[];
 };
 
-// pages/admin/skills/SkillForm.vue
-export type AdminSkillsSkillFormProps = {
+// components/Skill/SkillForm.vue
+export type SkillFormProps = {
     skill?: Skill;
     /** The founder's skill categories. */
     categoryOptions: SelectOption<number>[];
@@ -192,23 +193,23 @@ export type AdminSkillsSkillFormProps = {
     mode?: 'page' | 'dialog';
 };
 
-// pages/admin/studio/Content.vue
-export type AdminStudioContentProps = {
+// pages/studio/StudioContent.vue
+export type StudioContentProps = {
     studio: Pick<Studio, 'id' | 'name'>;
     /** The merged studio content: defaults plus any stored edits. */
     content: StudioContent;
 };
 
-// pages/admin/studio/Edit.vue
-export type AdminStudioEditProps = {
+// pages/studio/EditStudio.vue
+export type EditStudioProps = {
     studio: Studio;
     socials: SocialMap;
     sections: LandingSection[];
     sectionTypes: LandingSectionTypeOption[];
 };
 
-// pages/admin/technologies/Index.vue
-export type AdminTechnologiesIndexProps = { technologies: Technology[] };
+// pages/technology/TechnologyIndex.vue
+export type TechnologyIndexProps = { technologies: Technology[] };
 
 // pages/auth/ForgotPassword.vue
 export type AuthForgotPasswordProps = {
@@ -233,14 +234,14 @@ export type AuthVerifyEmailProps = {
     status?: string;
 };
 
-// pages/public/about/Index.vue
-export type PublicAboutIndexProps = {
+// pages/studio/AboutPage.vue
+export type AboutPageProps = {
     clients: Client[];
     stats: StudioStats;
 };
 
-// pages/public/founder/Index.vue
-export type PublicFounderIndexProps = {
+// pages/founder/FounderPage.vue
+export type FounderPageProps = {
     content: FounderContent;
     skillGroups: SkillCategory[];
     experiences: Experience[];
@@ -249,8 +250,8 @@ export type PublicFounderIndexProps = {
     stats: FounderStats;
 };
 
-// pages/public/home/Index.vue
-export type PublicHomeIndexProps = {
+// pages/studio/HomePage.vue
+export type HomePageProps = {
     content: StudioContent;
     projects: ProjectCard[];
     totalProjects: number;
@@ -261,8 +262,8 @@ export type PublicHomeIndexProps = {
     stats: StudioStats;
 };
 
-// pages/public/landing/Show.vue
-export type PublicLandingShowLandingProject = {
+// pages/landingpage/ShowLandingPage.vue
+export type ShowLandingPageProject = {
     id: number;
     title: string;
     slug: string;
@@ -275,20 +276,20 @@ export type PublicLandingShowLandingProject = {
     started_at: string | null;
     completed_at: string | null;
 };
-export type PublicLandingShowProps = {
-    project: PublicLandingShowLandingProject;
+export type ShowLandingPageProps = {
+    project: ShowLandingPageProject;
     landingPage: ProjectLandingPage;
     sections: LandingSection[];
 };
 
-// pages/public/projects/Index.vue
-export type PublicProjectsIndexProps = {
+// pages/project/ProjectArchive.vue
+export type ProjectArchiveProps = {
     projects: ProjectCard[];
     filters: { tech: string | null; owner: 'studio' | 'founder' | null };
 };
 
-// pages/public/projects/Show.vue
-export type PublicProjectsShowProps = {
+// pages/project/ShowProject.vue
+export type ShowProjectProps = {
     project: ProjectDetail;
     related: ProjectCard[];
 };
@@ -300,11 +301,11 @@ export type SettingsSecurityProps = {
 
 // Emitted events
 
-// pages/admin/educations/EducationForm.vue
-export type AdminEducationsEducationFormEmits = { saved: []; cancel: [] };
+// components/Education/EducationForm.vue
+export type EducationFormEmits = { saved: []; cancel: [] };
 
-// pages/admin/experiences/ExperienceForm.vue
-export type AdminExperiencesExperienceFormEmits = { saved: []; cancel: [] };
+// components/Experience/ExperienceForm.vue
+export type ExperienceFormEmits = { saved: []; cancel: [] };
 
-// pages/admin/skills/SkillForm.vue
-export type AdminSkillsSkillFormEmits = { saved: []; cancel: [] };
+// components/Skill/SkillForm.vue
+export type SkillFormEmits = { saved: []; cancel: [] };

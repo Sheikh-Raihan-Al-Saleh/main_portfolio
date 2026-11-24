@@ -1,7 +1,7 @@
 <?php
 
+use App\Models\Studio;
 use App\Models\User;
-use App\Services\Studio\StudioService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,7 +21,7 @@ test('the studio form loads with its social links and home blocks', function () 
         ->get('/admin/studio')
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('admin/studio/Edit')
+            ->component('studio/EditStudio')
             ->has('studio')
             ->has('socials')
             ->has('sections')
@@ -41,7 +41,7 @@ test('an admin can rename the studio and upload its logos', function () {
         ->assertRedirect()
         ->assertSessionHasNoErrors();
 
-    $studio = app(StudioService::class)->current()->fresh('socialLinks');
+    $studio = Studio::current()->fresh('socialLinks');
 
     expect($studio->name)->toBe('Acme Studio')
         ->and($studio->slug)->toBe('acme-studio')
@@ -82,7 +82,7 @@ test('logos may be uploaded as JPG', function () {
         ])
         ->assertSessionHasNoErrors();
 
-    $studio = app(StudioService::class)->current()->fresh();
+    $studio = Studio::current()->fresh();
     Storage::disk('uploads')->assertExists([$studio->logo_path, $studio->logo_mark_path]);
 });
 
@@ -91,7 +91,7 @@ test('replacing a logo deletes the old file and remove clears it', function () {
         'name' => 'Acme',
         'logo' => UploadedFile::fake()->image('one.png', 600, 160),
     ]);
-    $first = app(StudioService::class)->current()->fresh()->logo_path;
+    $first = Studio::current()->fresh()->logo_path;
 
     $this->actingAs($this->admin)->put('/admin/studio', [
         'name' => 'Acme',
@@ -100,14 +100,14 @@ test('replacing a logo deletes the old file and remove clears it', function () {
     Storage::disk('uploads')->assertMissing($first);
 
     $this->actingAs($this->admin)->put('/admin/studio', ['name' => 'Acme', 'remove_logo' => true]);
-    expect(app(StudioService::class)->current()->fresh()->logo_path)->toBeNull();
+    expect(Studio::current()->fresh()->logo_path)->toBeNull();
 });
 
 test('the home page copy can be edited and merges over the defaults', function () {
     $this->actingAs($this->admin)
         ->get('/admin/studio/content')
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('admin/studio/Content')->has('content.cta'));
+        ->assertInertia(fn ($page) => $page->component('studio/StudioContent')->has('content.cta'));
 
     $this->actingAs($this->admin)
         ->put('/admin/studio/content', ['content' => ['cta' => ['title' => 'Custom CTA']]])

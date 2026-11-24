@@ -7,33 +7,45 @@ use App\Http\Requests\Project\StoreProjectRequest;
 use App\Http\Requests\Project\UpdateProjectRequest;
 use App\Http\Requests\ReorderRequest;
 use App\Http\Resources\Project\ProjectFormResource;
+use App\Models\Founder;
 use App\Models\Project;
-use App\Services\Project\ProjectService;
-use App\Services\Technology\TechnologyService;
+use App\Models\Studio;
+use App\Models\Technology;
+use App\Services\ProjectService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Admin: projects.
+ * Admin: projects. Create, edit, delete, reorder, with the gallery and
+ * tech stack.
  */
 class ProjectController extends Controller
 {
-    public function __construct(
-        private readonly ProjectService $projectService,
-        private readonly TechnologyService $technologyService,
-    ) {}
+    public function __construct(private ProjectService $projects) {}
 
     /**
-     * Show the list of projects.
+     * Show the list of projects, optionally searched by title or summary.
      */
     public function index(Request $request): Response
     {
         $search = $request->string('search')->trim()->value();
 
-        return Inertia::render('admin/projects/Index', [
-            'projects' => ProjectFormResource::collection($this->projectService->list($search))->resolve(),
+        $query = Project::select(Project::CARD_COLUMNS)
+            ->with('technologies:id,name')
+            ->withCount('images')
+            ->withExists('landingPage as has_landing_page')
+            ->ordered();
+
+        if ($search !== '') {
+            $query->whereAny(['title', 'summary'], 'like', "%{$search}%");
+        }
+
+        $projects = $query->get();
+
+        return Inertia::render('project/ProjectIndex', [
+            'projects' => ProjectFormResource::collection($projects)->resolve(),
             'filters' => ['search' => $search ?: null],
         ]);
     }
@@ -43,52 +55,58 @@ class ProjectController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('admin/projects/Create', [
-            'owners' => $this->projectService->ownerOptions(),
-            'technologyOptions' => $this->technologyService->names(),
+        return Inertia::render('project/CreateProject', [
+            'owners' => $this->ownerOptions(),
+            'technologyOptions' => $this->technologyNames(),
         ]);
     }
 
     /**
-     * Validate and save a new project. The service does the work.
+     * Save a new project with its cover, gallery and tech stack.
      */
     public function store(StoreProjectRequest $request): RedirectResponse
     {
-        $this->projectService->create($request->validated());
+        $this->projects->create($request->validated());
+
         $this->toast(__('Project created.'));
 
-        return to_route('admin.projects.index');
+        return to_route('projectIndex');
     }
 
     /**
-     * Show the form to edit a project.
+     * Show the form to edit a project, with its gallery and stack.
      */
     public function edit(Project $project): Response
     {
-        return Inertia::render('admin/projects/Edit', [
-            'project' => ProjectFormResource::make($this->projectService->forEdit($project))->resolve(),
-            'owners' => $this->projectService->ownerOptions(),
-            'technologyOptions' => $this->technologyService->names(),
+        $project->load(['images', 'technologies:id,name']);
+
+        return Inertia::render('project/EditProject', [
+            'project' => ProjectFormResource::make($project)->resolve(),
+            'owners' => $this->ownerOptions(),
+            'technologyOptions' => $this->technologyNames(),
         ]);
     }
 
     /**
-     * Validate and save the changes to a project. The service does the work.
+     * Save the changes: details, cover, stack, and gallery additions and
+     * removals.
      */
     public function update(UpdateProjectRequest $request, Project $project): RedirectResponse
     {
-        $this->projectService->update($project, $request->validated());
+        $this->projects->update($project, $request->validated());
+
         $this->toast(__('Project updated.'));
 
-        return to_route('admin.projects.index');
+        return to_route('projectIndex');
     }
 
     /**
-     * Delete a project.
+     * Delete a project with its landing page, blocks and files.
      */
     public function destroy(Project $project): RedirectResponse
     {
-        $this->projectService->delete($project);
+        $this->projects->delete($project);
+
         $this->toast(__('Project deleted.'), 'error');
 
         return back();
@@ -99,8 +117,34 @@ class ProjectController extends Controller
      */
     public function reorder(ReorderRequest $request): RedirectResponse
     {
-        $this->projectService->reorder($request->validated('ids'));
+        $this->saveSortOrder(Project::query(), $request->validated('ids'));
+
+        // A query update fires no model events, so clear the cache here.
+        Project::forgetShowcase();
 
         return back();
+    }
+
+    /**
+     * Who a project can belong to, for the owner select.
+     *
+     * @return array<int, array{value: string, label: string}>
+     */
+    private function ownerOptions(): array
+    {
+        return [
+            ['value' => 'studio', 'label' => Studio::current()->name.' (studio work)'],
+            ['value' => 'founder', 'label' => Founder::current()->name.' (personal work)'],
+        ];
+    }
+
+    /**
+     * Technology names, for the tech stack suggestions.
+     *
+     * @return array<int, string>
+     */
+    private function technologyNames(): array
+    {
+        return Technology::orderBy('name')->pluck('name')->all();
     }
 }

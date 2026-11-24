@@ -3,7 +3,7 @@
 namespace App\Http\Resources\Client;
 
 use App\Models\Client;
-use App\Services\Media\MediaService;
+use App\Services\FileService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -24,7 +24,7 @@ class ClientResource extends JsonResource
             // Every column, then every loaded relation (what Model::toArray() returns).
             ...$this->attributesToArray(),
             ...$this->relationsToArray(),
-            'logo_url' => MediaService::url($this->logo_path),
+            'logo_url' => FileService::url($this->logo_path),
         ];
     }
 }

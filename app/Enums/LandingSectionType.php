@@ -3,13 +3,12 @@
 namespace App\Enums;
 
 /**
- * The section blocks a marketing landing page can be composed from.
+ * The content block types a page (the studio home page or a project landing
+ * page) can be built from.
  *
- * This enum is the single source of truth for the type list: it owns the human
- * label, the validation rules for the section's `data` payload, and which keys
- * inside that payload hold uploaded media that must be cleaned up on delete.
- * Keeping all four together stops the list drifting between the form request,
- * the controller and the Vue section registry.
+ * Each type owns its label in the admin picker, the validation rules of its
+ * `data` payload, and the `data` keys that hold uploaded files. The
+ * `landing_sections.type` column stores the case value.
  */
 enum LandingSectionType: string
 {
@@ -26,7 +25,20 @@ enum LandingSectionType: string
     case RichText = 'richtext';
 
     /**
-     * The human name shown in the admin block picker.
+     * Every type as `{ value, label }`, for the admin "add block" menu.
+     *
+     * @return array<int, array{value: string, label: string}>
+     */
+    public static function options(): array
+    {
+        return array_map(
+            fn (self $type): array => ['value' => $type->value, 'label' => $type->label()],
+            self::cases(),
+        );
+    }
+
+    /**
+     * The name shown in the admin block picker.
      */
     public function label(): string
     {
@@ -46,12 +58,12 @@ enum LandingSectionType: string
     }
 
     /**
-     * Validation rules for this type's `data` payload, keyed relative to the
-     * request root (i.e. already prefixed with `data.`).
+     * Validation rules of this type's `data`, keyed from the request root
+     * (already prefixed with `data.`).
      *
      * @return array<string, array<int, string>>
      */
-    public function rules(): array
+    public function dataRules(): array
     {
         return match ($this) {
             self::Features => [
@@ -121,12 +133,11 @@ enum LandingSectionType: string
     }
 
     /**
-     * Dot-paths inside `data` that hold stored media paths. `*` marks a list.
-     * Used to delete uploaded files when a section is removed.
+     * Dot-paths inside `data` that hold uploaded files (`*` marks a list).
      *
      * @return array<int, string>
      */
-    public function mediaPaths(): array
+    public function mediaKeys(): array
     {
         return match ($this) {
             self::DemoVideo => ['video_path', 'poster_path'],
@@ -135,19 +146,5 @@ enum LandingSectionType: string
             self::Testimonials => ['items.*.avatar_path'],
             default => [],
         };
-    }
-
-    /**
-     * Every case as `{ value, label }`, for populating the admin's "add
-     * section" menu without hardcoding the list in the frontend.
-     *
-     * @return array<int, array{value: string, label: string}>
-     */
-    public static function options(): array
-    {
-        return array_map(
-            fn (self $type): array => ['value' => $type->value, 'label' => $type->label()],
-            self::cases(),
-        );
     }
 }

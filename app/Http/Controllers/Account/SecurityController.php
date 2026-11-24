@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Account;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Account\TwoFactorAuthenticationRequest;
 use App\Http\Requests\Account\UpdatePasswordRequest;
-use App\Services\Account\AccountService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
@@ -17,10 +16,6 @@ use Laravel\Fortify\Features;
  */
 class SecurityController extends Controller
 {
-    public function __construct(
-        private readonly AccountService $accountService,
-    ) {}
-
     /**
      * Show the user's security settings page.
      */
@@ -42,11 +37,11 @@ class SecurityController extends Controller
     }
 
     /**
-     * Update the user's password.
+     * Save a new password. The model's "hashed" cast hashes it on save.
      */
     public function update(UpdatePasswordRequest $request): RedirectResponse
     {
-        $this->accountService->updatePassword($request->user(), $request->validated('password'));
+        $request->user()->update(['password' => $request->validated('password')]);
 
         $this->toast(__('Password updated.'));
 

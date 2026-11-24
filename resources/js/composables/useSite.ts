@@ -19,7 +19,7 @@ export function useSite() {
      * accent.
      */
     const face = computed<'studio' | 'founder'>(() => {
-        if (page.component === 'public/founder/Index') {
+        if (page.component === 'founder/FounderPage') {
             return 'founder';
         }
 

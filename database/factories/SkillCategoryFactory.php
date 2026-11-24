@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Founder;
 use App\Models\SkillCategory;
-use App\Services\Founder\FounderService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -22,7 +22,7 @@ class SkillCategoryFactory extends Factory
         $name = Str::title(fake()->unique()->word());
 
         return [
-            'founder_id' => fn (): int => app(FounderService::class)->current()->id,
+            'founder_id' => fn (): int => Founder::current()->id,
             'name' => $name,
             'slug' => Str::slug($name),
             'sort_order' => 0,

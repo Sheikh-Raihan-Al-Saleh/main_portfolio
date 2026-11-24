@@ -14,5 +14,5 @@ test('authenticated users are forwarded to the admin dashboard', function () {
     $this->actingAs($user);
 
     $response = $this->get(route('dashboard'));
-    $response->assertRedirect(route('admin.dashboard'));
+    $response->assertRedirect(route('adminDashboard'));
 });

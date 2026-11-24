@@ -26,6 +26,6 @@ class UpdateLandingSectionRequest extends StoreLandingSectionRequest
     {
         $section = $this->route('landingSection');
 
-        return $section instanceof LandingSection ? $section->type : null;
+        return $section instanceof LandingSection ? LandingSectionType::tryFrom($section->type) : null;
     }
 }

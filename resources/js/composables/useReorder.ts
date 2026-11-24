@@ -5,7 +5,7 @@ import type { Identifiable, UseReorderReturn } from '@/types';
 
 /**
  * Keeps a locally reorderable copy of a list and saves the new order to the
- * module's reorder route (e.g. `projects.reorder().url`). The list updates
+ * module's reorder route (e.g. `route('projectReorder')`). The list updates
  * immediately, so moving an item feels instant.
  */
 export function useReorder<T extends Identifiable>(

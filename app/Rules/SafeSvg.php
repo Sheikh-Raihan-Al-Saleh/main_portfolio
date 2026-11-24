@@ -4,22 +4,21 @@ namespace App\Rules;
 
 use Closure;
 use DOMDocument;
-use DOMElement;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Http\UploadedFile;
 
 /**
- * Accepts an SVG only if it is plain vector artwork.
+ * Accepts an SVG upload only if it is plain vector artwork. Other file types
+ * pass through untouched.
  *
- * Uploaded files are served from this origin, and an SVG opened directly is a
+ * Uploads are served from this origin, and an SVG opened directly is a
  * document that can run script. A pattern blacklist is easy to slip past
- * (entity-encoded "javascript&colon;", <animate> rewriting an href, and so
- * on), so this parses the file and allows only known drawing elements and
- * attributes. Anything else fails validation instead of being stored.
+ * (entity-encoded "javascript&colon;", <animate> rewriting an href...), so
+ * the file is parsed and only known drawing elements and attributes pass.
  */
 class SafeSvg implements ValidationRule
 {
-    /** Drawing, structure and filter elements a logo can reasonably use. */
+    /** SVG drawing, structure and filter elements a logo can reasonably use. */
     private const ALLOWED_ELEMENTS = [
         'svg', 'g', 'defs', 'symbol', 'use', 'title', 'desc', 'metadata',
         'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon',
@@ -30,7 +29,7 @@ class SafeSvg implements ValidationRule
     ];
 
     /**
-     * Fail when an uploaded SVG holds anything beyond plain vector shapes.
+     * Run the validation rule.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -38,15 +37,16 @@ class SafeSvg implements ValidationRule
             return;
         }
 
-        if (! $this->isSafe((string) file_get_contents($value->getRealPath()))) {
+        if (! self::isSafe((string) file_get_contents($value->getRealPath()))) {
             $fail('The :attribute may only contain plain vector shapes, not scripts, links or embedded content.');
         }
     }
 
     /**
-     * Whether an SVG has no DOCTYPE and contains only allowed elements and attributes.
+     * Whether an SVG has no DOCTYPE and contains only allowed elements and
+     * attributes: no event handlers, no outside links, no script URLs.
      */
-    public function isSafe(string $svg): bool
+    public static function isSafe(string $svg): bool
     {
         // A DOCTYPE is how entity-expansion and external-entity attacks get in;
         // real logo files do not need one.
@@ -65,8 +65,14 @@ class SafeSvg implements ValidationRule
         }
 
         foreach ($document->getElementsByTagName('*') as $element) {
-            if (! $this->isSafeElement($element)) {
+            if (! in_array(strtolower($element->localName), self::ALLOWED_ELEMENTS, true)) {
                 return false;
+            }
+
+            foreach ($element->attributes ?? [] as $svgAttribute) {
+                if (! self::isSafeAttribute(strtolower($svgAttribute->localName), $svgAttribute->value)) {
+                    return false;
+                }
             }
         }
 
@@ -74,44 +80,38 @@ class SafeSvg implements ValidationRule
     }
 
     /**
-     * Whether one element is on the allow-list and none of its attributes is an event handler or an unsafe link.
+     * Whether one attribute is harmless: not an event handler, and any link
+     * or url() only points inside the file.
      */
-    private function isSafeElement(DOMElement $element): bool
+    private static function isSafeAttribute(string $name, string $rawValue): bool
     {
-        if (! in_array(strtolower($element->localName), self::ALLOWED_ELEMENTS, true)) {
+        // The DOM has already decoded entities, so encoded payloads show here.
+        $value = strtolower(preg_replace('/\s+/', '', $rawValue) ?? '');
+
+        if (str_starts_with($name, 'on')) {
             return false;
         }
 
-        foreach ($element->attributes ?? [] as $attribute) {
-            $name = strtolower($attribute->localName);
-            // The DOM has already decoded entities, so encoded payloads show here.
-            $value = strtolower(preg_replace('/\s+/', '', $attribute->value) ?? '');
+        // Links may only point inside the file (gradients, <use> symbols).
+        if ($name === 'href' && ! str_starts_with($value, '#')) {
+            return false;
+        }
 
-            if (str_starts_with($name, 'on')) {
-                return false;
-            }
+        if (str_contains($value, 'javascript:') || str_contains($value, 'data:')) {
+            return false;
+        }
 
-            // Links may only point inside the file (gradients, <use> symbols).
-            if ($name === 'href' && ! str_starts_with($value, '#')) {
-                return false;
-            }
-
-            if (str_contains($value, 'javascript:') || str_contains($value, 'data:')) {
-                return false;
-            }
-
-            // url() may only reference an in-file id, e.g. fill="url(#grad)".
-            if (preg_match_all('/url\(([^)]*)\)/', $value, $matches) > 0) {
-                foreach ($matches[1] as $target) {
-                    if (! str_starts_with(trim($target, '\'"'), '#')) {
-                        return false;
-                    }
+        // url() may only reference an in-file id, e.g. fill="url(#grad)".
+        if (preg_match_all('/url\(([^)]*)\)/', $value, $matches) > 0) {
+            foreach ($matches[1] as $target) {
+                if (! str_starts_with(trim($target, '\'"'), '#')) {
+                    return false;
                 }
             }
+        }
 
-            if ($name === 'style' && (str_contains($value, '@import') || str_contains($value, 'expression('))) {
-                return false;
-            }
+        if ($name === 'style' && (str_contains($value, '@import') || str_contains($value, 'expression('))) {
+            return false;
         }
 
         return true;

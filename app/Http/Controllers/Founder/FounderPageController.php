@@ -5,8 +5,12 @@ namespace App\Http\Controllers\Founder;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Experience\ExperienceResource;
 use App\Http\Resources\Project\ProjectCardResource;
-use App\Services\Founder\FounderService;
-use App\Services\Project\ProjectService;
+use App\Models\Founder;
+use App\Models\Project;
+use App\Services\FileService;
+use Carbon\CarbonInterface;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -16,38 +20,53 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class FounderPageController extends Controller
 {
-    public function __construct(
-        private readonly FounderService $founderService,
-        private readonly ProjectService $projectService,
-    ) {}
-
     /**
-     * Show the founder portfolio page (/founder).
+     * Show the founder portfolio page: skills, experience, education and projects.
      */
     public function show(): Response
     {
-        $founder = $this->founderService->withPortfolio();
-        $projects = $this->projectService->publishedFor($founder);
+        $founder = Founder::current();
 
-        return Inertia::render('public/founder/Index', [
-            'content' => $this->founderService->content(),
-            'skillGroups' => $founder->skillCategories,
-            'experiences' => ExperienceResource::collection($founder->experiences)->resolve(),
-            'educations' => $founder->educations,
+        // Only categories that have skills are shown.
+        $skillGroups = $founder->skillCategories()->has('skills')->with('skills')->ordered()->get();
+        $experiences = $founder->experiences()->with('highlights')->ordered()->get();
+        $educations = $founder->educations()->ordered()->get();
+        $projects = Project::forCards()->published()->ownedBy($founder)->ordered()->get();
+
+        return Inertia::render('founder/FounderPage', [
+            'content' => $founder->pageContent(),
+            'skillGroups' => $skillGroups,
+            'experiences' => ExperienceResource::collection($experiences)->resolve(),
+            'educations' => $educations,
             'projects' => ProjectCardResource::collection($projects)->resolve(),
-            'stats' => $this->founderService->stats($founder, $projects->count()),
+            'stats' => [
+                'projects' => $projects->count(),
+                'skills' => $founder->skills()->count(),
+                'yearsExperience' => $this->yearsOfExperience($experiences->min('start_date')),
+            ],
         ]);
     }
 
     /**
-     * Download the uploaded resume, or 404 when there is none.
+     * Download the uploaded resume with a readable filename, or 404 when there is none.
      */
-    public function resume(): StreamedResponse
+    public function resume(FileService $files): StreamedResponse
     {
-        $response = $this->founderService->resumeResponse();
+        $founder = Founder::current();
 
-        abort_if($response === null, 404);
+        abort_unless($files->exists($founder->resume_path), 404);
 
-        return $response;
+        return Storage::disk(FileService::DISK)->response(
+            (string) $founder->resume_path,
+            Str::slug($founder->name).'-resume.pdf',
+        );
+    }
+
+    /**
+     * Whole years since the first job started, or 0 without any job.
+     */
+    private function yearsOfExperience(?CarbonInterface $firstJobStart): int
+    {
+        return $firstJobStart ? (int) $firstJobStart->diffInYears(now(), absolute: true) : 0;
     }
 }

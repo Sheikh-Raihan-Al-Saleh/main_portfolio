@@ -9,7 +9,8 @@ use Illuminate\Validation\Rule;
 
 /**
  * A new content block: its type, the page it goes on, and its fields.
- * Each block type adds the rules for its own `data` (LandingSectionType).
+ * Each block type adds the rules for its own `data`
+ * (LandingSectionType::dataRules()).
  */
 class StoreLandingSectionRequest extends FormRequest
 {
@@ -27,7 +28,7 @@ class StoreLandingSectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => ['required', Rule::enum(LandingSectionType::class)],
+            'type' => ['required', 'string', Rule::enum(LandingSectionType::class)],
             // The studio home page, or a project's landing page.
             'owner' => ['required', Rule::in(['studio', 'project'])],
             'project_id' => ['required_if:owner,project', 'nullable', 'integer', 'exists:projects,id'],
@@ -58,7 +59,7 @@ class StoreLandingSectionRequest extends FormRequest
             'body' => ['nullable', 'string', 'max:4000'],
             'is_visible' => ['boolean'],
             'data' => ['required', 'array'],
-            ...($this->sectionType()?->rules() ?? []),
+            ...($this->sectionType()?->dataRules() ?? []),
         ];
     }
 

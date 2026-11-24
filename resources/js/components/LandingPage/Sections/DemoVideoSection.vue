@@ -1,0 +1,235 @@
+<script setup lang="ts">
+import { Play, Volume2, VolumeX } from '@lucide/vue';
+import { motion } from 'motion-v';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import SectionShell from '@/components/LandingPage/SectionShell.vue';
+import { mediaUrl } from '@/composables/media';
+import { scaleIn } from '@/composables/motion';
+import type { DemoVideoSectionProps } from '@/types';
+
+const props = defineProps<DemoVideoSectionProps>();
+const data = computed(() => props.section.data);
+const posterUrl = computed(() => mediaUrl(data.value.poster_path));
+const videoUrl = computed(() => mediaUrl(data.value.video_path));
+const activated = ref(false);
+const embedUrl = computed(() => {
+    const url = data.value.video_url;
+
+    if (!url) {
+        return null;
+    }
+
+    if (data.value.provider === 'youtube') {
+        const videoId = youtubeId(url);
+
+        // YouTube rejects embeds that arrive without a Referer (error 153),
+        // so the iframe must not use referrerpolicy="no-referrer".
+        return videoId
+            ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&rel=0`
+            : null;
+    }
+
+    if (data.value.provider === 'vimeo') {
+        const videoId = vimeoId(url);
+
+        return videoId
+            ? `https://player.vimeo.com/video/${videoId}?autoplay=1`
+            : null;
+    }
+
+    return null;
+});
+/** Video ID from watch, youtu.be, shorts, embed and live links. */
+function youtubeId(url: string): string | null {
+    try {
+        const parsed = new URL(url.trim());
+        const segments = parsed.pathname.split('/').filter(Boolean);
+        const videoId =
+            parsed.hostname === 'youtu.be'
+                ? segments[0]
+                : ['shorts', 'embed', 'live', 'v'].includes(segments[0])
+                  ? segments[1]
+                  : parsed.searchParams.get('v');
+
+        return videoId && /^[\w-]{11}$/.test(videoId) ? videoId : null;
+    } catch {
+        return null;
+    }
+}
+/** Numeric video ID from a Vimeo link, ignoring query strings like ?share=. */
+function vimeoId(url: string): string | null {
+    try {
+        const segments = new URL(url.trim()).pathname.split('/');
+
+        return (
+            segments.filter((segment) => /^\d+$/.test(segment)).pop() ?? null
+        );
+    } catch {
+        return null;
+    }
+}
+const facadePoster = computed(() => {
+    if (posterUrl.value) {
+        return posterUrl.value;
+    }
+
+    const videoId = data.value.video_url
+        ? youtubeId(data.value.video_url)
+        : null;
+
+    return videoId
+        ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`
+        : null;
+});
+const videoElement = ref<HTMLVideoElement | null>(null);
+const muted = ref(true);
+let observer: IntersectionObserver | null = null;
+onMounted(() => {
+    const video = videoElement.value;
+
+    if (!video) {
+        return;
+    }
+
+    const reduced = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+    ).matches;
+
+    if (reduced || !data.value.autoplay) {
+        return;
+    }
+
+    observer = new IntersectionObserver(
+        (entries) => {
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                    void video.play().catch(() => undefined);
+                } else {
+                    video.pause();
+                }
+            }
+        },
+        { threshold: 0.4 },
+    );
+    observer.observe(video);
+});
+onBeforeUnmount(() => {
+    observer?.disconnect();
+    observer = null;
+});
+function toggleMute() {
+    const video = videoElement.value;
+
+    if (!video) {
+        return;
+    }
+
+    video.muted = !video.muted;
+    muted.value = video.muted;
+}
+</script>
+
+<template>
+    <SectionShell
+        :eyebrow="section.eyebrow"
+        :heading="section.heading"
+        :subheading="section.subheading"
+        :anchor="props.anchor"
+    >
+        <motion.figure
+            :variants="scaleIn"
+            initial="hidden"
+            while-in-view="visible"
+            :in-view-options="{ once: true, margin: '0px 0px -80px 0px' }"
+            class="space-y-4 [perspective:1200px]"
+        >
+            <div
+                class="card-3d overflow-hidden p-2 [transform-style:preserve-3d]"
+            >
+                <div class="overflow-hidden rounded-xl bg-black">
+                    <div
+                        v-if="data.provider === 'upload' && videoUrl"
+                        class="relative"
+                    >
+                        <video
+                            ref="videoElement"
+                            :src="videoUrl"
+                            :poster="posterUrl"
+                            class="aspect-video w-full object-contain"
+                            preload="metadata"
+                            playsinline
+                            muted
+                            loop
+                            controls
+                        />
+                        <button
+                            v-if="data.autoplay"
+                            type="button"
+                            class="absolute right-4 bottom-16 grid size-10 place-items-center rounded-full border border-white/20 bg-card/90 backdrop-blur"
+                            :aria-label="muted ? 'Unmute video' : 'Mute video'"
+                            @click="toggleMute"
+                        >
+                            <VolumeX v-if="muted" class="size-4" />
+                            <Volume2 v-else class="size-4" />
+                        </button>
+                    </div>
+                    <div
+                        v-else-if="activated && embedUrl"
+                        class="aspect-video w-full"
+                    >
+                        <iframe
+                            :src="embedUrl"
+                            class="size-full"
+                            :title="section.heading ?? 'Project demo video'"
+                            allow="
+                                accelerometer;
+                                autoplay;
+                                clipboard-write;
+                                encrypted-media;
+                                picture-in-picture;
+                            "
+                            allowfullscreen
+                            referrerpolicy="strict-origin-when-cross-origin"
+                        />
+                    </div>
+                    <button
+                        v-else-if="embedUrl"
+                        type="button"
+                        class="group relative block aspect-video w-full bg-black"
+                        @click="activated = true"
+                    >
+                        <img
+                            v-if="facadePoster"
+                            :src="facadePoster"
+                            alt=""
+                            loading="lazy"
+                            class="size-full object-cover opacity-80 transition group-hover:opacity-100"
+                        />
+                        <span class="absolute inset-0 grid place-items-center">
+                            <span
+                                class="grid size-16 place-items-center rounded-full bg-card text-foreground shadow-2xl transition group-hover:scale-110"
+                            >
+                                <Play
+                                    class="size-6 translate-x-0.5 fill-current"
+                                />
+                            </span>
+                        </span>
+                        <span class="sr-only">Play the demo video</span>
+                    </button>
+                    <div
+                        v-else
+                        class="grid aspect-video w-full place-items-center text-sm text-white/60"
+                    >
+                        No video configured for this section.
+                    </div>
+                </div>
+            </div>
+            <figcaption
+                v-if="data.caption"
+                class="text-center text-sm text-muted-foreground"
+            >
+                {{ data.caption }}
+            </figcaption>
+        </motion.figure>
+    </SectionShell>
+</template>

@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Founder;
-use App\Services\Studio\StudioService;
+use App\Models\Studio;
 use App\Support\Defaults\FounderDefaults;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -24,7 +24,7 @@ class FounderFactory extends Factory
 
         return [
             ...FounderDefaults::attributes(),
-            'studio_id' => fn (): int => app(StudioService::class)->current()->id,
+            'studio_id' => fn (): int => Studio::current()->id,
             'name' => $name,
             'slug' => Str::slug($name),
             'headline' => 'Full-stack engineer',

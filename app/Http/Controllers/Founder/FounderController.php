@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Founder;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Founder\UpdateFounderRequest;
 use App\Http\Resources\Founder\FounderFormResource;
-use App\Services\Founder\FounderService;
-use App\Services\SocialLink\SocialLinkService;
+use App\Models\Founder;
+use App\Services\FounderService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,33 +16,31 @@ use Inertia\Response;
  */
 class FounderController extends Controller
 {
-    public function __construct(
-        private readonly FounderService $founderService,
-        private readonly SocialLinkService $socialLinkService,
-    ) {}
+    public function __construct(private FounderService $founders) {}
 
     /**
      * Show the founder profile form, with the page copy merged over its defaults.
      */
     public function edit(): Response
     {
-        $founder = $this->founderService->current();
+        $founder = Founder::current();
 
-        return Inertia::render('admin/founder/Edit', [
+        return Inertia::render('founder/EditFounder', [
             'founder' => [
                 ...FounderFormResource::make($founder)->resolve(),
-                'content' => $this->founderService->content(),
+                'content' => $founder->pageContent(),
             ],
-            'socials' => $this->socialLinkService->asMap($founder),
+            'socials' => $founder->socialLinkMap(),
         ]);
     }
 
     /**
-     * Validate and save the founder profile. The service does the work.
+     * Save the founder profile: details, media files and social links.
      */
     public function update(UpdateFounderRequest $request): RedirectResponse
     {
-        $this->founderService->update($request->validated());
+        $this->founders->update(Founder::current(), $request->validated());
+
         $this->toast(__('Founder profile updated.'));
 
         return back();

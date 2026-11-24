@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Contact;
 
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
-use App\Services\Contact\ContactMessageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,31 +14,37 @@ use Inertia\Response;
  */
 class MessageController extends Controller
 {
-    public function __construct(
-        private readonly ContactMessageService $messageService,
-    ) {}
-
     /**
-     * Show the list of messages.
+     * Show the inbox, newest first, 15 per page. Filter "unread" hides read messages.
      */
     public function index(Request $request): Response
     {
         $filter = $request->string('filter')->trim()->value();
 
-        return Inertia::render('admin/messages/Index', [
-            'messages' => $this->messageService->list($filter),
+        $query = ContactMessage::latest();
+
+        if ($filter === 'unread') {
+            $query->whereNull('read_at');
+        }
+
+        $messages = $query->paginate(15)->withQueryString();
+
+        return Inertia::render('contact/MessageIndex', [
+            'messages' => $messages,
             'filters' => ['filter' => $filter ?: null],
         ]);
     }
 
     /**
-     * Opening a message marks it read.
+     * Show a message. Opening it marks it read.
      */
     public function show(ContactMessage $message): Response
     {
-        $this->messageService->markRead($message);
+        if ($message->read_at === null) {
+            $message->forceFill(['read_at' => now()])->save();
+        }
 
-        return Inertia::render('admin/messages/Show', ['message' => $message]);
+        return Inertia::render('contact/ShowMessage', ['message' => $message]);
     }
 
     /**
@@ -47,10 +52,10 @@ class MessageController extends Controller
      */
     public function markUnread(ContactMessage $message): RedirectResponse
     {
-        $this->messageService->markUnread($message);
+        $message->forceFill(['read_at' => null])->save();
         $this->toast(__('Marked as unread.'));
 
-        return to_route('admin.messages.index');
+        return to_route('messageIndex');
     }
 
     /**
@@ -58,9 +63,9 @@ class MessageController extends Controller
      */
     public function destroy(ContactMessage $message): RedirectResponse
     {
-        $this->messageService->delete($message);
+        $message->delete();
         $this->toast(__('Message deleted.'), 'error');
 
-        return to_route('admin.messages.index');
+        return to_route('messageIndex');
     }
 }

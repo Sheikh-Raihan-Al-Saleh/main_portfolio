@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Technology\StoreTechnologyRequest;
 use App\Http\Requests\Technology\UpdateTechnologyRequest;
 use App\Models\Technology;
-use App\Services\Technology\TechnologyService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,48 +16,51 @@ use Inertia\Response;
  */
 class TechnologyController extends Controller
 {
-    public function __construct(
-        private readonly TechnologyService $technologyService,
-    ) {}
-
     /**
-     * Show the list of technologies.
+     * Show every technology, alphabetically, with how many projects use each.
      */
     public function index(): Response
     {
-        return Inertia::render('admin/technologies/Index', [
-            'technologies' => $this->technologyService->list(),
+        return Inertia::render('technology/TechnologyIndex', [
+            'technologies' => Technology::withCount('projects')->orderBy('name')->get(),
         ]);
     }
 
     /**
-     * Validate and save a new technology. The service does the work.
+     * Save a new technology.
      */
     public function store(StoreTechnologyRequest $request): RedirectResponse
     {
-        $this->technologyService->create($request->validated());
+        $data = $request->validated();
+
+        Technology::create([...$data, 'slug' => Str::slug($data['name'])]);
+
         $this->toast(__('Technology added.'));
 
         return back();
     }
 
     /**
-     * Validate and save the changes to a technology. The service does the work.
+     * Save the changes to a technology.
      */
     public function update(UpdateTechnologyRequest $request, Technology $technology): RedirectResponse
     {
-        $this->technologyService->update($technology, $request->validated());
+        $data = $request->validated();
+
+        $technology->update([...$data, 'slug' => Str::slug($data['name'])]);
+
         $this->toast(__('Technology updated.'));
 
         return back();
     }
 
     /**
-     * Delete a technology.
+     * Delete a technology; it is detached from every project (pivot cascades).
      */
     public function destroy(Technology $technology): RedirectResponse
     {
-        $this->technologyService->delete($technology);
+        $technology->delete();
+
         $this->toast(__('Technology deleted.'), 'error');
 
         return back();

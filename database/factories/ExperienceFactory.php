@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Experience;
-use App\Services\Founder\FounderService;
+use App\Models\Founder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,7 +19,7 @@ class ExperienceFactory extends Factory
     public function definition(): array
     {
         return [
-            'founder_id' => fn (): int => app(FounderService::class)->current()->id,
+            'founder_id' => fn (): int => Founder::current()->id,
             'company' => fake()->company(),
             'role' => fake()->jobTitle(),
             'employment_type' => 'Full-time',

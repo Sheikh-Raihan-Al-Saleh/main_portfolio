@@ -4,13 +4,13 @@ namespace App\Http\Resources\Project;
 
 use App\Models\Project;
 use App\Models\Technology;
-use App\Services\Media\MediaService;
+use App\Services\FileService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * A project in a list (cards, grids, marquees). Expects `technologies` loaded
- * and the `has_landing_page` exists-flag selected (see ProjectService).
+ * and the `has_landing_page` exists-flag selected (see the Project::forCards() scope).
  *
  * @mixin Project
  */
@@ -28,16 +28,16 @@ class ProjectCardResource extends JsonResource
             'summary' => $this->summary,
             'owner' => $this->owner_type,
             'role' => $this->role,
-            'cover_image_url' => MediaService::url($this->cover_image_path),
+            'cover_image_url' => FileService::url($this->cover_image_path),
             'is_featured' => $this->is_featured,
             'year' => ($this->completed_at ?? $this->started_at)?->year,
             'technologies' => $this->technologies->map(fn (Technology $technology): array => [
                 'name' => $technology->name,
                 'slug' => $technology->slug,
             ])->values()->all(),
-            'url' => route('projects.show', $this->slug, absolute: false),
+            'url' => route('projectShow', $this->slug, absolute: false),
             'landing_url' => $this->has_landing_page
-                ? route('landing.show', $this->slug, absolute: false)
+                ? route('landingPageShow', $this->slug, absolute: false)
                 : null,
             'live_url' => $this->live_url,
             'repo_url' => $this->repo_url,

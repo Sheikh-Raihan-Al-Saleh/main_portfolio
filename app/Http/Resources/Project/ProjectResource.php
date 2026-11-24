@@ -4,7 +4,7 @@ namespace App\Http\Resources\Project;
 
 use App\Models\Project;
 use App\Models\ProjectImage;
-use App\Services\Media\MediaService;
+use App\Services\FileService;
 use Illuminate\Http\Request;
 
 /**
@@ -27,7 +27,7 @@ class ProjectResource extends ProjectCardResource
             'completed_at' => $this->completed_at?->toDateString(),
             'images' => $this->images->map(fn (ProjectImage $image): array => [
                 'id' => $image->id,
-                'url' => MediaService::url($image->path),
+                'url' => FileService::url($image->path),
                 'alt' => $image->alt ?: $this->title,
                 'caption' => $image->caption,
             ])->values()->all(),

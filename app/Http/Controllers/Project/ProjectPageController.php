@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Project\ProjectCardResource;
 use App\Http\Resources\Project\ProjectResource;
 use App\Models\Project;
-use App\Services\Project\ProjectService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,10 +15,6 @@ use Inertia\Response;
  */
 class ProjectPageController extends Controller
 {
-    public function __construct(
-        private readonly ProjectService $projectService,
-    ) {}
-
     /**
      * Every published project. Filtering happens in the browser; the query
      * string only sets the starting filter.
@@ -28,8 +23,10 @@ class ProjectPageController extends Controller
     {
         $owner = $request->query('owner');
 
-        return Inertia::render('public/projects/Index', [
-            'projects' => ProjectCardResource::collection($this->projectService->publishedArchive())->resolve(),
+        $projects = Project::forCards()->published()->ordered()->get();
+
+        return Inertia::render('project/ProjectArchive', [
+            'projects' => ProjectCardResource::collection($projects)->resolve(),
             'filters' => [
                 'tech' => $request->string('tech')->trim()->value() ?: null,
                 'owner' => in_array($owner, ['studio', 'founder'], true) ? $owner : null,
@@ -38,15 +35,28 @@ class ProjectPageController extends Controller
     }
 
     /**
-     * Show a published project. Drafts return 404.
+     * Show a published project with up to three related ones. Drafts return 404.
      */
     public function show(Project $project): Response
     {
         abort_unless($project->is_published, 404);
 
-        return Inertia::render('public/projects/Show', [
-            'project' => ProjectResource::make($this->projectService->forShow($project))->resolve(),
-            'related' => ProjectCardResource::collection($this->projectService->related($project))->resolve(),
+        $project
+            ->load(['images', 'technologies:id,name,slug'])
+            ->loadExists('publishedLandingPage as has_landing_page');
+
+        $related = Project::forCards()
+            ->published()
+            ->where('owner_type', $project->owner_type)
+            ->where('owner_id', $project->owner_id)
+            ->whereKeyNot($project->id)
+            ->ordered()
+            ->limit(3)
+            ->get();
+
+        return Inertia::render('project/ShowProject', [
+            'project' => ProjectResource::make($project)->resolve(),
+            'related' => ProjectCardResource::collection($related)->resolve(),
         ]);
     }
 }

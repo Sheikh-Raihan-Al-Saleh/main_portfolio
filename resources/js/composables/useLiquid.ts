@@ -6,7 +6,7 @@
  * them every LiquidImage stays a plain <img> and every LiquidBlob keeps its
  * CSS gradient.
  */
-import type * as LiquidEngine from '@/lib/liquid/engine';
+import type * as LiquidEngine from '@/composables/liquidEngine';
 
 type Engine = typeof LiquidEngine;
 
@@ -49,7 +49,7 @@ export function loadLiquid(): Promise<Engine | null> {
     enginePromise = allowed()
         ? new Promise((resolve) => {
               whenIdle(() => {
-                  import('@/lib/liquid/engine')
+                  import('@/composables/liquidEngine')
                       .then((engine) =>
                           resolve(engine.supported() ? engine : null),
                       )

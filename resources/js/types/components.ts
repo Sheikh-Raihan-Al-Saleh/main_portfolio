@@ -40,70 +40,70 @@ import type {
     ValueContent,
 } from './index';
 
-// components/common/AlertError.vue
+// components/AlertError.vue
 export type AlertErrorProps = {
     errors: string[];
     title?: string;
 };
 
-// components/app/AppContent.vue
+// components/AppContent.vue
 export type AppContentProps = {
     variant?: AppVariant;
     class?: string;
 };
 
-// components/app/AppShell.vue
+// components/AppShell.vue
 export type AppShellProps = {
     variant?: AppVariant;
 };
 
-// components/app/AppSidebarHeader.vue
+// components/AppSidebarHeader.vue
 export type AppSidebarHeaderProps = {
     breadcrumbs?: BreadcrumbItem[];
 };
 
-// components/app/Breadcrumbs.vue
+// components/Breadcrumbs.vue
 export type BreadcrumbsProps = {
     breadcrumbs: BreadcrumbItemType[];
 };
 
-// components/common/Heading.vue
+// components/Heading.vue
 export type HeadingProps = {
     title: string;
     description?: string;
     variant?: 'default' | 'small';
 };
 
-// components/common/InputError.vue
+// components/InputError.vue
 export type InputErrorProps = {
     message?: string;
 };
 
-// components/account/ManageTwoFactor.vue
+// components/Account/ManageTwoFactor.vue
 export type ManageTwoFactorProps = {
     canManageTwoFactor?: boolean;
     requiresConfirmation?: boolean;
     twoFactorEnabled?: boolean;
 };
 
-// components/app/NavFooter.vue
+// components/NavFooter.vue
 export type NavFooterProps = {
     items: NavItem[];
     class?: string;
 };
 
-// components/app/NavMain.vue
+// components/NavMain.vue
 export type NavMainProps = {
     items: NavItem[];
     label?: string;
 };
 
-// components/common/PasswordInput.vue
+// components/PasswordInput.vue
 export type PasswordInputProps = {
     class?: HTMLAttributes['class'];
 };
 
-// components/common/TextLink.vue
+// components/TextLink.vue
 export type TextLinkProps = {
     href: LinkComponentBaseProps['href'];
     tabindex?: number;
@@ -111,31 +111,31 @@ export type TextLinkProps = {
     as?: string;
 };
 
-// components/account/TwoFactorSetupModal.vue
+// components/Account/TwoFactorSetupModal.vue
 export type TwoFactorSetupModalProps = {
     requiresConfirmation: boolean;
     twoFactorEnabled: boolean;
 };
 
-// components/app/UserInfo.vue
+// components/UserInfo.vue
 export type UserInfoProps = {
     user: User;
     showEmail?: boolean;
 };
 
-// components/app/UserMenuContent.vue
+// components/UserMenuContent.vue
 export type UserMenuContentProps = {
     user: User;
 };
 
-// components/admin/AdminPageHeader.vue
+// components/AdminPageHeader.vue
 export type AdminPageHeaderProps = {
     title: string;
     description?: string;
     eyebrow?: string;
 };
 
-// components/admin/CompletenessRing.vue
+// components/Dashboard/CompletenessRing.vue
 export type CompletenessRingProps = {
     label: string;
     percent: number;
@@ -145,18 +145,18 @@ export type CompletenessRingProps = {
     size?: number;
 };
 
-// components/admin/ContentEditor.vue
+// components/ContentEditor.vue
 export type ContentEditorProps = { content: FounderContent };
 
-// components/admin/DeleteAction.vue
+// components/DeleteAction.vue
 export type DeleteActionProps = {
-    /** Wayfinder route definition for the destroy action. */
+    /** URL of the destroy route, e.g. `route('skillDestroy', skill.id)`. */
     url: string;
     label: string;
     description?: string;
 };
 
-// components/admin/DonutChart.vue
+// components/Dashboard/DonutChart.vue
 export type DonutChartProps = {
     slices: {
         label: string;
@@ -168,7 +168,7 @@ export type DonutChartProps = {
     size?: number;
 };
 
-// components/admin/FileField.vue
+// components/FileField.vue
 export type FileFieldProps = {
     name: string;
     label: string;
@@ -181,7 +181,7 @@ export type FileFieldProps = {
     preview?: boolean;
 };
 
-// components/admin/FooterEditor.vue
+// components/FooterEditor.vue
 export type FooterEditorProps = {
     footer: FooterConfig | null;
 };
@@ -194,7 +194,7 @@ export type FooterEditorColumnRow = {
     links: FooterEditorLinkRow[];
 };
 
-// components/admin/LineChart.vue
+// components/Dashboard/LineChart.vue
 export type LineChartProps = {
     labels: string[];
     series: {
@@ -205,14 +205,14 @@ export type LineChartProps = {
     height?: number;
 };
 
-// components/admin/ReorderButtons.vue
+// components/ReorderButtons.vue
 export type ReorderButtonsProps = {
     index: number;
     total: number;
     disabled?: boolean;
 };
 
-// components/admin/StudioContentSectionDialog.vue
+// components/Studio/StudioContentSectionDialog.vue
 export type StudioContentSectionDialogRecordOf = Record<string, unknown>;
 export type StudioContentSectionDialogSectionKey = keyof Omit<
     StudioContent,
@@ -251,7 +251,7 @@ export type StudioContentSectionDialogExposedDef = {
     repeater?: StudioContentSectionDialogRepeaterDef;
 };
 
-// components/admin/TagInput.vue
+// components/TagInput.vue
 export type TagInputProps = {
     /**
      * Form field name; values are submitted as `name[]`. Optional, because
@@ -264,27 +264,27 @@ export type TagInputProps = {
     suggestions?: string[];
 };
 
-// components/admin/form/ErrorList.vue
+// components/Form/ErrorList.vue
 export type ErrorListProps = {
     errors: Record<string, string>;
     prefix: string;
 };
 
-// components/admin/form/FieldGroup.vue
+// components/Form/FieldGroup.vue
 export type FieldGroupProps = {
     title: string;
     description?: string;
     columns?: 1 | 2;
 };
 
-// components/admin/form/FormDialog.vue
+// components/Form/FormDialog.vue
 export type FormDialogProps = {
     title: string;
     description?: string;
     icon?: Component;
 };
 
-// components/admin/form/FormFooter.vue
+// components/Form/FormFooter.vue
 export type FormFooterProps = {
     processing?: boolean;
     submitLabel: string;
@@ -292,7 +292,7 @@ export type FormFooterProps = {
     cancelHref?: string;
 };
 
-// components/admin/form/FormSection.vue
+// components/Form/FormSection.vue
 export type FormSectionProps = {
     title?: string;
     description?: string;
@@ -301,7 +301,7 @@ export type FormSectionProps = {
     class?: string;
 };
 
-// components/admin/form/FormTabs.vue
+// components/Form/FormTabs.vue
 export type FormTabsProps = {
     tabs: FormTab[];
     errors?: Record<string, string>;
@@ -310,7 +310,7 @@ export type FormTabsProps = {
     cancelHref?: string | null;
 };
 
-// components/admin/landing/MediaUploadField.vue
+// components/LandingPage/MediaUploadField.vue
 export type MediaUploadFieldProps = {
     modelValue: string | null;
     label: string;
@@ -321,7 +321,7 @@ export type MediaUploadFieldProps = {
     hint?: string;
 };
 
-// components/admin/landing/SectionEditorDialog.vue
+// components/LandingPage/SectionEditorDialog.vue
 export type SectionEditorDialogProps = {
     open: boolean;
     /**
@@ -336,7 +336,7 @@ export type SectionEditorDialogProps = {
     type: LandingSectionType | null;
 };
 
-// components/admin/landing/SectionFields.vue
+// components/LandingPage/SectionFields.vue
 export type SectionFieldsProps = {
     fields: Field[];
     /** Laravel validation errors, keyed as `data.items.0.title`. */
@@ -345,7 +345,7 @@ export type SectionFieldsProps = {
     prefix?: string;
 };
 
-// components/admin/landing/SectionListRow.vue
+// components/LandingPage/SectionListRow.vue
 export type SectionListRowProps = {
     section: LandingSection;
     index: number;
@@ -356,7 +356,7 @@ export type SectionListRowProps = {
     noun?: string;
 };
 
-// components/brand/BrandLogo.vue
+// components/BrandLogo.vue
 export type BrandLogoProps = {
     /** Full logo, or the square mark (also the favicon). */
     variant?: 'full' | 'mark';
@@ -368,34 +368,34 @@ export type BrandLogoProps = {
     class?: string;
 };
 
-// components/founder/ExperienceSection.vue
+// components/Founder/ExperienceSection.vue
 export type ExperienceSectionProps = {
     copy: SectionCopy;
     experiences: Experience[];
     educations: Education[];
 };
 
-// components/founder/FounderAbout.vue
+// components/Founder/FounderAbout.vue
 export type FounderAboutProps = { copy: SectionCopy };
 
-// components/founder/FounderHero.vue
+// components/Founder/FounderHero.vue
 export type FounderHeroProps = {
     content: FounderContent;
     stats: FounderStats;
 };
 
-// components/founder/SkillsSection.vue
+// components/Founder/SkillsSection.vue
 export type SkillsSectionProps = {
     copy: SectionCopy;
     groups: SkillCategory[];
 };
 
-// components/landing/HeroDevicesCarousel.vue
+// components/LandingPage/HeroDevicesCarousel.vue
 export type HeroDevicesCarouselProps = {
     images: string[];
 };
 
-// components/landing/SectionList.vue
+// components/LandingPage/SectionList.vue
 export type SectionListProps = {
     sections: LandingSection[];
     /**
@@ -405,7 +405,7 @@ export type SectionListProps = {
     anchorFor: (section: LandingSection) => string;
 };
 
-// components/landing/SectionShell.vue
+// components/LandingPage/SectionShell.vue
 export type SectionShellProps = {
     eyebrow?: string | null;
     heading?: string | null;
@@ -417,86 +417,98 @@ export type SectionShellProps = {
     class?: string;
 };
 
-// components/landing/frames/BrowserFrame.vue
+// components/LandingPage/Frames/BrowserFrame.vue
 export type BrowserFrameProps = {
     /** Shown in the fake address bar. Host only — the full URL is noise. */
     url?: string | null;
     class?: string;
 };
 
-// components/landing/frames/DeviceFrame.vue
+// components/LandingPage/Frames/DeviceFrame.vue
 export type DeviceFrameProps = {
     variant?: 'phone' | 'tablet' | 'laptop';
     class?: string;
 };
 
-// components/landing/sections/CtaSection.vue
+// components/LandingPage/Sections/CtaSection.vue
 export type CtaSectionProps = {
     section: Extract<LandingSection, { type: 'cta' }>;
     anchor?: string;
 };
 
-// components/landing/sections/DemoEmbedSection.vue
+// components/LandingPage/Sections/DemoEmbedSection.vue
 export type DemoEmbedSectionProps = {
     section: Extract<LandingSection, { type: 'demo_embed' }>;
     anchor?: string;
 };
 
-// components/landing/sections/DemoVideoSection.vue
+// components/LandingPage/Sections/DemoVideoSection.vue
 export type DemoVideoSectionProps = {
     section: Extract<LandingSection, { type: 'demo_video' }>;
     anchor?: string;
 };
 
-// components/landing/sections/FaqSection.vue
+// components/LandingPage/Sections/FaqSection.vue
 export type FaqSectionProps = {
     section: Extract<LandingSection, { type: 'faq' }>;
     anchor?: string;
 };
 
-// components/landing/sections/FeaturesSection.vue
+// components/LandingPage/Sections/FeaturesSection.vue
 export type FeaturesSectionProps = {
     section: Extract<LandingSection, { type: 'features' }>;
     anchor?: string;
 };
 
-// components/landing/sections/GallerySection.vue
+// components/LandingPage/Sections/GallerySection.vue
 export type GallerySectionProps = {
     section: Extract<LandingSection, { type: 'gallery' }>;
     anchor?: string;
 };
 
-// components/landing/sections/RichTextSection.vue
+// components/LandingPage/Sections/RichTextSection.vue
 export type RichTextSectionProps = {
     section: Extract<LandingSection, { type: 'richtext' }>;
     anchor?: string;
 };
 
-// components/landing/sections/StatsSection.vue
+// components/LandingPage/Sections/StatsSection.vue
 export type StatsSectionProps = {
     section: Extract<LandingSection, { type: 'stats' }>;
     anchor?: string;
 };
 
-// components/landing/sections/TechSection.vue
+// components/LandingPage/Sections/TechSection.vue
 export type TechSectionProps = {
     section: Extract<LandingSection, { type: 'tech' }>;
     anchor?: string;
 };
 
-// components/landing/sections/TestimonialsSection.vue
+// components/LandingPage/Sections/TestimonialsSection.vue
 export type TestimonialsSectionProps = {
     section: Extract<LandingSection, { type: 'testimonials' }>;
     anchor?: string;
 };
 
-// components/landing/sections/WalkthroughSection.vue
+// components/LandingPage/Sections/WalkthroughSection.vue
 export type WalkthroughSectionProps = {
     section: Extract<LandingSection, { type: 'demo_walkthrough' }>;
     anchor?: string;
 };
 
-// components/media/SmartImage.vue
+// components/SmartImage.vue
+// components/MediaPreview.vue
+export type MediaPreviewProps = {
+    /** URL of the photo or video (a stored file or a picked file's blob URL). */
+    src: string;
+    /** Render a playable video instead of an image. */
+    video?: boolean;
+    alt?: string;
+    /** Fill a frame sized by the parent instead of taking the media's own size. */
+    fill?: boolean;
+    class?: string;
+};
+
 export type SmartImageProps = {
     src: string | null | undefined;
     alt: string;
@@ -509,18 +521,7 @@ export type SmartImageProps = {
     imgClass?: string;
 };
 
-// components/media/SmartVideo.vue
-export type SmartVideoProps = {
-    src: string | null | undefined;
-    poster?: string | null;
-    autoplay?: boolean;
-    loop?: boolean;
-    ratio?: string;
-    label?: string;
-    class?: string;
-};
-
-// components/project/ProjectCard.vue
+// components/Project/ProjectCard.vue
 export type ProjectCardProps = {
     project: ProjectCard;
     /** "feature" is the large, wide card that leads a grid. */
@@ -529,10 +530,10 @@ export type ProjectCardProps = {
     eager?: boolean;
 };
 
-// components/project/ProjectGallery.vue
+// components/Project/ProjectGallery.vue
 export type ProjectGalleryProps = { images: ProjectDetail['images'] };
 
-// components/project/ProjectGrid.vue
+// components/Project/ProjectGrid.vue
 export type ProjectGridProps = {
     projects: ProjectCardType[];
     /** Show the first project as a wide feature card. */
@@ -540,14 +541,14 @@ export type ProjectGridProps = {
     numbered?: boolean;
 };
 
-// components/site/AnimatedCounter.vue
+// components/Site/AnimatedCounter.vue
 export type AnimatedCounterProps = {
     value: number;
     suffix?: string;
     duration?: number;
 };
 
-// components/site/ContactForm.vue
+// components/Site/ContactForm.vue
 export type ContactFormProps = {
     site: 'studio' | 'founder';
     messagePlaceholder?: string;
@@ -555,7 +556,7 @@ export type ContactFormProps = {
     replyNote?: string | null;
 };
 
-// components/site/ContactSection.vue
+// components/Site/ContactSection.vue
 export type ContactSectionProps = {
     site: 'studio' | 'founder';
     eyebrow: string;
@@ -573,12 +574,12 @@ export type ContactSectionProps = {
     replyNote?: string | null;
 };
 
-// components/site/LiquidBlob.vue
+// components/Site/LiquidBlob.vue
 export type LiquidBlobProps = {
     class?: string;
 };
 
-// components/site/LiquidImage.vue
+// components/Site/LiquidImage.vue
 export type LiquidImageProps = {
     src: string;
     alt?: string;
@@ -587,7 +588,7 @@ export type LiquidImageProps = {
     eager?: boolean;
 };
 
-// components/site/Marquee.vue
+// components/Site/Marquee.vue
 export type MarqueeProps = {
     /** Seconds for one full loop. */
     duration?: number;
@@ -595,14 +596,14 @@ export type MarqueeProps = {
     reverse?: boolean;
 };
 
-// components/site/Reveal.vue
+// components/Site/Reveal.vue
 export type RevealProps = {
     delay?: number;
     y?: number;
     as?: 'div' | 'li' | 'section' | 'article' | 'span';
 };
 
-// components/site/SectionHeading.vue
+// components/Site/SectionHeading.vue
 export type SectionHeadingProps = {
     eyebrow?: string | null;
     title: string;
@@ -613,49 +614,49 @@ export type SectionHeadingProps = {
     class?: string;
 };
 
-// components/site/SiteHeader.vue
+// components/Site/SiteHeader.vue
 export type SiteHeaderNavLink = { label: string; href: string };
 
-// components/site/SocialIcon.vue
+// components/Site/SocialIcon.vue
 export type SocialIconProps = { name: SocialPlatform };
 
-// components/site/SocialLinks.vue
+// components/Site/SocialLinks.vue
 export type SocialLinksProps = {
     links: SocialLink[];
     class?: string;
 };
 
-// components/studio/AboutSection.vue
+// components/Studio/AboutSection.vue
 export type AboutSectionProps = { content: AboutContent };
 
-// components/studio/CapabilitiesSection.vue
+// components/Studio/CapabilitiesSection.vue
 export type CapabilitiesSectionProps = { content: CapabilitiesContent };
 
-// components/studio/ClientStrip.vue
+// components/Studio/ClientStrip.vue
 export type ClientStripProps = {
     clients: Client[];
     label?: string;
 };
 
-// components/studio/CtaBanner.vue
+// components/Studio/CtaBanner.vue
 export type CtaBannerProps = { content: CtaContent };
 
-// components/studio/FounderBridge.vue
+// components/Studio/FounderBridge.vue
 export type FounderBridgeProps = { content: FounderBridgeContent };
 
-// components/studio/ProcessSection.vue
+// components/Studio/ProcessSection.vue
 export type ProcessSectionProps = { content: EngineeringContent };
 
-// components/studio/StudioHero.vue
+// components/Studio/StudioHero.vue
 export type StudioHeroProps = {
     stats: StudioStats;
     ticker: string[];
 };
 
-// components/studio/ValueSection.vue
+// components/Studio/ValueSection.vue
 export type ValueSectionProps = { content: ValueContent };
 
-// components/studio/WorkSection.vue
+// components/Studio/WorkSection.vue
 export type WorkSectionProps = {
     id?: string;
     eyebrow: string;
@@ -672,23 +673,23 @@ export type WorkSectionProps = {
     alwaysShowArchive?: boolean;
 };
 
-// layouts/AppLayout.vue
+// components/Layout/AppLayout.vue
 export type AppLayoutProps = {
     breadcrumbs?: BreadcrumbItem[];
 };
 
-// layouts/AuthLayout.vue
+// components/Layout/AuthLayout.vue
 export type AuthLayoutProps = {
     title?: string;
     description?: string;
 };
 
-// layouts/app/AppSidebarLayout.vue
+// components/Layout/AppSidebarLayout.vue
 export type AppSidebarLayoutProps = {
     breadcrumbs?: BreadcrumbItem[];
 };
 
-// layouts/auth/AuthEditorialLayout.vue
+// components/Layout/AuthEditorialLayout.vue
 export type AuthEditorialLayoutShowcase = { title: string; cover: string }[];
 export type AuthEditorialLayoutProps = {
     title?: string;
@@ -697,12 +698,12 @@ export type AuthEditorialLayoutProps = {
 
 // Emitted events
 
-// components/admin/ReorderButtons.vue
+// components/ReorderButtons.vue
 export type ReorderButtonsEmits = {
     move: [index: number, direction: -1 | 1];
 };
 
-// components/admin/StudioContentSectionDialog.vue
+// components/Studio/StudioContentSectionDialog.vue
 export type StudioContentSectionDialogEmits = {
     'update:open': [boolean];
     /** Emitted with the edited clone; the parent decides when to persist. */
@@ -712,19 +713,19 @@ export type StudioContentSectionDialogEmits = {
     ];
 };
 
-// components/admin/TagInput.vue
+// components/TagInput.vue
 export type TagInputEmits = { 'update:modelValue': [string[]] };
 
-// components/admin/form/FormFooter.vue
+// components/Form/FormFooter.vue
 export type FormFooterEmits = { cancel: [] };
 
-// components/admin/landing/MediaUploadField.vue
+// components/LandingPage/MediaUploadField.vue
 export type MediaUploadFieldEmits = { 'update:modelValue': [string | null] };
 
-// components/admin/landing/SectionEditorDialog.vue
+// components/LandingPage/SectionEditorDialog.vue
 export type SectionEditorDialogEmits = { 'update:open': [boolean]; saved: [] };
 
-// components/admin/landing/SectionListRow.vue
+// components/LandingPage/SectionListRow.vue
 export type SectionListRowEmits = {
     move: [index: number, direction: -1 | 1];
     edit: [];

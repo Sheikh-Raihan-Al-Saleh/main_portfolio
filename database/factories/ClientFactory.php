@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Client;
-use App\Services\Studio\StudioService;
+use App\Models\Studio;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,7 +22,7 @@ class ClientFactory extends Factory
     public function definition(): array
     {
         return [
-            'studio_id' => fn (): int => app(StudioService::class)->current()->id,
+            'studio_id' => fn (): int => Studio::current()->id,
             'name' => fake()->unique()->company(),
             'logo_path' => null,
             'website_url' => 'https://'.fake()->domainName(),

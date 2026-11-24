@@ -3,7 +3,8 @@
 namespace App\Models;
 
 use Database\Factories\ProjectLandingPageFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -37,16 +38,35 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, LandingPageHeroMedia> $heroMedia
  * @property-read Collection<int, LandingSection> $sections
  */
-#[Fillable([
-    'eyebrow', 'headline', 'subheadline', 'hero_video_url',
-    'primary_cta_label', 'primary_cta_url', 'secondary_cta_label', 'secondary_cta_url',
-    'accent_from', 'accent_to', 'seo_title', 'seo_description', 'og_image_path',
-    'is_published',
-])]
 class ProjectLandingPage extends Model
 {
     /** @use HasFactory<ProjectLandingPageFactory> */
     use HasFactory;
+
+    /**
+     * Every column is mass assignable; controllers pass only validated fields.
+     *
+     * @var array<int, string>
+     */
+    protected $guarded = [];
+
+    /** Hero screenshot slots, by position. */
+    public const HERO_SLOTS = [0 => 'desktop', 1 => 'tablet', 2 => 'phone'];
+
+    /**
+     * Every file the page owns: the OG image, the hero screenshots and the
+     * media of its blocks. Expects `heroMedia` and `sections` to be loaded.
+     *
+     * @return array<int, string>
+     */
+    public function filePaths(): array
+    {
+        return array_values(array_filter([
+            $this->og_image_path,
+            ...$this->heroMedia->pluck('path'),
+            ...$this->sections->flatMap(fn (LandingSection $section): array => $section->mediaPaths()),
+        ]));
+    }
 
     /**
      * The project this landing page presents (inverse of one-to-one).
@@ -76,6 +96,17 @@ class ProjectLandingPage extends Model
     public function sections(): MorphMany
     {
         return $this->morphMany(LandingSection::class, 'sectionable');
+    }
+
+    /**
+     * Only published landing pages.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function published(Builder $query): void
+    {
+        $query->where('is_published', true);
     }
 
     /**

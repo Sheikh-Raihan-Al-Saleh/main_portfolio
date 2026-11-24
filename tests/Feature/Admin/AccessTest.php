@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Routing\Route as IlluminateRoute;
+use Illuminate\Support\Facades\Route;
 
 /**
  * Every admin route reachable with a plain GET, used to assert the guard
@@ -44,6 +46,19 @@ test('admins can reach every admin route', function (string $uri) {
 
     $this->actingAs($admin)->get($uri)->assertOk();
 })->with(adminGetRoutes());
+
+test('every admin route, of every method, runs the admin middleware', function () {
+    // Admin controllers register "admin" in their constructor (Ahad style),
+    // so this catches a controller that forgets it, write routes included.
+    $unguarded = collect(Route::getRoutes()->getRoutes())
+        ->filter(fn (IlluminateRoute $route): bool => $route->uri() === 'admin' || str_starts_with($route->uri(), 'admin/'))
+        ->reject(fn (IlluminateRoute $route): bool => in_array('admin', $route->gatherMiddleware(), true))
+        ->map(fn (IlluminateRoute $route): string => implode('|', $route->methods()).' '.$route->uri())
+        ->values()
+        ->all();
+
+    expect($unguarded)->toBe([]);
+});
 
 test('the dashboard route sends admins to the admin panel', function () {
     $admin = User::factory()->create(['is_admin' => true]);

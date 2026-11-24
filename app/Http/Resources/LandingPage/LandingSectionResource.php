@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources\LandingPage;
 
-use App\Enums\LandingSectionType;
 use App\Models\LandingSection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -26,7 +25,7 @@ class LandingSectionResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'type' => $this->type->value,
+            'type' => $this->type,
             'eyebrow' => $this->eyebrow,
             'heading' => $this->heading,
             'subheading' => $this->subheading,
@@ -34,7 +33,7 @@ class LandingSectionResource extends JsonResource
             'data' => $this->data ?? [],
             'is_visible' => $this->is_visible,
             'body_html' => $this->when(
-                $this->type === LandingSectionType::RichText,
+                $this->type === 'richtext',
                 fn (): string => Str::markdown((string) data_get($this->data, 'markdown', ''), [
                     'html_input' => 'strip',
                     'allow_unsafe_links' => false,

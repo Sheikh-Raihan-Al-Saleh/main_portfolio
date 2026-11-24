@@ -4,7 +4,7 @@ namespace App\Http\Resources\Founder;
 
 use App\Models\Founder;
 use App\Models\SocialLink;
-use App\Services\Media\MediaService;
+use App\Services\FileService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -32,10 +32,10 @@ class FounderResource extends JsonResource
             'location' => $this->location,
             'public_email' => $this->public_email,
             'phone' => $this->phone,
-            'avatar_url' => MediaService::url($this->avatar_path),
-            'logo_url' => MediaService::url($this->logo_path),
+            'avatar_url' => FileService::url($this->avatar_path),
+            'logo_url' => FileService::url($this->logo_path),
             'resume_url' => self::resumeUrl($this->resource),
-            'og_image_url' => MediaService::url($this->og_image_path),
+            'og_image_url' => FileService::url($this->og_image_path),
             'hero' => [
                 'title' => $this->hero_title,
                 'statement' => $this->hero_statement,

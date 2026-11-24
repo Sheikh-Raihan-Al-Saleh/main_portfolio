@@ -5,8 +5,6 @@ namespace App\Providers;
 use App\Models\Founder;
 use App\Models\ProjectLandingPage;
 use App\Models\Studio;
-use App\Services\Founder\FounderService;
-use App\Services\Studio\StudioService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -16,7 +14,10 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
 /**
- * Application services: the public path on shared hosting, local upload limits and per-request services.
+ * Application services: the public path on shared hosting and model defaults.
+ *
+ * Upload limits are PHP settings, so they are set where PHP is configured:
+ * the local php.ini, and public/.user.ini / public/.htaccess in production.
  */
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,12 +27,6 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->usePublicPathOfFrontController();
-        $this->raiseLocalServerUploadLimits();
-
-        // One instance per request, so their once() memoised reads (the
-        // studio and founder records) are shared by middleware and controllers.
-        $this->app->scoped(StudioService::class);
-        $this->app->scoped(FounderService::class);
     }
 
     /**
@@ -68,39 +63,6 @@ class AppServiceProvider extends ServiceProvider
         }
 
         config(['filesystems.disks.uploads.root' => $this->app->publicPath('uploads')]);
-    }
-
-    /**
-     * Give `php artisan serve` upload limits large enough for the admin forms.
-     *
-     * The dev server runs in a child PHP process, so its php.ini limits cannot
-     * be changed from PHP code. Herd's default upload_max_filesize is 2M, and
-     * PHP silently drops any larger file, so most screenshots never reached
-     * the app. Adding php-ini/ to PHP_INI_SCAN_DIR makes the child process
-     * load php-ini/uploads.ini, however the server was started (the launcher
-     * script, `composer run dev` or by hand). The leading path separator keeps
-     * PHP's own scan directory, so no extension .ini files are lost.
-     *
-     * Symfony Process only passes on variables that also exist in $_SERVER,
-     * so the value is written there as well as to the process environment.
-     */
-    protected function raiseLocalServerUploadLimits(): void
-    {
-        if (! $this->app->runningInConsole() || ($_SERVER['argv'][1] ?? null) !== 'serve') {
-            return;
-        }
-
-        $current = getenv('PHP_INI_SCAN_DIR');
-        $ours = base_path('php-ini');
-
-        if ($current !== false && str_contains($current, $ours)) {
-            return;
-        }
-
-        $value = ($current === false ? '' : $current).PATH_SEPARATOR.$ours;
-
-        putenv('PHP_INI_SCAN_DIR='.$value);
-        $_SERVER['PHP_INI_SCAN_DIR'] = $value;
     }
 
     /**

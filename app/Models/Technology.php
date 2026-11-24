@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Database\Factories\TechnologyFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -16,11 +15,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string $slug
  * @property string|null $icon
  */
-#[Fillable(['name', 'slug', 'icon'])]
 class Technology extends Model
 {
     /** @use HasFactory<TechnologyFactory> */
     use HasFactory;
+
+    /**
+     * Every column is mass assignable; controllers pass only validated fields.
+     *
+     * @var array<int, string>
+     */
+    protected $guarded = [];
 
     /**
      * The projects that use this technology (many-to-many through the project_technology pivot).

@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Founder;
 use App\Models\Skill;
-use App\Services\Founder\FounderService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,7 +21,7 @@ class SkillFactory extends Factory
     public function definition(): array
     {
         return [
-            'skill_category_id' => fn (): int => app(FounderService::class)->current()
+            'skill_category_id' => fn (): int => Founder::current()
                 ->skillCategories()->orderBy('sort_order')->value('id'),
             'technology_id' => null,
             'name' => ucfirst(fake()->unique()->word()),

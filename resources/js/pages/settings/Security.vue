@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
-import SecurityController from '@/actions/App/Http/Controllers/Account/SecurityController';
-import ManageTwoFactor from '@/components/account/ManageTwoFactor.vue';
-import Heading from '@/components/common/Heading.vue';
-import InputError from '@/components/common/InputError.vue';
-import PasswordInput from '@/components/common/PasswordInput.vue';
+import ManageTwoFactor from '@/components/Account/ManageTwoFactor.vue';
+import Heading from '@/components/Heading.vue';
+import InputError from '@/components/InputError.vue';
+import PasswordInput from '@/components/PasswordInput.vue';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { edit } from '@/routes/security';
+import { route, routeForm } from '@/composables/useRoute';
 import type { SettingsSecurityProps } from '@/types';
 
 const props = defineProps<SettingsSecurityProps>();
@@ -17,7 +16,7 @@ defineOptions({
         breadcrumbs: [
             {
                 title: 'Security settings',
-                href: edit(),
+                href: route('securityEdit'),
             },
         ],
     },
@@ -37,7 +36,7 @@ defineOptions({
         />
 
         <Form
-            v-bind="SecurityController.update.form()"
+            v-bind="routeForm('passwordUpdate')"
             :options="{
                 preserveScroll: true,
             }"

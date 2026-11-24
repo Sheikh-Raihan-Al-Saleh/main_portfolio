@@ -8,27 +8,28 @@ use App\Http\Requests\Experience\UpdateExperienceRequest;
 use App\Http\Requests\ReorderRequest;
 use App\Http\Resources\Experience\ExperienceResource;
 use App\Models\Experience;
-use App\Services\Experience\ExperienceService;
+use App\Models\Founder;
+use App\Services\ExperienceService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Admin: the founder's work history.
+ * Admin: the founder's work history and its highlight bullets.
  */
 class ExperienceController extends Controller
 {
-    public function __construct(
-        private readonly ExperienceService $experienceService,
-    ) {}
+    public function __construct(private ExperienceService $experiences) {}
 
     /**
-     * Show the list of roles.
+     * Show every role, in order, with its highlights.
      */
     public function index(): Response
     {
-        return Inertia::render('admin/experiences/Index', [
-            'experiences' => ExperienceResource::collection($this->experienceService->list())->resolve(),
+        $experiences = Founder::current()->experiences()->with('highlights')->ordered()->get();
+
+        return Inertia::render('experience/ExperienceIndex', [
+            'experiences' => ExperienceResource::collection($experiences)->resolve(),
         ]);
     }
 
@@ -37,18 +38,19 @@ class ExperienceController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('admin/experiences/Create');
+        return Inertia::render('experience/CreateExperience');
     }
 
     /**
-     * Validate and save a new role. The service does the work.
+     * Save a new role at the end of the list, with its logo and highlights.
      */
     public function store(StoreExperienceRequest $request): RedirectResponse
     {
-        $this->experienceService->create($request->validated());
+        $this->experiences->create($request->validated());
+
         $this->toast(__('Experience created.'));
 
-        return to_route('admin.experiences.index');
+        return to_route('experienceIndex');
     }
 
     /**
@@ -56,28 +58,30 @@ class ExperienceController extends Controller
      */
     public function edit(Experience $experience): Response
     {
-        return Inertia::render('admin/experiences/Edit', [
-            'experience' => ExperienceResource::make($this->experienceService->find($experience))->resolve(),
+        return Inertia::render('experience/EditExperience', [
+            'experience' => ExperienceResource::make($experience->load('highlights'))->resolve(),
         ]);
     }
 
     /**
-     * Validate and save the changes to a role. The service does the work.
+     * Save the changes to a role, its logo and its highlights.
      */
     public function update(UpdateExperienceRequest $request, Experience $experience): RedirectResponse
     {
-        $this->experienceService->update($experience, $request->validated());
+        $this->experiences->update($experience, $request->validated());
+
         $this->toast(__('Experience updated.'));
 
-        return to_route('admin.experiences.index');
+        return to_route('experienceIndex');
     }
 
     /**
-     * Delete a role.
+     * Delete a role (its highlights cascade) and its logo file.
      */
     public function destroy(Experience $experience): RedirectResponse
     {
-        $this->experienceService->delete($experience);
+        $this->experiences->delete($experience);
+
         $this->toast(__('Experience deleted.'), 'error');
 
         return back();
@@ -88,7 +92,7 @@ class ExperienceController extends Controller
      */
     public function reorder(ReorderRequest $request): RedirectResponse
     {
-        $this->experienceService->reorder($request->validated('ids'));
+        $this->saveSortOrder(Founder::current()->experiences(), $request->validated('ids'));
 
         return back();
     }

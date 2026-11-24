@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Technology;
 
 use App\Models\Technology;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Validator;
@@ -41,15 +40,16 @@ class StoreTechnologyRequest extends FormRequest
     {
         return [
             function (Validator $validator): void {
+                $query = Technology::where('slug', Str::slug((string) $this->input('name')));
+
+                // When editing, the technology itself does not count as taken.
                 $current = $this->route('technology');
-                $ignoreId = $current instanceof Technology ? $current->id : null;
 
-                $taken = Technology::query()
-                    ->where('slug', Str::slug((string) $this->input('name')))
-                    ->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))
-                    ->exists();
+                if ($current instanceof Technology) {
+                    $query->whereKeyNot($current->id);
+                }
 
-                if ($taken) {
+                if ($query->exists()) {
                     $validator->errors()->add('name', __('This technology already exists.'));
                 }
             },

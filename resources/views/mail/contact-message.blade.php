@@ -19,7 +19,7 @@
 
 ---
 
-<x-mail::button :url="route('admin.messages.show', $contactMessage)">
+<x-mail::button :url="route('messageShow', $contactMessage)">
 Open in admin panel
 </x-mail::button>
 

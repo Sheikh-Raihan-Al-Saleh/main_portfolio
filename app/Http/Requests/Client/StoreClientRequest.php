@@ -30,7 +30,7 @@ class StoreClientRequest extends FormRequest
             'website_url' => ['nullable', 'url', 'max:255'],
             // SVG is allowed (the seeded logos are SVGs), so formats are listed by
             // extension: the `image` rule rejects svg outright. Uploads are served
-            // from this origin, so SafeSvg refuses anything beyond plain shapes.
+            // from this origin, so the safe-SVG rule refuses anything beyond plain shapes.
             'logo' => ['nullable', 'mimes:png,jpg,jpeg,gif,webp,svg', 'max:2048', new SafeSvg],
             'remove_logo' => ['boolean'],
             'is_visible' => ['boolean'],

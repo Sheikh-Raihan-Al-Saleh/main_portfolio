@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Founder;
 use App\Models\Project;
-use App\Services\Founder\FounderService;
-use App\Services\Studio\StudioService;
+use App\Models\Studio;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -27,7 +27,7 @@ class ProjectFactory extends Factory
 
         return [
             'owner_type' => 'studio',
-            'owner_id' => fn (): int => app(StudioService::class)->current()->id,
+            'owner_id' => fn (): int => Studio::current()->id,
             'title' => $title,
             'slug' => Str::slug($title),
             'summary' => fake()->sentence(12),
@@ -59,7 +59,7 @@ class ProjectFactory extends Factory
     {
         return $this->state(fn () => [
             'owner_type' => 'studio',
-            'owner_id' => app(StudioService::class)->current()->id,
+            'owner_id' => Studio::current()->id,
         ]);
     }
 
@@ -68,7 +68,7 @@ class ProjectFactory extends Factory
     {
         return $this->state(fn () => [
             'owner_type' => 'founder',
-            'owner_id' => app(FounderService::class)->current()->id,
+            'owner_id' => Founder::current()->id,
         ]);
     }
 }

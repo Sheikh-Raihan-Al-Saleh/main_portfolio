@@ -3,7 +3,8 @@
 namespace App\Models;
 
 use Database\Factories\SkillFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,11 +22,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $sort_order
  * @property-read SkillCategory $category
  */
-#[Fillable(['skill_category_id', 'technology_id', 'name', 'proficiency', 'icon', 'is_featured', 'sort_order'])]
 class Skill extends Model
 {
     /** @use HasFactory<SkillFactory> */
     use HasFactory;
+
+    /**
+     * Every column is mass assignable; controllers pass only validated fields.
+     *
+     * @var array<int, string>
+     */
+    protected $guarded = [];
 
     /**
      * The category this skill is grouped under (inverse of one-to-many).
@@ -45,6 +52,17 @@ class Skill extends Model
     public function technology(): BelongsTo
     {
         return $this->belongsTo(Technology::class);
+    }
+
+    /**
+     * Display order: by position, then by name.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function ordered(Builder $query): void
+    {
+        $query->orderBy('sort_order')->orderBy('name');
     }
 
     /**

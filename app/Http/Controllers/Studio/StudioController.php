@@ -7,9 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Studio\UpdateStudioContentRequest;
 use App\Http\Requests\Studio\UpdateStudioRequest;
 use App\Http\Resources\Studio\StudioFormResource;
-use App\Services\LandingPage\LandingSectionService;
-use App\Services\SocialLink\SocialLinkService;
-use App\Services\Studio\StudioService;
+use App\Models\Studio;
+use App\Services\StudioService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,33 +18,30 @@ use Inertia\Response;
  */
 class StudioController extends Controller
 {
-    public function __construct(
-        private readonly StudioService $studioService,
-        private readonly SocialLinkService $socialLinkService,
-        private readonly LandingSectionService $sectionService,
-    ) {}
+    public function __construct(private StudioService $studios) {}
 
     /**
      * Show the "Studio & brand" form with the home page content blocks.
      */
     public function edit(): Response
     {
-        $studio = $this->studioService->current();
+        $studio = Studio::current();
 
-        return Inertia::render('admin/studio/Edit', [
+        return Inertia::render('studio/EditStudio', [
             'studio' => StudioFormResource::make($studio)->resolve(),
-            'socials' => $this->socialLinkService->asMap($studio),
-            'sections' => $this->sectionService->allFor($studio),
+            'socials' => $studio->socialLinkMap(),
+            'sections' => $studio->sections()->ordered()->get(),
             'sectionTypes' => LandingSectionType::options(),
         ]);
     }
 
     /**
-     * Validate and save the studio details. The service does the work.
+     * Save the studio details, logos and social links.
      */
     public function update(UpdateStudioRequest $request): RedirectResponse
     {
-        $this->studioService->update($request->validated());
+        $this->studios->update(Studio::current(), $request->validated());
+
         $this->toast(__('Studio updated.'));
 
         return back();
@@ -56,20 +52,22 @@ class StudioController extends Controller
      */
     public function editContent(): Response
     {
-        $studio = $this->studioService->current();
+        $studio = Studio::current();
 
-        return Inertia::render('admin/studio/Content', [
+        return Inertia::render('studio/StudioContent', [
             'studio' => $studio->only(['id', 'name']),
-            'content' => $this->studioService->content(),
+            'content' => $studio->pageContent(),
         ]);
     }
 
     /**
-     * Validate and save the home page copy.
+     * Save the home page copy. It is merged over the defaults whenever it is
+     * read (see Studio::pageContent()).
      */
     public function updateContent(UpdateStudioContentRequest $request): RedirectResponse
     {
-        $this->studioService->updateContent($request->validated('content'));
+        Studio::current()->update(['content' => $request->validated('content')]);
+
         $this->toast(__('Home page copy updated.'));
 
         return back();

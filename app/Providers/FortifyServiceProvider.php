@@ -2,15 +2,18 @@
 
 namespace App\Providers;
 
-use App\Actions\Fortify\ResetUserPassword;
-use App\Services\Project\ProjectService;
+use App\Http\Requests\Concerns\PasswordValidationRules;
+use App\Models\Project;
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
+use Laravel\Fortify\Contracts\ResetsUserPasswords;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 
@@ -38,11 +41,27 @@ class FortifyServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure Fortify actions.
+     * Configure Fortify actions: after a reset link is used, validate the new
+     * password and save it (the model's "hashed" cast hashes it).
      */
     private function configureActions(): void
     {
-        Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
+        Fortify::resetUserPasswordsUsing(fn (): ResetsUserPasswords => new class implements ResetsUserPasswords
+        {
+            use PasswordValidationRules;
+
+            /**
+             * Validate and reset the user's forgotten password.
+             *
+             * @param  array<string, string>  $input
+             */
+            public function reset(User $user, array $input): void
+            {
+                Validator::make($input, ['password' => $this->passwordRules()])->validate();
+
+                $user->forceFill(['password' => $input['password']])->save();
+            }
+        });
     }
 
     /**
@@ -53,7 +72,7 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function showcase(): array
     {
-        return app(ProjectService::class)->loginShowcase();
+        return Project::loginShowcase();
     }
 
     /**

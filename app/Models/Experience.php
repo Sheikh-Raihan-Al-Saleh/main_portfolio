@@ -3,7 +3,8 @@
 namespace App\Models;
 
 use Database\Factories\ExperienceFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,14 +29,17 @@ use Illuminate\Support\Carbon;
  * @property int $sort_order
  * @property-read Collection<int, ExperienceHighlight> $highlights
  */
-#[Fillable([
-    'company', 'role', 'employment_type', 'location', 'start_date', 'end_date',
-    'description', 'company_url', 'logo_path', 'sort_order',
-])]
 class Experience extends Model
 {
     /** @use HasFactory<ExperienceFactory> */
     use HasFactory;
+
+    /**
+     * Every column is mass assignable; controllers pass only validated fields.
+     *
+     * @var array<int, string>
+     */
+    protected $guarded = [];
 
     /**
      * The founder this role belongs to (inverse of one-to-many).
@@ -55,6 +59,17 @@ class Experience extends Model
     public function highlights(): HasMany
     {
         return $this->hasMany(ExperienceHighlight::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * Display order: by position, then the latest start first.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function ordered(Builder $query): void
+    {
+        $query->orderBy('sort_order')->orderByDesc('start_date');
     }
 
     /**

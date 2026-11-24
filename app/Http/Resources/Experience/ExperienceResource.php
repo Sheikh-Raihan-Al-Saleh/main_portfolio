@@ -3,7 +3,7 @@
 namespace App\Http\Resources\Experience;
 
 use App\Models\Experience;
-use App\Services\Media\MediaService;
+use App\Services\FileService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -24,7 +24,7 @@ class ExperienceResource extends JsonResource
             // Every column, then every loaded relation (what Model::toArray() returns).
             ...$this->attributesToArray(),
             ...$this->relationsToArray(),
-            'logo_url' => MediaService::url($this->logo_path),
+            'logo_url' => FileService::url($this->logo_path),
             // A role without an end date is the one the founder holds now.
             'is_current' => $this->end_date === null,
         ];

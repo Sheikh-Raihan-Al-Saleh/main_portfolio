@@ -6,8 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\LandingPage\LandingPageResource;
 use App\Http\Resources\LandingPage\LandingSectionResource;
 use App\Models\Project;
-use App\Services\LandingPage\LandingPageService;
-use App\Services\Media\MediaService;
+use App\Services\FileService;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,28 +15,29 @@ use Inertia\Response;
  */
 class LandingPageController extends Controller
 {
-    public function __construct(
-        private readonly LandingPageService $landingPageService,
-    ) {}
-
     /**
-     * Drafts return 404, so their existence is not disclosed.
+     * Show the published landing page of a published project. Drafts return
+     * 404, so their existence is not disclosed.
      */
     public function show(Project $project): Response
     {
-        $landingPage = $this->landingPageService->findPublished($project);
+        abort_unless($project->is_published, 404);
+
+        $landingPage = $project->landingPage()->published()->with('heroMedia')->first();
 
         abort_if($landingPage === null, 404);
 
-        return Inertia::render('public/landing/Show', [
+        $sections = $landingPage->sections()->visible()->ordered()->get();
+
+        return Inertia::render('landingpage/ShowLandingPage', [
             'project' => [
                 ...$project->only(['id', 'title', 'slug', 'summary', 'role', 'owner_type', 'live_url', 'repo_url']),
-                'cover_image_url' => MediaService::url($project->cover_image_path),
+                'cover_image_url' => FileService::url($project->cover_image_path),
                 'started_at' => $project->started_at?->toDateString(),
                 'completed_at' => $project->completed_at?->toDateString(),
             ],
             'landingPage' => LandingPageResource::make($landingPage)->resolve(),
-            'sections' => LandingSectionResource::collection($landingPage->sections)->resolve(),
+            'sections' => LandingSectionResource::collection($sections)->resolve(),
         ]);
     }
 }

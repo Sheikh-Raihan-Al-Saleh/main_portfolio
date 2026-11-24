@@ -4,9 +4,9 @@ namespace App\Http\Middleware;
 
 use App\Http\Resources\Founder\FounderResource;
 use App\Http\Resources\Studio\StudioResource;
-use App\Services\Contact\ContactMessageService;
-use App\Services\Founder\FounderService;
-use App\Services\Studio\StudioService;
+use App\Models\ContactMessage;
+use App\Models\Founder;
+use App\Models\Studio;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -49,15 +49,15 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             // The company name and logos, used on every page: header, footer,
-            // loader, login, admin sidebar and page titles. Cached in StudioService.
-            'brand' => fn () => app(StudioService::class)->brand(),
+            // loader, login, admin sidebar and page titles. Cached by Studio::brand().
+            'brand' => fn () => Studio::brand(),
             // The studio and founder records, for the public header, footer and
             // contact details. One query each per request (memoised).
-            'studio' => fn () => StudioResource::make(app(StudioService::class)->current())->resolve(),
-            'founder' => fn () => FounderResource::make(app(FounderService::class)->current())->resolve(),
+            'studio' => fn () => StudioResource::make(Studio::current())->resolve(),
+            'founder' => fn () => FounderResource::make(Founder::current())->resolve(),
             // Only counted for signed-in admins, so public pages skip the query.
             'unreadMessages' => fn () => $request->user()?->is_admin
-                ? app(ContactMessageService::class)->unreadCount()
+                ? ContactMessage::whereNull('read_at')->count()
                 : 0,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             // PHP's upload limits, so admin file pickers can reject an oversized

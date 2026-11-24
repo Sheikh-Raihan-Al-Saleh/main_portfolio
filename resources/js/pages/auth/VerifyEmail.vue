@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
-import TextLink from '@/components/common/TextLink.vue';
+import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { logout } from '@/routes';
-import { send } from '@/routes/verification';
+import { route, routeForm } from '@/composables/useRoute';
 import type { AuthVerifyEmailProps } from '@/types';
 
 defineOptions({
@@ -30,7 +29,7 @@ defineProps<AuthVerifyEmailProps>();
     </div>
 
     <Form
-        v-bind="send.form()"
+        v-bind="routeForm('verification.send')"
         class="space-y-6 text-center"
         v-slot="{ processing }"
     >
@@ -39,7 +38,12 @@ defineProps<AuthVerifyEmailProps>();
             Resend verification email
         </Button>
 
-        <TextLink :href="logout()" as="button" class="mx-auto block text-sm">
+        <TextLink
+            :href="route('logout')"
+            method="post"
+            as="button"
+            class="mx-auto block text-sm"
+        >
             Log out
         </TextLink>
     </Form>

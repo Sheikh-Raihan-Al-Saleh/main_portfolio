@@ -6,17 +6,14 @@ use App\Models\ContactMessage;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Queue\SerializesModels;
 
 /**
  * Tells the site owner about a new contact-form enquiry.
  */
 class NewContactMessage extends Mailable
 {
-    use SerializesModels;
-
     /**
-     * @param  array{name: string, logo_url: string|null}  $brand
+     * @param  array{name: string, logo_url: string|null}  $brand  The studio brand (see Studio::brand()).
      */
     public function __construct(
         public ContactMessage $contactMessage,

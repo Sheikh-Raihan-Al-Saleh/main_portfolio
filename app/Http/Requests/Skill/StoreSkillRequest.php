@@ -19,7 +19,7 @@ class StoreSkillRequest extends FormRequest
 
     /**
      * The category is checked against the founder's own categories in
-     * SkillService, so only the shape is validated here.
+     * SkillController, so only the shape is validated here.
      *
      * @return array<string, mixed>
      */

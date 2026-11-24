@@ -1,10 +1,9 @@
 <?php
 
-use App\Enums\LandingSectionType;
 use App\Models\LandingSection;
 use App\Models\Project;
 use App\Models\ProjectLandingPage;
-use App\Services\Studio\StudioService;
+use App\Models\Studio;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,7 +18,7 @@ test('the builder renders before the page exists', function () {
     $this->actingAs($this->admin)->get("/admin/projects/{$project->slug}/landing")
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('admin/projects/landing/Edit')
+            ->component('landingpage/EditLandingPage')
             ->where('landingPage', null)
             ->has('sectionTypes'),
         );
@@ -33,7 +32,7 @@ test('saving creates the page once and updates it afterwards', function () {
     $this->actingAs($this->admin)->put("/admin/projects/{$project->slug}/landing", ['headline' => 'New'])
         ->assertRedirect();
 
-    expect(ProjectLandingPage::query()->count())->toBe(1)
+    expect(ProjectLandingPage::count())->toBe(1)
         ->and($project->landingPage()->value('headline'))->toBe('New');
 });
 
@@ -76,8 +75,8 @@ test('deleting the landing page removes its blocks and files', function () {
     $this->actingAs($this->admin)->delete("/admin/projects/{$page->project->slug}/landing")
         ->assertRedirect('/admin/projects');
 
-    expect(ProjectLandingPage::query()->count())->toBe(0)
-        ->and(LandingSection::query()->count())->toBe(0);
+    expect(ProjectLandingPage::count())->toBe(0)
+        ->and(LandingSection::count())->toBe(0);
     Storage::disk('uploads')->assertMissing('landing/og/x.png');
 });
 
@@ -94,7 +93,7 @@ test('blocks can be added to the studio home and to a project page', function ()
         'owner' => 'project', 'project_id' => $project->id, 'type' => 'features', 'data' => $data,
     ])->assertSessionHasNoErrors();
 
-    expect(app(StudioService::class)->current()->sections()->count())->toBe(1)
+    expect(Studio::current()->sections()->count())->toBe(1)
         ->and($project->landingPage()->firstOrFail()->sections()->count())->toBe(1);
 });
 
@@ -108,7 +107,7 @@ test('editing a block deletes media it no longer uses', function () {
     $page = ProjectLandingPage::factory()->create();
     Storage::disk('uploads')->put('landing/gallery/a.png', 'x');
     Storage::disk('uploads')->put('landing/gallery/b.png', 'x');
-    $section = LandingSection::factory()->ofType(LandingSectionType::Gallery)->create([
+    $section = LandingSection::factory()->ofType('gallery')->create([
         'sectionable_id' => $page->id,
         'data' => ['images' => ['landing/gallery/a.png', 'landing/gallery/b.png']],
     ]);

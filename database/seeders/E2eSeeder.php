@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Founder;
 use App\Models\Project;
+use App\Models\Studio;
 use App\Models\User;
-use App\Services\Founder\FounderService;
-use App\Services\Studio\StudioService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -55,27 +55,25 @@ class E2eSeeder extends Seeder
             );
         }
 
-        $studios = app(StudioService::class);
-        $studios->current()->forceFill([
+        Studio::current()->forceFill([
             'logo_path' => $this->image('e2e/logo.png', 480, 120, [17, 17, 17], 'LOGO'),
             'logo_mark_path' => $this->image('e2e/logo-mark.png', 128, 128, [17, 17, 17], 'MARK'),
         ])->save();
-        $studios->forgetBrand();
 
-        app(FounderService::class)->current()->forceFill([
+        Founder::current()->forceFill([
             'avatar_path' => $this->image('e2e/avatar.png', 600, 750, [16, 185, 129], 'AVATAR'),
         ])->save();
 
         /** @var list<array{0: int<0, 255>, 1: int<0, 255>, 2: int<0, 255>}> $palette */
         $palette = [[79, 70, 229], [14, 165, 233], [168, 85, 247], [234, 88, 12], [16, 185, 129], [225, 29, 72]];
 
-        Project::query()->orderBy('id')->get()->each(function (Project $project, int $index) use ($palette): void {
+        Project::orderBy('id')->get()->each(function (Project $project, int $index) use ($palette): void {
             $project->update([
                 'cover_image_path' => $this->image("e2e/cover-{$project->id}.png", 1280, 800, $palette[$index % count($palette)], $project->title),
             ]);
         });
 
-        $landingProject = Project::query()->where('is_published', true)->where('owner_type', 'studio')->orderBy('id')->firstOrFail();
+        $landingProject = Project::where('is_published', true)->where('owner_type', 'studio')->orderBy('id')->firstOrFail();
 
         $landingPage = $landingProject->landingPage()->updateOrCreate([], [
             'headline' => "{$landingProject->title}, end to end",

@@ -17,7 +17,7 @@ test('the project list and forms load', function () {
 
     $this->actingAs($this->admin)->get('/admin/projects')
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('admin/projects/Index')->has('projects', 2));
+        ->assertInertia(fn ($page) => $page->component('project/ProjectIndex')->has('projects', 2));
 
     $this->actingAs($this->admin)->get('/admin/projects/create')
         ->assertOk()
@@ -48,14 +48,14 @@ test('an admin can create a project with technologies, cover and gallery', funct
         ->assertRedirect('/admin/projects')
         ->assertSessionHasNoErrors();
 
-    $project = Project::query()->with(['technologies', 'images'])->sole();
+    $project = Project::with(['technologies', 'images'])->sole();
 
     expect($project->owner_type)->toBe('founder')
         ->and($project->slug)->toBe('my-side-project')
         ->and($project->published_at)->not->toBeNull()
         ->and($project->technologies->pluck('slug')->all())->toBe(['laravel', 'vuejs'])
         ->and($project->images)->toHaveCount(2)
-        ->and(Technology::query()->count())->toBe(2);
+        ->and(Technology::count())->toBe(2);
 
     Storage::disk('uploads')->assertExists($project->cover_image_path);
 });
@@ -65,7 +65,7 @@ test('slugs stay unique', function () {
 
     $this->actingAs($this->admin)->post('/admin/projects', ['owner' => 'studio', 'title' => 'Shop'])->assertSessionHasNoErrors();
 
-    expect(Project::query()->latest('id')->value('slug'))->toBe('shop-2');
+    expect(Project::latest('id')->value('slug'))->toBe('shop-2');
 });
 
 test('updating a project removes ticked gallery images and syncs technologies', function () {
@@ -110,8 +110,8 @@ test('deleting a project removes its landing page, blocks and files', function (
 
     $this->actingAs($this->admin)->delete("/admin/projects/{$project->slug}")->assertRedirect();
 
-    expect(Project::query()->count())->toBe(0)
-        ->and(ProjectLandingPage::query()->count())->toBe(0)
-        ->and(LandingSection::query()->count())->toBe(0);
+    expect(Project::count())->toBe(0)
+        ->and(ProjectLandingPage::count())->toBe(0)
+        ->and(LandingSection::count())->toBe(0);
     Storage::disk('uploads')->assertMissing('projects/cover.jpg');
 });

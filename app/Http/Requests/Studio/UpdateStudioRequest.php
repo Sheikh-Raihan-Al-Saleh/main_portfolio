@@ -27,7 +27,7 @@ class UpdateStudioRequest extends FormRequest
     public function rules(): array
     {
         // Logos may be SVG. The `image` rule rejects SVG, so formats are listed
-        // by extension, and SafeSvg refuses anything beyond plain shapes.
+        // by extension, and the safe-SVG rule refuses anything beyond plain shapes.
         $logo = ['nullable', 'mimes:png,jpg,jpeg,webp,svg', 'max:2048', new SafeSvg];
 
         return [
